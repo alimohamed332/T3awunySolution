@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="D:/Full Stack DEVELOPER/Backend Material/API/Authentication Module/Secure API With JWT/Codes/T3awunySolution/T3awuny.Application/T3awuny.Application.csproj" />
+  <Project Path="D:/Full Stack DEVELOPER/Backend Material/API/Authentication Module/Secure API With JWT/Codes/T3awunySolution/T3awuny.Core/T3awuny.Core.csproj" />
+  <Project Path="D:/Full Stack DEVELOPER/Backend Material/API/Authentication Module/Secure API With JWT/Codes/T3awunySolution/T3awuny.Infrastructure/T3awuny.Infrastructure.csproj" />
+  <Project Path="D:/Full Stack DEVELOPER/Backend Material/API/Authentication Module/Secure API With JWT/Codes/T3awunySolution/T3awunyWebService/T3awunyWebService.csproj" />
+</Solution>

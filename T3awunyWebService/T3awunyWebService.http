@@ -1,0 +1,6 @@
+@T3awunyWebService_HostAddress = http://localhost:5058
+
+GET {{T3awunyWebService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -171,15 +171,18 @@ namespace T3awunyWebService
             #endregion
 
             #region Register the file storage service
-            // Program.cs
             var webRootPath = builder.Environment.WebRootPath    // if wwwroot exists
                               ?? builder.Environment.ContentRootPath; // fallback
 
             //builder.Services.AddInfrastructure(builder.Configuration, webRootPath);
             //builder.Services.AddApplication();
-            builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>(provider => new LocalFileStorageService(webRootPath)); 
+            builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>(provider => new LocalFileStorageService(webRootPath));
             #endregion
 
+            #region Register the NominatimGeocodingService
+            //builder.Services.AddScoped<IGeocodingService, NominatimGeocodingService>();
+            builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>();
+            #endregion
 
 
             var app = builder.Build();

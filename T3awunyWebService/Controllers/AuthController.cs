@@ -27,7 +27,7 @@ namespace T3awunyWebService.Controllers
             _authService = authService;
         }
         [HttpPost("register")]
-        public async Task<ActionResult<AuthModel>> RegisterAsync([FromBody] RegisterDto model)
+        public async Task<ActionResult<AuthModel>> RegisterAsync([FromForm] RegisterDto model)
         {
             var result = await _authService.RegisterAsync(model);
             if(!result.IsAuthenticated)
@@ -72,7 +72,7 @@ namespace T3awunyWebService.Controllers
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
-
+        [Authorize]
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenDto model)
         {

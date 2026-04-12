@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\T3awuny.Application\T3awuny.Application.csproj" />
     <ProjectReference Include="..\T3awuny.Core\T3awuny.Core.csproj" />
   </ItemGroup>
 

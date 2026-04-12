@@ -13,6 +13,7 @@ using T3awuny.Application.JwtFeatures;
 using T3awuny.Application.Services;
 using T3awuny.Core.Entities;
 using T3awuny.Infrastructure.Data;
+using T3awuny.Infrastructure.Services;
 using T3awunyWebService.Helpers;
 
 namespace T3awunyWebService
@@ -169,7 +170,15 @@ namespace T3awunyWebService
             });
             #endregion
 
+            #region Register the file storage service
+            // Program.cs
+            var webRootPath = builder.Environment.WebRootPath    // if wwwroot exists
+                              ?? builder.Environment.ContentRootPath; // fallback
 
+            //builder.Services.AddInfrastructure(builder.Configuration, webRootPath);
+            //builder.Services.AddApplication();
+            builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>(provider => new LocalFileStorageService(webRootPath)); 
+            #endregion
 
 
 

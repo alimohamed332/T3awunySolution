@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+
+//using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
+//using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -28,8 +30,9 @@ namespace T3awuny.Application.Services
         private readonly RefreshTokenHandler _refreshTokenHandler;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IFileStorageService _fileStorageService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService)
+        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService, IFileStorageService fileStorageService)
         {
             _userManager = userManager;
             _jwtHandler = jwtHandler;
@@ -38,6 +41,7 @@ namespace T3awuny.Application.Services
             _refreshTokenHandler = refreshTokenHandler;
             _configuration = configuration;
             _emailService = emailService;
+            _fileStorageService = fileStorageService;
         }
 
         public async Task<AuthModel> RegisterAsync(RegisterDto model)
@@ -48,6 +52,12 @@ namespace T3awuny.Application.Services
             if (await _userManager.FindByNameAsync(model.UserName) is not null)
                 return new AuthModel { Message = "اسم المستخدم هذا مسجل من قبل" };
             var user = _mapper.Map<ApplicationUser>(model);
+            try
+            {
+                user.ProfileImageUrl = await _fileStorageService.SaveImageAsync(model.ImageFile, "users");
+            }
+            catch (Exception) { }
+            
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -59,12 +69,12 @@ namespace T3awuny.Application.Services
                 }
                 return new AuthModel { Message = errors.ToString() };
             }
-            var role = model.Role!.Contains("fa") ? "Farmer" : "Trader";
+            var role = model.Role?.ToLower().Contains("ta") == true ? "Trader" : "Farmer";
 
             await _userManager.AddToRoleAsync(user, role);
 
             List<string> roles = new List<string>();
-            roles.Add(role);
+            roles.Add(role); // mo loop because we have only one role for each user in this case 
             var token = _jwtHandler.CreateToken(user, roles);
 
             // generate email confirmation token
@@ -83,8 +93,8 @@ namespace T3awuny.Application.Services
 
             return new AuthModel
             {
-                Email = user.Email,
-                Username = user.UserName,
+                Email = user.Email!,
+                Username = user.UserName!,
                 IsAuthenticated = true,
                 Token = token,
                 Roles = roles,

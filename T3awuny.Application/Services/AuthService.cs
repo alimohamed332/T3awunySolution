@@ -31,8 +31,9 @@ namespace T3awuny.Application.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IAddressService _addressService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService, IFileStorageService fileStorageService)
+        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService, IFileStorageService fileStorageService, IAddressService addressService)
         {
             _userManager = userManager;
             _jwtHandler = jwtHandler;
@@ -42,6 +43,7 @@ namespace T3awuny.Application.Services
             _configuration = configuration;
             _emailService = emailService;
             _fileStorageService = fileStorageService;
+            _addressService = addressService;
         }
 
         public async Task<AuthModel> RegisterAsync(RegisterDto model)
@@ -52,12 +54,13 @@ namespace T3awuny.Application.Services
             if (await _userManager.FindByNameAsync(model.UserName) is not null)
                 return new AuthModel { Message = "اسم المستخدم هذا مسجل من قبل" };
             var user = _mapper.Map<ApplicationUser>(model);
+
             try
             {
                 user.ProfileImageUrl = await _fileStorageService.SaveImageAsync(model.ImageFile, "users");
             }
             catch (Exception) { }
-            
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -69,6 +72,10 @@ namespace T3awuny.Application.Services
                 }
                 return new AuthModel { Message = errors.ToString() };
             }
+            
+            //foreach(var add in  model.Addresses)
+            await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
+
             var role = model.Role?.ToLower().Contains("ta") == true ? "Trader" : "Farmer";
 
             await _userManager.AddToRoleAsync(user, role);

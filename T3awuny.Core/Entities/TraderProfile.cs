@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class TraderProfile
+    public class TraderProfile : BaseEntity
     {
         public string TraderId { get; set; } = string.Empty; //(PK, FK → AspNetUsers)
         public string? BusinessName { get; set; } = string.Empty;

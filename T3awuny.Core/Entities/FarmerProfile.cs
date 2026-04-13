@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class FarmerProfile
+    public class FarmerProfile : BaseEntity
     {
         public string FarmerId { get; set; } = string.Empty; //(PK, FK → AspNetUsers)
         // some info about the farm of the farmer

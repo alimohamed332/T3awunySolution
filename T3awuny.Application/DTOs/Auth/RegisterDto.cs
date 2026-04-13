@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Application.DTOs.Address;
 
 namespace T3awuny.Application.DTOs.Auth
 {
@@ -21,7 +21,9 @@ namespace T3awuny.Application.DTOs.Auth
         public string? Role { get; set; } = "Farmer";
         //public string? ProfileImageUrl { get; set; }
         public IFormFile? ImageFile { get; set; }
-        public virtual ICollection<Address> Addresses { get; set; } = new HashSet<Address>();/////remember to define how to recieve from nasr and how to map to DB
+        
+        public CreateAddressDto Addresses { get; set; }
+        //public  ICollection<CreateAddressDto> Addresses { get; set; } = new HashSet<CreateAddressDto>();/////remember to define how to recieve from nasr and how to map to DB
         [Required, StringLength(256)]
         public string Password { get; set; } = string.Empty;
         [Required, StringLength(256),Compare("Password")]

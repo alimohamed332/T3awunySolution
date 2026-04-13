@@ -39,11 +39,11 @@ namespace T3awuny.Application.Helpers
             return source?.Address?.Country ?? "Unknown Country";
         }
     }
-    public class PostalCodeResolver : IValueResolver<NominatimResponse, AddressDetailsDto, string>
+    public class PostalCodeResolver : IValueResolver<NominatimResponse, AddressDetailsDto, int?>
     {
-        public string Resolve(NominatimResponse source, AddressDetailsDto destination, string destMember, ResolutionContext context)
+        public int? Resolve(NominatimResponse source, AddressDetailsDto destination, int? destMember, ResolutionContext context)
         {
-            return source?.Address?.PostCode ?? "Unknown Postal Code";
+            return int.TryParse(source?.Address?.PostCode, out int result) ? result : null;
         }
     }
 

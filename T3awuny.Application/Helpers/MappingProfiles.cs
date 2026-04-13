@@ -20,6 +20,7 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FullName))
                 //.ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageUrl))
+                .ForMember(dest => dest.Addresses, opt => opt.Ignore())
                 .ReverseMap();
 
             CreateMap<NominatimResponse, AddressDetailsDto>()
@@ -28,6 +29,8 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.Governorate, opt => opt.MapFrom<GovernorateResolver>())
                 .ForMember(dest => dest.PostalCode, opt => opt.MapFrom<PostalCodeResolver>())
                 .ForMember(dest => dest.Country, opt => opt.MapFrom<CountryResolver>())
+                .ReverseMap();
+            CreateMap<Address, AddressDetailsDto>()
                 .ReverseMap();
         }
     }

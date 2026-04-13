@@ -24,10 +24,10 @@ namespace T3awuny.Infrastructure.Configurations
                 .HasMaxLength(30);
 
             builder.Property(a => a.Governorate)
-                .HasMaxLength(30).HasDefaultValue("Fayoum");
+                .HasMaxLength(30).HasDefaultValue("الفيوم");
 
             builder.Property(a => a.Country)
-                .HasMaxLength(30).HasDefaultValue("Egypt");
+                .HasMaxLength(30).HasDefaultValue("مصر");
         }
     }
 }

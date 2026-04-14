@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Address;
+using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Repository.Contracts;
 
@@ -13,20 +14,20 @@ namespace T3awuny.Application.Services
 {
     public class AddressService : IAddressService
     {
-        private readonly IGenericRepository<Address> _addressRep;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IGeocodingService _geocodingService;
         private readonly IMapper _mapper;
 
-        public AddressService(IGenericRepository<Address> addressRep, IGeocodingService geocodingService, IMapper mapper)
+        public AddressService(IGeocodingService geocodingService, IMapper mapper, IUnitOfWork unitOfWork)
         {
-            _addressRep = addressRep;
             _geocodingService = geocodingService;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<AddressDetailsDto?> GetAddressByIdAsync(int id)
         {
-            var address = await _addressRep.GetByIdAsync(id);
+            var address = await _unitOfWork.Repository<Address>().GetByIdAsync(id);
             if (address is null)
                 return null;
             
@@ -46,7 +47,7 @@ namespace T3awuny.Application.Services
 
         public async Task<IEnumerable<AddressDetailsDto>> GetAllAddressesAsync()
         {
-           var addresses = await _addressRep.GetAllAsync();
+           var addresses = await _unitOfWork.Repository<Address>().GetAllAsync();
            return addresses.Select(address => new AddressDetailsDto
            {
                Id = address.Id,
@@ -88,10 +89,8 @@ namespace T3awuny.Application.Services
                 IsDefault = dto.IsDefault //|| count == 0
             };
 
-            //await _unitOfWork.Addresses.AddAsync(address);
-            //await _unitOfWork.SaveChangesAsync();
-            await _addressRep.AddAsync(address);
-            await _addressRep.SaveAsync();
+            await _unitOfWork.Repository<Address>().AddAsync(address);
+            await _unitOfWork.CompleteAsync();
             var addressDetails = _mapper.Map<AddressDetailsDto>(address);
             return addressDetails;
         

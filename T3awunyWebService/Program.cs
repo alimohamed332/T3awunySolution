@@ -11,8 +11,10 @@ using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Application.Services;
+using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Repository.Contracts;
+using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
 using T3awuny.Infrastructure.Services;
@@ -182,15 +184,20 @@ namespace T3awunyWebService
             #endregion
 
             #region Register the generic repo service
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             #endregion
 
             #region Register the address  service
             builder.Services.AddScoped<IAddressService, AddressService>();
             #endregion
+
             #region Register the NominatimGeocodingService
             //builder.Services.AddScoped<IGeocodingService, NominatimGeocodingService>();
             builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>();
+            #endregion
+
+            #region Register UnitOfWork
+            builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork)); 
             #endregion
 
 

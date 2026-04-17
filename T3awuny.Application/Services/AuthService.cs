@@ -81,7 +81,7 @@ namespace T3awuny.Application.Services
             await _userManager.AddToRoleAsync(user, role);
 
             List<string> roles = new List<string>();
-            roles.Add(role); // mo loop because we have only one role for each user in this case 
+            roles.Add(role); // no loop because we have only one role for each user in this case 
             var token = _jwtHandler.CreateToken(user, roles);
 
             // generate email confirmation token

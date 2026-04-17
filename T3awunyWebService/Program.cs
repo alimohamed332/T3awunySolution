@@ -74,7 +74,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterConnection"));
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
                 });
             #endregion
 

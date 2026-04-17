@@ -9,6 +9,7 @@ using T3awuny.Application.DTOs.Address;
 using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Repository.Contracts;
+using T3awuny.Core.Specifications;
 
 namespace T3awuny.Application.Services
 {
@@ -27,7 +28,7 @@ namespace T3awuny.Application.Services
 
         public async Task<AddressDetailsDto?> GetAddressByIdAsync(int id)
         {
-            var address = await _unitOfWork.Repository<Address>().GetByIdAsync(id);
+            var address = await _unitOfWork.Repository<Address>().GetByIdAsync(id); // no need to include => no need to use spec. no need to filter by userId since this is an admin endpoint
             if (address is null)
                 return null;
             
@@ -47,8 +48,8 @@ namespace T3awuny.Application.Services
 
         public async Task<IEnumerable<AddressDetailsDto>> GetAllAddressesAsync()
         {
-           var addresses = await _unitOfWork.Repository<Address>().GetAllAsync();
-           return addresses.Select(address => new AddressDetailsDto
+           var addresses = await _unitOfWork.Repository<Address>().GetAllAsync(); // no need to include => no need to use spec. no need to filter by userId since this is an admin endpoint
+            return addresses.Select(address => new AddressDetailsDto
            {
                Id = address.Id,
                UserId = address.UserId,
@@ -66,14 +67,15 @@ namespace T3awuny.Application.Services
             // 1. Reverse geocode the coordinates
             var details = await _geocodingService.ReverseGeocodeAsync(dto.Latitude, dto.Longitude);
             // 2. Handle IsDefault logic
-            //if (dto.IsDefault)
-            //{
-            //    var existing = await _unitOfWork.Addresses.GetByUserIdAsync(userId);
-            //    foreach (var addr in existing)
-            //        addr.IsDefault = false;
-            //}
+            if (dto.IsDefault)
+            {
+                var addressSpecificationObj = new AddressSpecifications(a => a.UserId == userId && a.IsDefault);
+                var existing = await _unitOfWork.Repository<Address>().GetAllWithSpecAsync(addressSpecificationObj);
+                foreach (var addr in existing)
+                    addr.IsDefault = false;
+            }
 
-            //var count = await _unitOfWork.Addresses.CountByUserIdAsync(userId);
+            var count = await _unitOfWork.Repository<Address>().GetCountAsync(new AddressSpecifications(a => a.UserId == userId));
 
             // 3. Build entity
             var address = new Address
@@ -86,7 +88,7 @@ namespace T3awuny.Application.Services
                 PostalCode = details.PostalCode,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
-                IsDefault = dto.IsDefault //|| count == 0
+                IsDefault = dto.IsDefault || count == 0
             };
 
             await _unitOfWork.Repository<Address>().AddAsync(address);

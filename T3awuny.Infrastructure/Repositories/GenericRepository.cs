@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Repository.Contracts;
+using T3awuny.Core.Specifications;
 using T3awuny.Infrastructure.Data;
+using T3awuny.Infrastructure.Helpers;
 
 namespace T3awuny.Infrastructure.Repositories
 {
@@ -23,18 +25,26 @@ namespace T3awuny.Infrastructure.Repositories
 
         public async Task<T?> GetByIdAsync(int id)
         {
+            //if (typeof(T) == typeof(ApplicationUser))
+                //return await _dbContext.Set<ApplicationUser>().Where(a => a.Id == id).Include(a => a.Addresses).FirstOrDefaultAsync(a => a.Id == id) as T;
             return await _dbSet.FindAsync(id);
+        }
+        public async Task<T?> GetByIdWithSpecAsync(ISpecifications<T> spec)
+        {
+             return await ApplySpecification(spec).FirstOrDefaultAsync();  
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
+            //if (typeof(T) == typeof(ApplicationUser))
+               //return await _dbContext.Set<ApplicationUser>().Where(a => a.Id == id).Include(a => a.Addresses).AsNoTracking().ToListAsync() as IReadOnlyList<T>;
             return await _dbSet.AsNoTracking().ToListAsync();
         }
 
-        //public Task<T> GetByNameAsync(string name)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<IEnumerable<T>> GetAllWithSpecAsync(ISpecifications<T> spec)
+        {
+            return await ApplySpecification(spec).AsNoTracking().ToListAsync();
+        }
 
         public async Task<T> AddAsync(T entity)
         {
@@ -52,9 +62,14 @@ namespace T3awuny.Infrastructure.Repositories
             _dbSet.Remove(entity);
         }
 
-        public async Task<bool> SaveAsync()
+        public async Task<int> GetCountAsync(ISpecifications<T> spec)
         {
-            return await _dbContext.SaveChangesAsync() > 0;
+            return await ApplySpecification(spec).CountAsync();
+        }
+
+        private IQueryable<T> ApplySpecification(ISpecifications<T> spec)
+        {
+            return SpecificationsEvaluator<T>.GetQuery(_dbSet, spec);
         }
     }
 }

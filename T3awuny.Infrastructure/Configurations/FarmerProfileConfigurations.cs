@@ -21,10 +21,10 @@ namespace T3awuny.Infrastructure.Configurations
             builder.Property(f => f.Description)
                 .HasMaxLength(150);
 
-            builder.HasOne(f => f.Address)
-                .WithOne()
-                .HasForeignKey<FarmerProfile>(f => f.FarmAddressId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(f => f.Address)
+            //    .WithOne()
+            //    .HasForeignKey<FarmerProfile>(f => f.FarmAddressId)
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

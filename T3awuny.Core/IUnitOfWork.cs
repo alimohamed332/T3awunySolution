@@ -11,6 +11,7 @@ namespace T3awuny.Core
     public interface IUnitOfWork : IAsyncDisposable
     {
         IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity;
+        IUserRepository UserRepository { get; }
         Task<int> CompleteAsync();
     }
 }

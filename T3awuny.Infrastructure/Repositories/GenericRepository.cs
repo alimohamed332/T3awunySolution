@@ -29,6 +29,12 @@ namespace T3awuny.Infrastructure.Repositories
                 //return await _dbContext.Set<ApplicationUser>().Where(a => a.Id == id).Include(a => a.Addresses).FirstOrDefaultAsync(a => a.Id == id) as T;
             return await _dbSet.FindAsync(id);
         }
+        public async Task<T?> GetByIdAsync(string id)
+        {
+            //if (typeof(T) == typeof(ApplicationUser))
+            //return await _dbContext.Set<ApplicationUser>().Where(a => a.Id == id).Include(a => a.Addresses).FirstOrDefaultAsync(a => a.Id == id) as T;
+            return await _dbSet.FindAsync(id);
+        }
         public async Task<T?> GetByIdWithSpecAsync(ISpecifications<T> spec)
         {
              return await ApplySpecification(spec).FirstOrDefaultAsync();  

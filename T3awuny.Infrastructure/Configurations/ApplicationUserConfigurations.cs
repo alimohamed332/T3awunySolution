@@ -21,12 +21,12 @@ namespace T3awuny.Infrastructure.Configurations
                 .HasDefaultValueSql("GETUTCDATE()");
 
             builder.HasOne(u => u.FarmerProfile)
-                .WithOne()
+                .WithOne(fp => fp.User)
                 .HasForeignKey<FarmerProfile>(f => f.FarmerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(u => u.TraderProfile)
-                .WithOne()
+                .WithOne(tp => tp.User)
                 .HasForeignKey<TraderProfile>(t => t.TraderId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class BaseEntity
+    public class BaseEntity 
     {
     }
 }

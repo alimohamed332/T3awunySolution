@@ -9,6 +9,7 @@ namespace T3awuny.Core.Entities
     public class TraderProfile : BaseEntity
     {
         public string TraderId { get; set; } = string.Empty; //(PK, FK → AspNetUsers)
+        public virtual ApplicationUser? User { get; set; } = null;
         public string? BusinessName { get; set; } = string.Empty;
         public BusinessType? BusinessType { get; set; }
         public int? TaxNumber { get; set; }

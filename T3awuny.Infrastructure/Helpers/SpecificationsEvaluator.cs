@@ -19,10 +19,9 @@ namespace T3awuny.Infrastructure.Helpers
             {
                 query = query.Where(spec.Criteria); //_dbContext.Set<Product>().Where(p => p.BrandId == 1);
             }
-           // if (spec.Includes != null)
-            //{
-                query = spec.Includes.Aggregate(query, (current, includeExpression) => current.Include(includeExpression)); //_dbContext.Set<Product>().Where(p => p.BrandId == 1);.Include(p => p.Brand).Include(p => p.ProductType);
-            //}
+
+            query = spec.Includes.Aggregate(query, (current, includeExpression) => current.Include(includeExpression)); //_dbContext.Set<Product>().Where(p => p.BrandId == 1);.Include(p => p.Brand).Include(p => p.ProductType);
+
 
             return query;
         }

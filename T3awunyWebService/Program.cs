@@ -197,9 +197,37 @@ namespace T3awunyWebService
             #endregion
 
             #region Register UnitOfWork
-            builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork)); 
+            builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             #endregion
 
+            #region Add Authorization Policies
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("FarmerOnly",
+                    policy => policy.RequireRole("Farmer"));
+
+                options.AddPolicy("TraderOnly",
+                    policy => policy.RequireRole("Trader"));
+
+                options.AddPolicy("AdminOnly",
+                    policy => policy.RequireRole("Admin"));
+
+                options.AddPolicy("FarmerOrAdmin",
+                    policy => policy.RequireRole("Farmer", "Admin"));
+
+                options.AddPolicy("TraderOrAdmin",
+                   policy => policy.RequireRole("Trader", "Admin"));
+
+                options.AddPolicy("VerifiedFarmer", policy =>
+                    policy.RequireRole("Farmer")
+                          .RequireClaim("IsVerified", "true")); // add this claim in JWT
+            });
+            #endregion
+
+            #region Register farmer & trader & admin & User servicies
+            builder.Services.AddScoped<IFarmerService, FarmerService>(); 
+            builder.Services.AddScoped<IUserService, UserService>();
+            #endregion
 
             var app = builder.Build();
 
@@ -231,7 +259,7 @@ namespace T3awunyWebService
             //}
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseCors("Allow");
             app.UseAuthentication();
             app.UseAuthorization();

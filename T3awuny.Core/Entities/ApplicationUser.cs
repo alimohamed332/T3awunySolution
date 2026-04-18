@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser 
     {
         public string Name { get; set; } = string.Empty;  
         public string? ProfileImageUrl { get; set; }

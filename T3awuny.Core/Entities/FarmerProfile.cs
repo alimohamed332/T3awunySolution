@@ -10,13 +10,14 @@ namespace T3awuny.Core.Entities
     public class FarmerProfile : BaseEntity
     {
         public string FarmerId { get; set; } = string.Empty; //(PK, FK → AspNetUsers)
+        public virtual ApplicationUser? User { get; set; } = null;
         // some info about the farm of the farmer
         public string? FarmName { get; set; }
         //public int FarmSize { get; set; } ali nasr need to remove 
-        public int? FarmAddressId { get; set; }  // (FK → Address)
-        public Address? Address { get; set; }
+        //public int? FarmAddressId { get; set; }  // (FK → Address)
+        //public Address? Address { get; set; }
         public string? Description { get; set; }
         public bool IsVerified { get; set; }
-        public DateTime VerifiedAt { get; set; }
+        public DateTime? VerifiedAt { get; set; }
     }
 }

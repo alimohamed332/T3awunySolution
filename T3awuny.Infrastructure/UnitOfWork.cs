@@ -18,12 +18,15 @@ namespace T3awuny.Infrastructure
         //private Dictionary<string, GenericRepository<BaseEntity>> _repositories;  // Cache for repositories
         //ex: order , GenericRepository<Order> , "Order" , _repositories["Order"]
         private readonly Hashtable _repositories;  // Cache for repositories
+
+        public IUserRepository UserRepository { get; }
+
         public UnitOfWork(T3awunyDbContext dbContext)
         {
             _dbContext = dbContext;
             //_repositories = new Dictionary<string, GenericRepository<BaseEntity>>();
             _repositories = new Hashtable();
-
+            UserRepository = new UserRepository(_dbContext);
         }
 
         public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity

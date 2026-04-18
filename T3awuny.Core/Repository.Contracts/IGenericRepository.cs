@@ -11,6 +11,7 @@ namespace T3awuny.Core.Repository.Contracts
     public interface IGenericRepository<T> where T : BaseEntity
     {
         Task<T?> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(string id);
         //Task<T> GetByNameAsync(string name);
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdWithSpecAsync(ISpecifications<T> spec);

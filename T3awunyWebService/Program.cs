@@ -81,11 +81,14 @@ namespace T3awunyWebService
             #region Cors Settings
             builder.Services.AddCors(options =>
             {
-               options.AddPolicy("Allow", policy =>
-               {
-                   policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-               });
-            }); 
+                options.AddPolicy("Allow", policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:4200") //Angular
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
             #endregion
 
             #region Identity and Jwt registration and configuration

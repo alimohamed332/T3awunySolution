@@ -35,7 +35,9 @@ namespace T3awuny.Infrastructure.Configurations
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //builder.HasMany(u => u.RefreshTokens).WithOne().HasForeig;
+            builder.OwnsMany(u => u.RefreshTokens)
+                .WithOwner()
+                .HasForeignKey(rt => rt.UserId);
 
         }
     }

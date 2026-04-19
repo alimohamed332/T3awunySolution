@@ -74,17 +74,6 @@ namespace T3awunyWebService.Controllers
             return Ok(ApiResponse<TraderProfileDto>.Ok(traderProfile, "تم تحديث البروفايل بنجاح"));
         }
 
-        [Authorize]
-        [HttpGet("verified-traders")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TraderProfileDto>>>> GetVerifiedTraders()
-        {
-            var verifiedTraders = await _traderService.GetAllVerifiedAsync();
-            if (!verifiedTraders.Any())
-                return NotFound(ApiResponse<IEnumerable<TraderProfileDto>>.Fail("لا يوجد تجار موثقين"));
-
-            return Ok(ApiResponse<IEnumerable<TraderProfileDto>>.Ok(verifiedTraders, "تم العثور على التجار الموثقين بنجاح"));
-        }
-
         private string GetUserIdFromClaims()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

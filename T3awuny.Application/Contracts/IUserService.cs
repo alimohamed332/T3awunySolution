@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Core.Entities;
 
@@ -14,8 +15,8 @@ namespace T3awuny.Application.Contracts
         Task<string> GetUserIdByEmailAsync(string email);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
-        Task<IEnumerable<UserDetailsDto>> GetAllVerifiedUsersAsync();
-        Task<IEnumerable<UserDetailsDto>> GetAllNonVerifiedUsersAsync();
+        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllVerifiedUsersAsync();
+        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllNonVerifiedUsersAsync();
         Task<bool> UpdateProfileImageAsync(string userId, IFormFile image);
     }
 }

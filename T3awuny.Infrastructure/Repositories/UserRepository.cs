@@ -27,5 +27,10 @@ namespace T3awuny.Infrastructure.Repositories
         {
             return await _dbContext.Users.Where(u => !u.IsVerified).AsNoTracking().ToListAsync();
         }
+
+        public async Task<IReadOnlyList<ApplicationUser>> GetBannedUsersAsync()
+        {
+            return await _dbContext.Users.Where(u => !u.IsActive).AsNoTracking().ToListAsync();
+        }
     }
 }

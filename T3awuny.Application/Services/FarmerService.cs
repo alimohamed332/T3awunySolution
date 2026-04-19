@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Farmer;
@@ -28,23 +29,16 @@ namespace T3awuny.Application.Services
             _userManager = userManager;
         }
 
-        public async Task<IEnumerable<FarmerProfileDto>> GetAllVerifiedAsync()
+        public async Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetAllVerifiedAsync()
         {
             var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
-            return farmerProfiles.Select(f => new FarmerProfileDto
-            {
-                FarmerId = f.FarmerId,
-                Name = f.User!.Name,
-                FarmName = f.FarmName,
-                Description = f.Description,
-                Email = f.User!.Email!,
-                UserName = f.User!.UserName!,
-                ProfileImageUrl = f.User!.ProfileImageUrl!,
-                JoinDate = f.User!.JoinDate,
-                IsVerified = f.IsVerified
-            });
-            //return farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
+            var mappedFarmerProfiles = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
+
+            if (!mappedFarmerProfiles.Any())
+                return ApiResponse<IEnumerable<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
+
+            return ApiResponse<IEnumerable<FarmerProfileDto>>.Ok(mappedFarmerProfiles, "تم العثور على المزارعين الموثقين بنجاح");
         }
 
         public async Task<FarmerProfileDto?> GetProfileAsync(string userId)

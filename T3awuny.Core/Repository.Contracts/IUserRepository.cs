@@ -11,5 +11,6 @@ namespace T3awuny.Core.Repository.Contracts
     {
         Task<IReadOnlyList<ApplicationUser>> GetAllVerifiedUsersAsync();
         Task<IReadOnlyList<ApplicationUser>> GetAllNonVerifiedUsersAsync();
+        Task<IReadOnlyList<ApplicationUser>> GetBannedUsersAsync();
     }
 }

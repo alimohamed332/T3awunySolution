@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.JwtFeatures;
@@ -54,13 +55,13 @@ namespace T3awuny.Application.Services
             if (await _userManager.FindByNameAsync(model.UserName) is not null)
                 return new AuthModel { Message = "اسم المستخدم هذا مسجل من قبل" };
             var user = _mapper.Map<ApplicationUser>(model);
-
+        
             try
             {
                 user.ProfileImageUrl = await _fileStorageService.SaveImageAsync(model.ImageFile, "users");
             }
             catch (Exception) { }
-
+            user.IsActive = true;
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -123,6 +124,11 @@ namespace T3awuny.Application.Services
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
                 authModel.Message = "لم يتم تأكيد البريد الالكتروني اطلب إعادة ارسال لينك تأكيد مرة اخري";
+                return authModel;
+            }
+            if (!user.IsActive)
+            {
+                authModel.Message = "هذا المستخدم معلق. يرجى الاتصال بالدعم.";
                 return authModel;
             }
             var roles = await _userManager.GetRolesAsync(user);

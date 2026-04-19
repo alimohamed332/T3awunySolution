@@ -232,6 +232,7 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IFarmerService, FarmerService>(); 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITraderService, TraderService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
             #endregion
 
             var app = builder.Build();

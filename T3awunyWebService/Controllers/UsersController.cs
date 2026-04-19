@@ -17,27 +17,7 @@ namespace T3awunyWebService.Controllers
         public UsersController(IUserService userService)
         {
             _userService = userService;
-        }
-        [Authorize("AdminOnly")]
-        [HttpGet("verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
-        {
-            var result = await _userService.GetAllVerifiedUsersAsync();
-            if (!result.Any())
-                return NotFound(ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين موثقين"));
-
-            return Ok(ApiResponse<IEnumerable<UserDetailsDto>>.Ok(result, "تم العثور على المستخدمين الموثقين بنجاح"));
-        }
-
-        [Authorize("AdminOnly")]
-        [HttpGet("non-verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
-        {
-            var result = await _userService.GetAllNonVerifiedUsersAsync();
-            if (!result.Any())
-                return NotFound(ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين غير موثقين"));
-            return Ok(ApiResponse<IEnumerable<UserDetailsDto>>.Ok(result, "تم العثور على المستخدمين غير الموثقين بنجاح"));
-        }
+        }  
         [Authorize]
         [HttpPut("update-profile-image")]
         public async Task<ActionResult<ApiResponse<string>>> UpdateProfileImageAsync([FromForm] UpdateProfileImageDto dto)

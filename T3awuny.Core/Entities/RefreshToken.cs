@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 namespace T3awuny.Core.Entities
 {
     [Owned]
-    public class RefreshToken
+    public class RefreshToken : BaseEntity
     {
+        public string UserId { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
         public DateTime ExpiresOn { get; set; }
         public bool IsExpired => DateTime.UtcNow >= ExpiresOn;

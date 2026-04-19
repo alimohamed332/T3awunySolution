@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
@@ -27,11 +28,16 @@ namespace T3awuny.Application.Services
             _userManager = userManager;
         }
 
-        public async Task<IEnumerable<TraderProfileDto>> GetAllVerifiedAsync()
+        public async Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetAllVerifiedAsync()
         {
             var traderSpecification = new TraderSpecifications(t => t.IsVerified); // you can use only base spec but will not include user inside but it lighter if you didn't need it 
             var traderProfiles = await _unitOfWork.Repository<TraderProfile>().GetAllWithSpecAsync(traderSpecification);
-            return traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t)); // if ok do it in farmer service
+            var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
+
+            if (!mappedTraderProfiles.Any())
+                return ApiResponse<IEnumerable<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
+
+            return ApiResponse<IEnumerable<TraderProfileDto>>.Ok(mappedTraderProfiles, "تم العثور على التجار الموثقين بنجاح");
         }
 
         public async Task<TraderProfileDto?> GetProfileAsync(string userId)

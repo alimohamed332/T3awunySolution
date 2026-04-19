@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.User;
@@ -27,23 +28,27 @@ namespace T3awuny.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<UserDetailsDto>> GetAllNonVerifiedUsersAsync()
+        public async Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllNonVerifiedUsersAsync()
         {
             var users = await _unitOfWork.UserRepository.GetAllNonVerifiedUsersAsync();
-            return users.Select(u => new UserDetailsDto
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Email = u.Email!,
-                UserName = u.UserName!,
-                IsEmailConfirmed = u.EmailConfirmed
-            });
+            var userDetailsDtos =  users.Select(u => new UserDetailsDto
+                                   {
+                                      Id = u.Id,
+                                      Name = u.Name,
+                                      Email = u.Email!,
+                                      UserName = u.UserName!,
+                                      IsEmailConfirmed = u.EmailConfirmed
+                                   });
+            if (!userDetailsDtos.Any())
+                return ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين غير موثقين");
+
+            return ApiResponse<IEnumerable<UserDetailsDto>>.Ok(userDetailsDtos, "تم العثور على المستخدمين غير الموثقين بنجاح");
         }
 
-        public async Task<IEnumerable<UserDetailsDto>> GetAllVerifiedUsersAsync()
+        public async Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllVerifiedUsersAsync()
         {
             var users = await _unitOfWork.UserRepository.GetAllVerifiedUsersAsync();
-            return users.Select(u => new UserDetailsDto
+            var userDetailsDtos =  users.Select(u => new UserDetailsDto
             {
                 Id = u.Id,
                 Name = u.Name,
@@ -51,6 +56,11 @@ namespace T3awuny.Application.Services
                 UserName = u.UserName!,
                 IsEmailConfirmed = u.EmailConfirmed
             });
+
+            if (!userDetailsDtos.Any())
+                return ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين موثقين");
+
+            return ApiResponse<IEnumerable<UserDetailsDto>>.Ok(userDetailsDtos, "تم العثور على المستخدمين الموثقين بنجاح");
         }
 
         public async Task<ApplicationUser?> GetUserByEmailAsync(string email)

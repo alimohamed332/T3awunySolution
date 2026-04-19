@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.Farmer;
 
 namespace T3awuny.Application.Contracts
@@ -12,6 +13,6 @@ namespace T3awuny.Application.Contracts
         Task<FarmerProfileDto> CreateProfileAsync(string userId, CreateFarmerProfileDto dto);
         Task<FarmerProfileDto> UpdateProfileAsync(string userId, UpdateFarmerProfileDto dto);
         Task<FarmerProfileDto?> GetProfileAsync(string userId);
-        Task<IEnumerable<FarmerProfileDto>> GetAllVerifiedAsync();
+        Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetAllVerifiedAsync();
     }
 }

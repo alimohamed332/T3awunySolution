@@ -8,7 +8,8 @@ namespace T3awuny.Application.DTOs.Farmer
 {
     public class UpdateFarmerProfileDto
     {
-        public string Name { get; set; } = string.Empty;
+        public string? UserId { get; set; }
+        public string? Name { get; set; } = string.Empty;
         public string? FarmName { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
     }

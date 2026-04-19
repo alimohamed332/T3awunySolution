@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Farmer;
+using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Specifications;
@@ -29,7 +30,7 @@ namespace T3awuny.Application.Services
 
         public async Task<IEnumerable<FarmerProfileDto>> GetAllVerifiedAsync()
         {
-            var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);
+            var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
             return farmerProfiles.Select(f => new FarmerProfileDto
             {
@@ -43,6 +44,7 @@ namespace T3awuny.Application.Services
                 JoinDate = f.User!.JoinDate,
                 IsVerified = f.IsVerified
             });
+            //return farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
         }
 
         public async Task<FarmerProfileDto?> GetProfileAsync(string userId)
@@ -90,11 +92,11 @@ namespace T3awuny.Application.Services
             if (!await _userManager.IsInRoleAsync(user, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
 
             var existingProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdAsync(userId);
-            if (existingProfile is null) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس لديه بروفايل" };
+            if (existingProfile is null) return new FarmerProfileDto { Messsage = "هذا المزارع ليس لديه بروفايل" };
 
-            existingProfile.FarmName = dto.FarmName;
-            existingProfile.Description = dto.Description;
-            existingProfile.User!.Name = dto.Name;
+            existingProfile.FarmName = dto.FarmName ?? existingProfile.FarmName;
+            existingProfile.Description = dto.Description ?? existingProfile.Description;
+            existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
             await _unitOfWork.CompleteAsync();
             return _mapper.Map<FarmerProfileDto>(existingProfile);
         }

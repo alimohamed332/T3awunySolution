@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Farmer;
+using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
 
 namespace T3awuny.Application.Helpers
@@ -35,6 +36,16 @@ namespace T3awuny.Application.Helpers
                 .ReverseMap();
 
             CreateMap<FarmerProfile, FarmerProfileDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User!.Name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User!.Email))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName))
+                .ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.User!.Addresses))
+                .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.User!.ProfileImageUrl))
+                .ForMember(dest => dest.JoinDate, opt => opt.MapFrom(src => src.User!.JoinDate))
+                .ForMember(dest => dest.Messsage, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<TraderProfile,TraderProfileDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User!.Name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User!.Email))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName))

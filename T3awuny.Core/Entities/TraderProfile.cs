@@ -12,6 +12,7 @@ namespace T3awuny.Core.Entities
         public virtual ApplicationUser? User { get; set; } = null;
         public string? BusinessName { get; set; } = string.Empty;
         public BusinessType? BusinessType { get; set; }
+        public string? Description { get; set; } = string.Empty;
         public int? TaxNumber { get; set; }
         public bool IsVerified { get; set; }
         public DateTime VerifiedAt { get; set; }

@@ -8,6 +8,7 @@ namespace T3awuny.Application.DTOs.Farmer
 {
     public class CreateFarmerProfileDto
     {
+        public string? UserId { get; set; } 
         public string FarmName { get; set; } = string.Empty;
         public string? Description { get; set; }
         //public double? Latitude { get; set; }   // reverse geocode for farm address

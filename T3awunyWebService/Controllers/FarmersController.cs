@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
+using T3awuny.Application.DTOs.Trader;
 
 namespace T3awunyWebService.Controllers
 {
@@ -31,15 +32,23 @@ namespace T3awunyWebService.Controllers
             }
             var farmerProfile = await _farmerService.GetProfileAsync(id);
             if (farmerProfile is null) 
-                return NotFound(ApiResponse<FarmerProfileDto>.Fail("هذا المزارع لا يملك بروفايل"));
+                return NotFound(ApiResponse<FarmerProfileDto>.Fail(" هذا المستخدم لا يملك بروفايل مزارع"));
 
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم العثور على بروفايل المزارع بنجاح"));
         }
 
-        [Authorize]
+        [Authorize("FarmerOrAdmin")]
         [HttpPost("create-profile")]
-        public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> CreateFarmerProfile(string id, [FromBody]CreateFarmerProfileDto dto)
+        public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> CreateFarmerProfile([FromBody]CreateFarmerProfileDto dto)
         {
+            var id = dto.UserId;
+            if (string.IsNullOrEmpty(id))
+            {
+                // Get the user ID from the claims if not provided in the route => to get the profile of the currently authenticated farmer
+                id = GetUserIdFromClaims();
+                if (string.IsNullOrEmpty(id))
+                    return BadRequest(ApiResponse<TraderProfileDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            }
             var farmerProfile = await _farmerService.CreateProfileAsync(id, dto);
             if (farmerProfile.Messsage is not null) 
                 return BadRequest(ApiResponse<FarmerProfileDto>.Fail(farmerProfile.Messsage));
@@ -47,10 +56,18 @@ namespace T3awunyWebService.Controllers
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم إنشاء البروفايل بنجاح"));
         }
 
-        [Authorize]
+        [Authorize("FarmerOrAdmin")]
         [HttpPut("update-profile")]
-        public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> UpdateFarmerProfile(string id, [FromBody]UpdateFarmerProfileDto dto)
+        public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> UpdateFarmerProfile([FromBody]UpdateFarmerProfileDto dto)
         {
+            var id = dto.UserId;
+            if (string.IsNullOrEmpty(id))
+            {
+                // Get the user ID from the claims if not provided in the route => to get the profile of the currently authenticated farmer
+                id = GetUserIdFromClaims();
+                if (string.IsNullOrEmpty(id))
+                    return BadRequest(ApiResponse<TraderProfileDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            }
             var farmerProfile = await _farmerService.UpdateProfileAsync(id, dto);
             if (farmerProfile.Messsage is not null) 
                 return BadRequest(ApiResponse<FarmerProfileDto>.Fail(farmerProfile.Messsage));
@@ -69,5 +86,9 @@ namespace T3awunyWebService.Controllers
             return Ok(ApiResponse<IEnumerable<FarmerProfileDto>>.Ok(verifiedFarmers, "تم العثور على المزارعين الموثقين بنجاح"));
         }
 
+        private string GetUserIdFromClaims()
+        {
+            return User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;
+        }
     }
 }

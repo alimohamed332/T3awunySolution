@@ -22,7 +22,7 @@ namespace T3awuny.Application.DTOs.Auth
         //public string? ProfileImageUrl { get; set; }
         public IFormFile? ImageFile { get; set; }
         
-        public CreateAddressDto Addresses { get; set; }
+        public CreateAddressDto Addresses { get; set; } = new CreateAddressDto();
         //public  ICollection<CreateAddressDto> Addresses { get; set; } = new HashSet<CreateAddressDto>();/////remember to define how to recieve from nasr and how to map to DB
         [Required, StringLength(256)]
         public string Password { get; set; } = string.Empty;

@@ -21,6 +21,8 @@ namespace T3awuny.Infrastructure.Configurations
 
             builder.Property(t => t.BusinessType)
                 .HasDefaultValue(BusinessType.Wholesaler);
+            builder.Property(t => t.Description)
+                .HasMaxLength(150);
         }
     }
 }

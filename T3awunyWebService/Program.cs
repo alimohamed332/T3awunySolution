@@ -85,6 +85,7 @@ namespace T3awunyWebService
                 {
                     policy
                         .WithOrigins("http://localhost:4200") //Angular
+                        //.AllowAnyOrigin() // Allow requests from any origin (for development purposes)
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                 });
@@ -230,6 +231,7 @@ namespace T3awunyWebService
             #region Register farmer & trader & admin & User servicies
             builder.Services.AddScoped<IFarmerService, FarmerService>(); 
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ITraderService, TraderService>();
             #endregion
 
             var app = builder.Build();

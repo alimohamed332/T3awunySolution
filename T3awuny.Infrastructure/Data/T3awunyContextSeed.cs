@@ -23,20 +23,22 @@ namespace T3awuny.Infrastructure.Data
             }
         }
 
-        public static async Task SeedAdminAsync(T3awunyDbContext _dbContext)
+        public static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager)
         {
-            if (!_dbContext.Users.Any())
+            if (!userManager.Users.Any())
             {
-                _dbContext.Users.Add(
-                    new ApplicationUser { 
-                        Email = "Admin@gmail.com",
-                        UserName = "admin1",
-                        Name = "Admin1", 
-                        Addresses = new List<Address> { new Address { Street = "Alfawal" ,City = "Fayoum" , Governorate = "Fayoum" , Country = "Egypt"} },   
-                        PasswordHash = "69195a86ced09fc9f226ad02a9a56a7a3dcbfebd86f135f079c844f90299fefe"
-                    }
-                );
-                await _dbContext.SaveChangesAsync();
+                var admin = new ApplicationUser
+                {
+                    Email = "Admin@gmail.com",
+                    UserName = "admin1",
+                    Name = "Admin1",
+                    Addresses = new List<Address> { new Address { Street = "التعاونيات", City = "الفيوم", Governorate = "الفيوم", Country = "مصر" } },
+                    IsActive = true,
+                    IsVerified = true,
+                    EmailConfirmed = true,
+                };
+                await userManager.CreateAsync(admin, "Admin@123");
+                await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
     }

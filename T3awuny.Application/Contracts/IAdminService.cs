@@ -7,6 +7,7 @@ using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
+using T3awuny.Core.Entities;
 
 namespace T3awuny.Application.Contracts
 {
@@ -19,6 +20,9 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetPendingFarmersAsync();
         Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetPendingTradersAsync();
         Task<ApiResponse<IEnumerable<BannedUserDto>>> GetBannedUsersAsync();
+        Task<ApiResponse<bool>> DeleteUserAsync(string userId);
+        Task<ApiResponse<ApplicationUser>> GetAdminByIdAsync(string adminId);
+        Task<ApiResponse<ApplicationUser>> GetUserByIdAsync(string userId);
 
     }
 }

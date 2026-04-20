@@ -7,6 +7,7 @@ using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Application.Services;
+using T3awuny.Core.Entities;
 
 namespace T3awunyWebService.Controllers
 {
@@ -142,14 +143,40 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        //public async Task<IActionResult> GetAdminById(int id)
-        //{
-        //    var admin = await _adminService.GetAdminByIdAsync(id);
-        //    if (admin == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok(admin);
-        //}
+        [Authorize("AdminOnly")]
+        [HttpGet("admin/{id}")]
+        public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetAdminById(string id)
+        {
+            var result = await _adminService.GetAdminByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpGet("user/{id}")]
+        public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetUserById(string id)
+        {
+            var result = await _adminService.GetUserByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpDelete("delete-user/{id}")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
+        {
+            var result = await _adminService.DeleteUserAsync(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }  
     }
 }

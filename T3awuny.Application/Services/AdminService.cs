@@ -132,6 +132,41 @@ namespace T3awuny.Application.Services
             return ApiResponse<string>.Ok($"تم {statusMessage} بنجاح");
         }
 
+        public async Task<ApiResponse<bool>> DeleteUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return ApiResponse<bool>.Fail("هذا المستخدم غير موجود");
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Admin"))
+                return ApiResponse<bool>.Fail("لا تسطيع حذف الحساب الخاص بمسؤول");
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                return ApiResponse<bool>.Fail("فشل في حذف المستخدم حاول مرة اخرى لاحقاَ");
+
+            return ApiResponse<bool>.Ok(true, "تم حذف المستخدم بنجاح");
+        }
+
+        public async Task<ApiResponse<ApplicationUser>> GetUserByIdAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return ApiResponse<ApplicationUser>.Fail("هذا المستخدم غير موجود");
+            return ApiResponse<ApplicationUser>.Ok(user, "تم الحصول علي المستخدم بنجاح");
+        }
+
+        public async Task<ApiResponse<ApplicationUser>> GetAdminByIdAsync(string adminId)
+        {
+            var user = await _userManager.FindByIdAsync(adminId);
+            if (user is null)
+                return ApiResponse<ApplicationUser>.Fail("هذا المسؤول غير موجود");
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains("Admin"))
+                return ApiResponse<ApplicationUser>.Fail("هذا المستخدم ليس مسؤول");
+
+            return ApiResponse<ApplicationUser>.Ok(user, "تم الحصول علي المسؤول بنجاح");
+        }
+
         private async Task RevokeAllRefreshTokensAsync(string userId)
         {
             var refreshTokenSpecObject = new BaseSpecifications<RefreshToken>(r => r.UserId == userId && r.IsActive);

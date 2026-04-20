@@ -241,13 +241,14 @@ namespace T3awunyWebService
             var scope = app.Services.CreateScope();
             var services = scope.ServiceProvider;
             var _dbContext = services.GetRequiredService<T3awunyDbContext>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Program>();
             try
             {
                 _dbContext.Database.Migrate();  //update database by appliying any pending migrations if exists, if not it will do nothing
                 await T3awunyContextSeed.SeedRolesAsync(_dbContext); // data seeding
-                await T3awunyContextSeed.SeedAdminAsync(_dbContext); // data seeding
+                await T3awunyContextSeed.SeedAdminAsync(userManager); // data seeding
             }
             catch (Exception ex)
             {

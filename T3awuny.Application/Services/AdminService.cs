@@ -61,9 +61,10 @@ namespace T3awuny.Application.Services
                 return ApiResponse<bool>.Fail("هذا المزارع لا يملك بروفايل ");
 
             farmerProfile.IsVerified = true;
-            farmerProfile!.User!.IsActive = true;
+            farmerProfile.VerifiedAt = DateTime.UtcNow;
+            farmerProfile!.User!.IsVerified = true;
             var result = _unitOfWork.Repository<FarmerProfile>().Update(farmerProfile);
-            
+            // you can use user manager to update the user but it will make 2 calls to the database so i prefer to update the user with the unit of work and then call complete async once to save all changes
             //await _userManager.UpdateAsync(farmerProfile.User);
             await _unitOfWork.CompleteAsync();
             if (!result.IsVerified)
@@ -80,9 +81,10 @@ namespace T3awuny.Application.Services
                 return ApiResponse<bool>.Fail("هذا التاجر لا يملك بروفايل ");
 
             traderProfile.IsVerified = true;
-            traderProfile!.User!.IsActive = true;
+            traderProfile.VerifiedAt = DateTime.UtcNow;
+            traderProfile!.User!.IsVerified = true;
             var result = _unitOfWork.Repository<TraderProfile>().Update(traderProfile);
-            
+            // you can use user manager to update the user but it will make 2 calls to the database so i prefer to update the user with the unit of work and then call complete async once to save all changes
             //await _userManager.UpdateAsync(traderProfile.User);
             await _unitOfWork.CompleteAsync();
             if (!result.IsVerified)

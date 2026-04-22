@@ -26,7 +26,7 @@ namespace T3awunyWebService.Controllers
             if (string.IsNullOrEmpty(id))
             {
                 // Get the user ID from the claims if not provided in the route => to get the profile of the currently authenticated farmer
-                id = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+                id = GetUserIdFromClaims();
                 if (string.IsNullOrEmpty(id))
                     return BadRequest(ApiResponse<FarmerProfileDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
             }

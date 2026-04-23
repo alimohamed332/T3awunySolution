@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace T3awuny.Core.Entities
+namespace T3awuny.Core.Entities.Enums
 {
     public enum BusinessType
     {

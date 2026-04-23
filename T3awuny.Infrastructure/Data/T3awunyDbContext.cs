@@ -16,7 +16,9 @@ namespace T3awuny.Infrastructure.Data
         public virtual DbSet<FarmerProfile> FarmerProfiles { get; set; }
         public virtual DbSet<TraderProfile> TraderProfiles { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
-
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<ProductImage> ProductImages { get; set; }
 
         public T3awunyDbContext(DbContextOptions<T3awunyDbContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder builder)

@@ -249,6 +249,7 @@ namespace T3awunyWebService
                 _dbContext.Database.Migrate();  //update database by appliying any pending migrations if exists, if not it will do nothing
                 await T3awunyContextSeed.SeedRolesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedAdminAsync(userManager); // data seeding
+                await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
             }
             catch (Exception ex)
             {

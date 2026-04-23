@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Core.Entities.Enums;
 
 namespace T3awuny.Core.Entities
 {

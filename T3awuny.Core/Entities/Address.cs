@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.Enums;
 
 namespace T3awuny.Core.Entities
 {

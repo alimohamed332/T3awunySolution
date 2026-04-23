@@ -71,6 +71,7 @@ namespace T3awuny.Application.Services
                 {
                     errors.Append(error.Description + " , ");
                 }
+                _fileStorageService.DeleteImage(user.ProfileImageUrl!);
                 return new AuthModel { Message = errors.ToString() };
             }
             
@@ -81,9 +82,9 @@ namespace T3awuny.Application.Services
 
             await _userManager.AddToRoleAsync(user, role);
 
-            List<string> roles = new List<string>();
-            roles.Add(role); // no loop because we have only one role for each user in this case 
-            var token = _jwtHandler.CreateToken(user, roles);
+            //List<string> roles = new List<string>();
+            //roles.Add(role); // no loop because we have only one role for each user in this case 
+            //var token = _jwtHandler.CreateToken(user, roles);
 
             // generate email confirmation token
             var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -104,8 +105,8 @@ namespace T3awuny.Application.Services
                 Email = user.Email!,
                 Username = user.UserName!,
                 IsAuthenticated = true,
-                Token = token,
-                Roles = roles,
+                //Token = token,
+                //Roles = roles,
                 Message = "تم التسجيل بنجاح برجاء تأكيد البريد الالكتروني لتتمكن من استخدام حسابك"
             };
 

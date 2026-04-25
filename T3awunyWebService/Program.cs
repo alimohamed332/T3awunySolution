@@ -235,6 +235,10 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IAdminService, AdminService>();
             #endregion
 
+            #region Register Product & Category Services
+            builder.Services.AddScoped<IProductService, ProductService>(); 
+            #endregion
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application

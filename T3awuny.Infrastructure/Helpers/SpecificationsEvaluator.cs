@@ -20,6 +20,14 @@ namespace T3awuny.Infrastructure.Helpers
                 query = query.Where(spec.Criteria); //_dbContext.Set<Product>().Where(p => p.BrandId == 1);
             }
 
+            if (spec.OrderBy is not null)
+                query = query.OrderBy(spec.OrderBy);
+            else if (spec.OrderByDesc is not null)
+                query = query.OrderByDescending(spec.OrderByDesc);
+
+            if (spec.IsPaginationEnabled)
+                query = query.Skip(spec.Skip).Take(spec.Take);
+
             query = spec.Includes.Aggregate(query, (current, includeExpression) => current.Include(includeExpression)); //_dbContext.Set<Product>().Where(p => p.BrandId == 1);.Include(p => p.Brand).Include(p => p.ProductType);
 
 

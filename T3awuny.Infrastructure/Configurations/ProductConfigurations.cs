@@ -53,7 +53,7 @@ namespace T3awuny.Infrastructure.Configurations
                 .WithOne(i => i.Product)
                 .HasForeignKey(p => p.ProductId);
 
-            builder.HasQueryFilter(p => p.Status != ProductStatus.Deleted);
+            builder.HasQueryFilter(p => p.Status != ProductStatus.Deleted && p.Status != ProductStatus.Archived);
 
             builder.HasIndex(p => p.Name);
         }

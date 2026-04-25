@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class Category
+    public class Category : BaseEntity
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

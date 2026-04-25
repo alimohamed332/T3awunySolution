@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Core.Entities
 {
-    public class ProductImage
+    public class ProductImage : BaseEntity
     {
         public int Id { get; set; }
         public int ProductId { get; set; }

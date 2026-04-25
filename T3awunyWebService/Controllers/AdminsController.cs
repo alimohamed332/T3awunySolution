@@ -8,6 +8,7 @@ using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Application.Services;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.Enums;
 
 namespace T3awunyWebService.Controllers
 {
@@ -19,13 +20,15 @@ namespace T3awunyWebService.Controllers
         private readonly IFarmerService _farmerService;
         private readonly ITraderService _traderService;
         private readonly IUserService _userService;
+        private readonly IProductService _productService;
 
-        public AdminsController(IAdminService adminService, IFarmerService farmerService, ITraderService traderService, IUserService userService)
+        public AdminsController(IAdminService adminService, IFarmerService farmerService, ITraderService traderService, IUserService userService, IProductService productService)
         {
             _adminService = adminService;
             _farmerService = farmerService;
             _traderService = traderService;
             _userService = userService;
+            _productService = productService;
         }
         [Authorize("AdminOnly")]
         [HttpPatch("verify-farmer/{id}")]
@@ -177,6 +180,19 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }  
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpPut("products/review")]
+        public async Task<ActionResult<ApiResponse<string>>> FlagProduct(int productId)
+        {
+            var adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(adminId))
+                return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            var result = await _productService.ChangeStatusAsync(adminId, productId, ProductStatus.UnderReview);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
     }
 }

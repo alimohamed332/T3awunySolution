@@ -7,7 +7,7 @@ using T3awuny.Core.Entities.Enums;
 
 namespace T3awuny.Core.Entities
 {
-    public class Product
+    public class Product : BaseEntity
     {
         public int Id { get; set; }
         public string FarmerId { get; set; } = string.Empty;         // FK → ApplicationUser

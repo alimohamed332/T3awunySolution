@@ -44,7 +44,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize]
         [HttpGet("farmer/{id}")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ProductSummaryDto>>>> GetByFarmerAsync(string id)
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ProductSummaryDto>>>> GetByFarmerAsync(string id)
         {
             var result = await _productService.GetByFarmerAsync(id);
             if (!result.IsSuccess)

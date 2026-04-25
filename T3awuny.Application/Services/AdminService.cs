@@ -30,27 +30,27 @@ namespace T3awuny.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetPendingFarmersAsync()
+        public async Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetPendingFarmersAsync()
         {
             var farmerSpecification = new FarmerSpecifications(f => !f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
             var farmerProfilesDtos = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
 
             if (!farmerProfilesDtos.Any())
-                return ApiResponse<IEnumerable<FarmerProfileDto>>.Fail("لا يوجد حسابات مزارعين في انتظار التحقق حاليا");
+                return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد حسابات مزارعين في انتظار التحقق حاليا");
 
-            return ApiResponse<IEnumerable<FarmerProfileDto>>.Ok(farmerProfilesDtos, "تم العثور على حسابات المزارعين في انتظار التحقق بنجاح");
+            return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(farmerProfilesDtos.ToList(), "تم العثور على حسابات المزارعين في انتظار التحقق بنجاح");
         }
 
-        public async Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetPendingTradersAsync()
+        public async Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetPendingTradersAsync()
         {
             var traderSpecification = new TraderSpecifications(t => !t.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
             var traderProfiles = await _unitOfWork.Repository<TraderProfile>().GetAllWithSpecAsync(traderSpecification);
             var traderProfilesDtos = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
 
             if (!traderProfilesDtos.Any()) 
-                return ApiResponse<IEnumerable<TraderProfileDto>>.Fail("لا يوجد حسابات تجار في انتظار التحقق حاليا");
-            return ApiResponse<IEnumerable<TraderProfileDto>>.Ok(traderProfilesDtos, "تم العثور على حسابات التجار في انتظار التحقق بنجاح");
+                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد حسابات تجار في انتظار التحقق حاليا");
+            return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(traderProfilesDtos.ToList(), "تم العثور على حسابات التجار في انتظار التحقق بنجاح");
         }
 
         public async Task<ApiResponse<bool>> VerifyFarmerAsync(string farmerId)
@@ -93,12 +93,12 @@ namespace T3awuny.Application.Services
             return ApiResponse<bool>.Ok(true, "تم التحقق من التاجر بنجاح");
         }
 
-        public  async Task<ApiResponse<IEnumerable<BannedUserDto>>> GetBannedUsersAsync()
+        public  async Task<ApiResponse<IReadOnlyList<BannedUserDto>>> GetBannedUsersAsync()
         {
             var bannedUsers = await _unitOfWork.UserRepository.GetBannedUsersAsync();
             if (!bannedUsers.Any())
             {
-                return ApiResponse<IEnumerable<BannedUserDto>>.Fail("لا يوجد مستخدمين محظورين حاليا");
+                return ApiResponse<IReadOnlyList<BannedUserDto>>.Fail("لا يوجد مستخدمين محظورين حاليا");
             }
             var bannedUsersDtos = bannedUsers.Select(u => new BannedUserDto 
             { 
@@ -108,7 +108,7 @@ namespace T3awuny.Application.Services
                 Name = u.Name
             });
 
-            return ApiResponse<IEnumerable<BannedUserDto>>.Ok(bannedUsersDtos,"تم الحصول علي المستخدمين المحظورين بنجاح");
+            return ApiResponse<IReadOnlyList<BannedUserDto>>.Ok(bannedUsersDtos.ToList(),"تم الحصول علي المستخدمين المحظورين بنجاح");
         }
 
         public async Task<ApiResponse<string>> ToggleUserStatusAsync(string userId)

@@ -46,11 +46,11 @@ namespace T3awuny.Application.Services
             };
         }
 
-        public async Task<IEnumerable<AddressDetailsDto>> GetAllAddressesAsync()
+        public async Task<IReadOnlyList<AddressDetailsDto>> GetAllAddressesAsync()
         {
            var addresses = await _unitOfWork.Repository<Address>().GetAllAsync(); // no need to include => no need to use spec. no need to filter by userId since this is an admin endpoint
             return addresses.Select(address => new AddressDetailsDto
-           {
+            {
                Id = address.Id,
                UserId = address.UserId,
                Street = address.Street!,
@@ -60,7 +60,7 @@ namespace T3awuny.Application.Services
                Country = address.Country!,
                Longitude = address.Longitude,
                Latitude = address.Latitude
-           });
+            }).ToList();
         }
         public async Task<AddressDetailsDto> AddAddressAsync(string userId, CreateAddressDto dto)
         {

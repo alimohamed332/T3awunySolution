@@ -15,8 +15,8 @@ namespace T3awuny.Application.Contracts
         Task<string> GetUserIdByEmailAsync(string email);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
-        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllVerifiedUsersAsync();
-        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllNonVerifiedUsersAsync();
+        Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllVerifiedUsersAsync();
+        Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllNonVerifiedUsersAsync();
         Task<bool> UpdateProfileImageAsync(string userId, IFormFile image);
     }
 }

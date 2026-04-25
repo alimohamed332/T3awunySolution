@@ -48,18 +48,18 @@ namespace T3awuny.Application.Services
             return ApiResponse<Pagination<ProductSummaryDto>>.Ok(pagination, "تم العثور علي المنتجات بنجاح");
         }
 
-        public async Task<ApiResponse<IEnumerable<ProductSummaryDto>>> GetByFarmerAsync(string farmerId)
+        public async Task<ApiResponse<IReadOnlyList<ProductSummaryDto>>> GetByFarmerAsync(string farmerId)
         {
             var farmer = await _userManager.FindByIdAsync(farmerId);
             if (farmer is null)
-                return ApiResponse<IEnumerable<ProductSummaryDto>>.Fail("هذا المزارع غير موجود");
+                return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("هذا المزارع غير موجود");
             var productSpec = new ProductSpecifications(p => p.FarmerId == farmerId);
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             if(!products.Any())
-                return ApiResponse<IEnumerable<ProductSummaryDto>>.Fail("لا يوجد منتجات معروضة لهذا المزارع");
+                return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("لا يوجد منتجات معروضة لهذا المزارع");
 
             var productDtos = products.Select(p =>_mapper.Map<ProductSummaryDto>(p));
-            return ApiResponse<IEnumerable<ProductSummaryDto>>.Ok(productDtos, "تم العثور علي محاصيل المزارع بنجاح");
+            return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Ok(productDtos.ToList(), "تم العثور علي محاصيل المزارع بنجاح");
         }
 
         public async Task<ApiResponse<ProductResponseDto>> GetByIdAsync(int productId)

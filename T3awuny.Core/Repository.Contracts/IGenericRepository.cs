@@ -13,9 +13,9 @@ namespace T3awuny.Core.Repository.Contracts
         Task<T?> GetByIdAsync(int id);
         Task<T?> GetByIdAsync(string id);
         //Task<T> GetByNameAsync(string name);
-        Task<IEnumerable<T>> GetAllAsync();
+        Task<IReadOnlyList<T>> GetAllAsync();
         Task<T?> GetByIdWithSpecAsync(ISpecifications<T> spec);
-        Task<IEnumerable<T>> GetAllWithSpecAsync(ISpecifications<T> spec);
+        Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecifications<T> spec);
         Task<int> GetCountAsync(ISpecifications<T> spec);
         Task<T> AddAsync(T entity);
         T Update(T entity);

@@ -29,16 +29,16 @@ namespace T3awuny.Application.Services
             _userManager = userManager;
         }
 
-        public async Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetAllVerifiedAsync()
+        public async Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetAllVerifiedAsync()
         {
             var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
             var mappedFarmerProfiles = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
 
             if (!mappedFarmerProfiles.Any())
-                return ApiResponse<IEnumerable<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
+                return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
 
-            return ApiResponse<IEnumerable<FarmerProfileDto>>.Ok(mappedFarmerProfiles, "تم العثور على المزارعين الموثقين بنجاح");
+            return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(mappedFarmerProfiles.ToList(), "تم العثور على المزارعين الموثقين بنجاح");
         }
 
         public async Task<FarmerProfileDto?> GetProfileAsync(string userId)

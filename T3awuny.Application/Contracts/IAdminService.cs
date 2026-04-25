@@ -17,9 +17,9 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<bool>> VerifyTraderAsync(string traderId);
         Task<ApiResponse<string>> ToggleUserStatusAsync(string userId);
         //Task<IEnumerable<UserDto>> GetAllUsersAsync();
-        Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetPendingFarmersAsync();
-        Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetPendingTradersAsync();
-        Task<ApiResponse<IEnumerable<BannedUserDto>>> GetBannedUsersAsync();
+        Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetPendingFarmersAsync();
+        Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetPendingTradersAsync();
+        Task<ApiResponse<IReadOnlyList<BannedUserDto>>> GetBannedUsersAsync();
         Task<ApiResponse<bool>> DeleteUserAsync(string userId);
         Task<ApiResponse<ApplicationUser>> GetAdminByIdAsync(string adminId);
         Task<ApiResponse<ApplicationUser>> GetUserByIdAsync(string userId);

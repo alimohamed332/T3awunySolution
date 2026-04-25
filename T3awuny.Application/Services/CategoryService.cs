@@ -25,7 +25,7 @@ namespace T3awuny.Application.Services
             if (!categories.Any())
                 return ApiResponse<IReadOnlyList<Category>>.Fail("لا يوجد فئات متاحة لعرضها");
 
-            return ApiResponse<IReadOnlyList<Category>>.Ok((IReadOnlyList<Category>)categories, "تم العثور علي الفئات المتاحة بنجاح");
+            return ApiResponse<IReadOnlyList<Category>>.Ok(categories, "تم العثور علي الفئات المتاحة بنجاح");
         }
 
         public async Task<ApiResponse<Category>> GetCategoryByIdAsync(int id)

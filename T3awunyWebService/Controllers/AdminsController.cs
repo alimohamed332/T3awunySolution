@@ -68,7 +68,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("pending-farmers")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetPendingFarmers()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetPendingFarmers()
         {
             var result = await _adminService.GetPendingFarmersAsync();
             if (!result.IsSuccess)
@@ -80,7 +80,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("pending-traders")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TraderProfileDto>>>> GetPendingTraders()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetPendingTraders()
         {
             var result = await _adminService.GetPendingTradersAsync();
             if (!result.IsSuccess)
@@ -92,7 +92,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("banned-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetBannedUsers()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetBannedUsers()
         {
             var result = await _adminService.GetBannedUsersAsync();
             if (!result.IsSuccess)
@@ -104,7 +104,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("verified-farmers")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetVerifiedFarmers()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
         {
             var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
             if (!verifiedFarmers.IsSuccess)
@@ -115,7 +115,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize]
         [HttpGet("verified-traders")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TraderProfileDto>>>> GetVerifiedTraders()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetVerifiedTraders()
         {
             var verifiedTraders = await _traderService.GetAllVerifiedAsync();
             if (!verifiedTraders.IsSuccess)
@@ -126,7 +126,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
         {
             var result = await _userService.GetAllVerifiedUsersAsync();
             if (!result.IsSuccess)
@@ -137,7 +137,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("non-verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
         {
             var result = await _userService.GetAllNonVerifiedUsersAsync();
             if (!result.IsSuccess)

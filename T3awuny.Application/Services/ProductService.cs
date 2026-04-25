@@ -36,7 +36,7 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter)
         {
-            var productSpec = new ProductSpecifications(filter);
+            var productSpec = new ProductSpecifications(filter,true);
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);
             var count = await _unitOfWork.Repository<Product>().GetCountAsync(countSpec);
@@ -81,7 +81,7 @@ namespace T3awuny.Application.Services
             if (!roles.Any() || !roles.Contains("Farmer"))
                 return ApiResponse<Pagination<ProductResponseDto>>.Fail("هذا المستخدم ليس مزارع");
 
-            var productSpec = new ProductSpecifications(specs);
+            var productSpec = new ProductSpecifications(specs,true);
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
 
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);

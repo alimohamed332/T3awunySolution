@@ -39,9 +39,9 @@ namespace T3awunyWebService
                 //This is to generate the Default UI of Swagger Documentation    
                 swagger.SwaggerDoc("v1", new OpenApiInfo
                 {
-                     Version = "v1",
-                     Title = "ASP.NET 9 Web API",
-                     Description = " T3awuny Web Service"
+                    Version = "v1",
+                    Title = "ASP.NET 9 Web API",
+                    Description = " T3awuny Web Service"
                 });
                 // To Enable authorization using Swagger (JWT)    
                 swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -85,7 +85,7 @@ namespace T3awunyWebService
                 {
                     policy
                         .WithOrigins("http://localhost:4200") //Angular
-                        //.AllowAnyOrigin() // Allow requests from any origin (for development purposes)
+                                                              //.AllowAnyOrigin() // Allow requests from any origin (for development purposes)
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                 });
@@ -110,19 +110,19 @@ namespace T3awunyWebService
             })
              .AddCookie("External", options =>
              {
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                 options.Cookie.SameSite = SameSiteMode.None;
+                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
              })
                .AddGoogle(options =>
                {
                    var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
-               
+
                    options.ClientId = googleAuthSection["ClientId"]
                        ?? throw new InvalidOperationException("Google ClientId not found.");
-               
+
                    options.ClientSecret = googleAuthSection["ClientSecret"]
                        ?? throw new InvalidOperationException("Google ClientSecret not found.");
-               
+
                    options.CallbackPath = "/signin-google";
                    options.SignInScheme = "External";
                })
@@ -229,14 +229,15 @@ namespace T3awunyWebService
             #endregion
 
             #region Register farmer & trader & admin & User servicies
-            builder.Services.AddScoped<IFarmerService, FarmerService>(); 
+            builder.Services.AddScoped<IFarmerService, FarmerService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITraderService, TraderService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             #endregion
 
             #region Register Product & Category Services
-            builder.Services.AddScoped<IProductService, ProductService>(); 
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped <ICategoryService, CategoryService>(); 
             #endregion
 
             var app = builder.Build();

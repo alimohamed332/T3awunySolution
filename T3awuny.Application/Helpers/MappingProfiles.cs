@@ -60,7 +60,7 @@ namespace T3awuny.Application.Helpers
             CreateMap<Product, ProductSummaryDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
-                .ForMember(dest => dest.FarmerName, opt => opt.Ignore())
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer.Name))
                 .ReverseMap();
 
             CreateMap<Product, ProductResponseDto>()

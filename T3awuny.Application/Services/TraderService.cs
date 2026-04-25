@@ -28,16 +28,16 @@ namespace T3awuny.Application.Services
             _userManager = userManager;
         }
 
-        public async Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetAllVerifiedAsync()
+        public async Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetAllVerifiedAsync()
         {
             var traderSpecification = new TraderSpecifications(t => t.IsVerified); // you can use only base spec but will not include user inside but it lighter if you didn't need it 
             var traderProfiles = await _unitOfWork.Repository<TraderProfile>().GetAllWithSpecAsync(traderSpecification);
             var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
 
             if (!mappedTraderProfiles.Any())
-                return ApiResponse<IEnumerable<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
+                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
 
-            return ApiResponse<IEnumerable<TraderProfileDto>>.Ok(mappedTraderProfiles, "تم العثور على التجار الموثقين بنجاح");
+            return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles.ToList(), "تم العثور على التجار الموثقين بنجاح");
         }
 
         public async Task<TraderProfileDto?> GetProfileAsync(string userId)

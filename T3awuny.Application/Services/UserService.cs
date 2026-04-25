@@ -28,7 +28,7 @@ namespace T3awuny.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllNonVerifiedUsersAsync()
+        public async Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllNonVerifiedUsersAsync()
         {
             var users = await _unitOfWork.UserRepository.GetAllNonVerifiedUsersAsync();
             var userDetailsDtos =  users.Select(u => new UserDetailsDto
@@ -40,12 +40,12 @@ namespace T3awuny.Application.Services
                                       IsEmailConfirmed = u.EmailConfirmed
                                    });
             if (!userDetailsDtos.Any())
-                return ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين غير موثقين");
+                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Fail("لا يوجد مستخدمين غير موثقين");
 
-            return ApiResponse<IEnumerable<UserDetailsDto>>.Ok(userDetailsDtos, "تم العثور على المستخدمين غير الموثقين بنجاح");
+            return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(userDetailsDtos.ToList(), "تم العثور على المستخدمين غير الموثقين بنجاح");
         }
 
-        public async Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllVerifiedUsersAsync()
+        public async Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllVerifiedUsersAsync()
         {
             var users = await _unitOfWork.UserRepository.GetAllVerifiedUsersAsync();
             var userDetailsDtos =  users.Select(u => new UserDetailsDto
@@ -58,9 +58,9 @@ namespace T3awuny.Application.Services
             });
 
             if (!userDetailsDtos.Any())
-                return ApiResponse<IEnumerable<UserDetailsDto>>.Fail("لا يوجد مستخدمين موثقين");
+                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Fail("لا يوجد مستخدمين موثقين");
 
-            return ApiResponse<IEnumerable<UserDetailsDto>>.Ok(userDetailsDtos, "تم العثور على المستخدمين الموثقين بنجاح");
+            return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(userDetailsDtos.ToList(), "تم العثور على المستخدمين الموثقين بنجاح");
         }
 
         public async Task<ApplicationUser?> GetUserByEmailAsync(string email)

@@ -24,7 +24,7 @@ namespace T3awuny.Application.Contracts
         // Public actions (buyers browse)
         Task<ApiResponse<ProductResponseDto>> GetByIdAsync(int productId);
         Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter);
-        Task<ApiResponse<IEnumerable<ProductSummaryDto>>> GetByFarmerAsync(string farmerId);
+        Task<ApiResponse<IReadOnlyList<ProductSummaryDto>>> GetByFarmerAsync(string farmerId);
 
         // Image management
         Task<ApiResponse<string>> AddImageAsync(string farmerId, int productId, IFormFile image);

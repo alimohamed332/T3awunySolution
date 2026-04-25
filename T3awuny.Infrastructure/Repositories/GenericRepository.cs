@@ -40,14 +40,14 @@ namespace T3awuny.Infrastructure.Repositories
              return await ApplySpecification(spec).FirstOrDefaultAsync();  
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IReadOnlyList<T>> GetAllAsync()
         {
             //if (typeof(T) == typeof(ApplicationUser))
                //return await _dbContext.Set<ApplicationUser>().Where(a => a.Id == id).Include(a => a.Addresses).AsNoTracking().ToListAsync() as IReadOnlyList<T>;
             return await _dbSet.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAllWithSpecAsync(ISpecifications<T> spec)
+        public async Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecifications<T> spec)
         {
             return await ApplySpecification(spec).AsNoTracking().ToListAsync();
         }

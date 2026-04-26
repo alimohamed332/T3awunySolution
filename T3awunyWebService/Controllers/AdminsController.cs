@@ -159,7 +159,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpGet("user/{id}")]
+        [HttpGet("users/{id}")]
         public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetUserById(string id)
         {
             var result = await _adminService.GetUserByIdAsync(id);
@@ -171,7 +171,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpDelete("delete-user/{id}")]
+        [HttpDelete("users/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
         {
             var result = await _adminService.DeleteUserAsync(id);
@@ -183,7 +183,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpPut("products/review")]
+        [HttpPut("products/{productId}/review")]
         public async Task<ActionResult<ApiResponse<string>>> FlagProduct(int productId)
         {
             var adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

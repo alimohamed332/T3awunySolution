@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("trader-profile/{id?}")]
+        [HttpGet("trader-profiles/{id?}")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> GetTraderProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))
@@ -37,7 +37,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("TraderOrAdmin")]
-        [HttpPost("create-profile")]
+        [HttpPost("profiles")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> CreateTraderProfile([FromBody] CreateTraderProfileDto dto)
         {
             var id = dto.UserId;
@@ -56,7 +56,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("TraderOrAdmin")]
-        [HttpPut("update-profile")]
+        [HttpPut("profiles")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> UpdateTraderProfile([FromBody] UpdateTraderProfileDto dto)
         {
             var id = dto.UserId;

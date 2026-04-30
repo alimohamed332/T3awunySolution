@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Data
@@ -71,6 +73,27 @@ namespace T3awuny.Infrastructure.Data
                 await _dbContext.SaveChangesAsync();
             }
                 
+        }
+
+        public static async Task SeedDeliveryMethodsAsync(T3awunyDbContext _dbContext)
+        {
+            if (!_dbContext.DeliveryMethods.Any())
+            {
+                
+                var deliveryMethodData = File.ReadAllText("../T3awuny.Infrastructure/Data/DataSeed/delivery.json");
+                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodData);
+                if (deliveryMethods is not null && deliveryMethods.Any())
+                {
+                    foreach (var delivery in deliveryMethods)
+                    {
+                        _dbContext.Set<DeliveryMethod>().Add(delivery);
+                    }
+                    //await _dbContext.SaveChangesAsync();
+                }             
+
+                await _dbContext.SaveChangesAsync();
+            }
+
         }
     }
 }

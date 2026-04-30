@@ -251,6 +251,10 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IBaskeetService,BasketService>();
             #endregion
 
+            #region Register Order, Payment, and Logistics service
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            #endregion
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
@@ -266,6 +270,7 @@ namespace T3awunyWebService
                 await T3awunyContextSeed.SeedRolesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedAdminAsync(userManager); // data seeding
                 await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
+                await T3awunyContextSeed.SeedDeliveryMethodsAsync(_dbContext); // data seeding
             }
             catch (Exception ex)
             {

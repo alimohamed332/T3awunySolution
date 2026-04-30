@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace T3awuny.Core.Entities
+namespace T3awuny.Core.Entities.UserModule
 {
     [Owned]
     public class RefreshToken : BaseEntity

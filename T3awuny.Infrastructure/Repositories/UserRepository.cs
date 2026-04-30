@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Infrastructure.Data;
 

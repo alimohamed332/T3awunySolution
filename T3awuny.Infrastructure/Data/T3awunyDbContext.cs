@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.ProductModule;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Infrastructure.Configurations;
 
 namespace T3awuny.Infrastructure.Data

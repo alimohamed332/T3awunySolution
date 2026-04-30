@@ -12,6 +12,7 @@ using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Helpers
 {

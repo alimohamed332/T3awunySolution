@@ -7,8 +7,8 @@ using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Application.Services;
-using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awunyWebService.Controllers
 {

@@ -10,7 +10,7 @@ using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Core;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Specifications;
 
 namespace T3awuny.Application.Services

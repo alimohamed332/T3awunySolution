@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -12,7 +13,7 @@ using T3awuny.Application.Helpers;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Application.Services;
 using T3awuny.Core;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
@@ -237,7 +238,17 @@ namespace T3awunyWebService
 
             #region Register Product & Category Services
             builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped <ICategoryService, CategoryService>(); 
+            builder.Services.AddScoped <ICategoryService, CategoryService>();
+            #endregion
+
+            #region Register Basket repo, service, redis connection and service
+            builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
+            {
+                var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost", true); 
+                return ConnectionMultiplexer.Connect(configuration);
+            }); //"database-MOKIC5S7"
+            builder.Services.AddScoped<IBaskeetService,BasketService>();
             #endregion
 
             var app = builder.Build();

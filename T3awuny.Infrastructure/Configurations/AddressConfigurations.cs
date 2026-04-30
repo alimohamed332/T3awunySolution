@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Configurations
 {

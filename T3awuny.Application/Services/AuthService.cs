@@ -19,6 +19,7 @@ using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Services
 {

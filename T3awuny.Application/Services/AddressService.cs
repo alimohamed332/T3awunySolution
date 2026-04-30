@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Core;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Core.Specifications;
 

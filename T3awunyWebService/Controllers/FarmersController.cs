@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("farmer-profile/{id?}")]
+        [HttpGet("farmer-profiles/{id?}")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> GetFarmerProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))
@@ -38,7 +38,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("FarmerOrAdmin")]
-        [HttpPost("create-profile")]
+        [HttpPost("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> CreateFarmerProfile([FromBody]CreateFarmerProfileDto dto)
         {
             var id = dto.UserId;
@@ -57,7 +57,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("FarmerOrAdmin")]
-        [HttpPut("update-profile")]
+        [HttpPut("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> UpdateFarmerProfile([FromBody]UpdateFarmerProfileDto dto)
         {
             var id = dto.UserId;

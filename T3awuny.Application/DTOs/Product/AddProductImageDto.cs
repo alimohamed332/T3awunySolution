@@ -11,8 +11,6 @@ namespace T3awuny.Application.DTOs.Product
     public class AddProductImageDto
     {
         [Required]
-        public int ProductId { get; set; }
-        [Required]
         public required IFormFile Image {  get; set; }
     }
 }

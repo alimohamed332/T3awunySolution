@@ -6,6 +6,7 @@ using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.Helpers;
+using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Specifications.ProductSpecs;
 
@@ -43,7 +44,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("farmer/{id}")]
+        [HttpGet("farmers/{id}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ProductSummaryDto>>>> GetByFarmerAsync(string id)
         {
             var result = await _productService.GetByFarmerAsync(id);
@@ -121,34 +122,37 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("FarmerOnly")]
-        [HttpPost("add-image")]
-        public async Task<ActionResult<ApiResponse<string>>> AddImageAsync([FromForm] AddProductImageDto dto)
+        [HttpPost("{productId}/images")]
+        public async Task<ActionResult<ApiResponse<string>>> AddImageAsync(int productId, [FromForm] AddProductImageDto dto)
         {
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
                 return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
-            var result = await _productService.AddImageAsync(farmerId,dto.ProductId,dto.Image);
+            if (dto.Image is null || dto.Image.Length == 0)
+                return BadRequest(ApiResponse<string>.Fail("يرجى تحميل صورة صحيحة"));
+
+            var result = await _productService.AddImageAsync(farmerId,productId,dto.Image);
             if(!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);
         }
         [Authorize("FarmerOnly")]
-        [HttpPatch("set-main-image")]
-        public async Task<ActionResult<ApiResponse<string>>> SetMainImageAsync(UpdateProductImageDto dto)
+        [HttpPatch("{productId}/images/{imageId}/set-main")]
+        public async Task<ActionResult<ApiResponse<string>>> SetMainImageAsync(int productId, int imageId)
         {
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
                 return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
-            var result = await _productService.SetMainImageAsync(farmerId,dto.ProductId,dto.ImageId);
+            var result = await _productService.SetMainImageAsync(farmerId,productId,imageId);
             if(!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);
         }
 
         [Authorize("FarmerOnly")]
-        [HttpDelete("delete-image")]
+        [HttpDelete("{productId}/images/{imageId}")]
         public async Task<ActionResult<ApiResponse<string>>> DeleteImageAsync(int productId, int imageId)
         {
             var farmerId = GetUserIdFromClaims();

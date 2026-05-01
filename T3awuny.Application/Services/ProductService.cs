@@ -13,6 +13,8 @@ using T3awuny.Application.Helpers;
 using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.ProductModule;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Specifications;
 using T3awuny.Core.Specifications.ProductSpecs;
 using static System.Net.Mime.MediaTypeNames;

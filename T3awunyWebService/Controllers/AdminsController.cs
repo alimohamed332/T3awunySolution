@@ -7,8 +7,8 @@ using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Application.Services;
-using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awunyWebService.Controllers
 {
@@ -159,7 +159,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpGet("user/{id}")]
+        [HttpGet("users/{id}")]
         public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetUserById(string id)
         {
             var result = await _adminService.GetUserByIdAsync(id);
@@ -171,7 +171,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpDelete("delete-user/{id}")]
+        [HttpDelete("users/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
         {
             var result = await _adminService.DeleteUserAsync(id);
@@ -183,7 +183,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpPut("products/review")]
+        [HttpPut("products/{productId}/review")]
         public async Task<ActionResult<ApiResponse<string>>> FlagProduct(int productId)
         {
             var adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

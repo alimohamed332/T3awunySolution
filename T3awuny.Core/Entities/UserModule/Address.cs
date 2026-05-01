@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities.Enums;
 
-namespace T3awuny.Core.Entities
+namespace T3awuny.Core.Entities.UserModule
 {
     public class Address : BaseEntity
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Core.Specifications
 {

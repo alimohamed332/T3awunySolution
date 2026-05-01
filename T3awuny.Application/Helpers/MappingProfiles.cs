@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Farmer;
+using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.OrderAggregate;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Helpers
 {
@@ -95,6 +98,22 @@ namespace T3awuny.Application.Helpers
                 ;
             //.ForAllMembers(opt => opt.Condition((src,dest,srcMember) => srcMember is not null && (!(srcMember is string
             //str) || !string.IsNullOrEmpty(str)) ));
+
+            CreateMap<Order, OrderResponseDto>()
+                .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
+                .ForMember(dest => dest.Items, opt => opt.Ignore())
+                .ForMember(dest => dest.Logistics, opt => opt.Ignore());
+
+            CreateMap<Order, OrderSummeryDto>()
+               .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
+               .ForMember(dest => dest.Items, opt => opt.Ignore())
+               .ForMember(dest => dest.LogisticsStatus, opt => opt.Ignore());
+            CreateMap<OrderItem, OrderItemResponseDto>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ItemOrdered.ProductId))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ItemOrdered.ProductName))
+                .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.ItemOrdered.PictureUrl))
+                .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.ItemOrdered.Unit));
         }
     }
 }

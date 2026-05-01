@@ -12,16 +12,16 @@ namespace T3awuny.Application.Contracts
     public interface IOrderService
     {
         // Buyer actions
-        Task<ApiResponse<OrderResponseDto>> PlaceOrderAsync(string buyerId, CreateOrderDto dto);
+        Task<ApiResponse<OrderSummeryDto>> PlaceOrderAsync(string buyerId, CreateOrderDto dto);
         //Task<ApiResponse<string>> CancelOrderAsync(string buyerId, int orderId);
-        //Task<ApiResponse<IEnumerable<OrderSummaryDto>>> GetMyOrdersAsBuyerAsync(string buyerId);
-        //Task<ApiResponse<OrderResponseDto>> GetOrderDetailsAsync(string userId, int orderId);
+        Task<ApiResponse<IReadOnlyList<OrderSummeryDto>>> GetOrdersForBuyerAsync(string buyerId);
+        Task<ApiResponse<OrderResponseDto>> GetOrderDetailsAsync(string userId, int orderId);
 
         //// Farmer actions
         //Task<ApiResponse<string>> ConfirmOrderAsync(string farmerId, int orderId);
         //Task<ApiResponse<string>> RejectOrderAsync(string farmerId, int orderId, string reason);
         //Task<ApiResponse<string>> UpdateOrderStatusAsync(string farmerId, int orderId, OrderStatus newStatus);
-        //Task<ApiResponse<IEnumerable<OrderSummaryDto>>> GetMyOrdersAsFarmerAsync(string farmerId);
+        //Task<ApiResponse<IReadOnlyList<OrderSummaryDto>>> GetMyOrdersAsFarmerAsync(string farmerId);
 
         //// Admin actions
         //Task<ApiResponse<PagedResult<OrderSummaryDto>>> GetAllOrdersAsync(OrderFilterDto filter);

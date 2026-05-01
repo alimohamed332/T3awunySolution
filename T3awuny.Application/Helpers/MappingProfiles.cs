@@ -102,8 +102,13 @@ namespace T3awuny.Application.Helpers
             CreateMap<Order, OrderResponseDto>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
-                .ForMember(dest => dest.Items, opt => opt.Ignore());
+                .ForMember(dest => dest.Items, opt => opt.Ignore())
+                .ForMember(dest => dest.Logistics, opt => opt.Ignore());
 
+            CreateMap<Order, OrderSummeryDto>()
+               .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
+               .ForMember(dest => dest.Items, opt => opt.Ignore())
+               .ForMember(dest => dest.LogisticsStatus, opt => opt.Ignore());
             CreateMap<OrderItem, OrderItemResponseDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ItemOrdered.ProductId))
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ItemOrdered.ProductName))

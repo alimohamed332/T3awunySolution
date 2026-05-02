@@ -7,7 +7,7 @@ using T3awuny.Core.Entities.OrderAggregate;
 
 namespace T3awuny.Application.DTOs.Order
 {
-    public class OrderSummeryDto
+    public class OrderSummaryDto
     {
         public int Id { get; set; }
         public string BuyerName { get; set; } = string.Empty;//

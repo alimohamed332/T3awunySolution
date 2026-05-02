@@ -105,7 +105,7 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.Items, opt => opt.Ignore())
                 .ForMember(dest => dest.Logistics, opt => opt.Ignore());
 
-            CreateMap<Order, OrderSummeryDto>()
+            CreateMap<Order, OrderSummaryDto>()
                .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
                .ForMember(dest => dest.Items, opt => opt.Ignore())
                .ForMember(dest => dest.LogisticsStatus, opt => opt.Ignore());

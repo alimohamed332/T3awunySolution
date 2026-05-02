@@ -10,11 +10,21 @@ namespace T3awuny.Core.Specifications.OrderSpecs
 {
     public class OrderSpecifications : BaseSpecifications<Order>
     {
-        public OrderSpecifications(Expression<Func<Order,bool>> criteria) : base(criteria) 
+        public OrderSpecifications(Expression<Func<Order,bool>> criteria , bool lighted = false) : base(criteria) 
         {
-            Includes.Add(o => o.DeliveryMethod);
-            Includes.Add(o => o.Logistics);
-            Includes.Add(o => o.Items);
+            if(lighted)
+            {
+                Includes.Add(o => o.Logistics);
+                //Includes.Add(o => o.Payment);
+            }
+            else
+            {
+                Includes.Add(o => o.DeliveryMethod);
+                Includes.Add(o => o.Logistics);
+                Includes.Add(o => o.Items);
+                //Includes.Add(o => o.Payment);
+            }
+           
         }
 
         public OrderSpecifications(OrderSpecParams specs) 

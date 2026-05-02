@@ -34,7 +34,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
         public PaymentStatus PaymentStatus { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-
+        public string? FarmerId { get; set; }
         public virtual ICollection<OrderItem> Items { get; set; } = new HashSet<OrderItem>();
         //public int? PaymentId { get; set; }
         //public virtual Payment? Payment { get; set; }

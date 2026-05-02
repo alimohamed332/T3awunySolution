@@ -14,7 +14,7 @@ namespace T3awuny.Application.Helpers
             {
             { OrderStatus.Pending,        new() { OrderStatus.Confirmed, OrderStatus.Rejected, OrderStatus.Cancelled } },
             { OrderStatus.Confirmed,      new() { OrderStatus.Preparing, OrderStatus.Cancelled } },
-            { OrderStatus.Preparing,      new() { OrderStatus.ReadyForPickup } },
+            { OrderStatus.Preparing,      new() { OrderStatus.ReadyForPickup, OrderStatus.Cancelled } },
             { OrderStatus.ReadyForPickup, new() { OrderStatus.InDelivery } },
             { OrderStatus.InDelivery,     new() { OrderStatus.Delivered, /*OrderStatus.Failed*/ } },
             { OrderStatus.Delivered,      new() { } },

@@ -16,6 +16,7 @@ namespace T3awuny.Application.Contracts
         Task<AuthModel> GetTokenAsync(TokenRequestDto model);
         Task<string> AddRoleAsync(AddRoleDto model);
         Task<AuthModel> RefreshTokenAsync(string token); // this the refresh token
+        Task<bool> IsValidRefreshTokenAsync(string token);
         Task<bool> RevokeTokenAsync(string token);
         Task<AuthModel> ConfirmEmailAsync(ConfirmEmailDto model);
         Task<bool> SendConfirmationLinkAsync(SendConfirmationLinkDto model);

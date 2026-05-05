@@ -11,7 +11,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
         public string Name { get; set; } = string.Empty;
         public string Street { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
-        public string Government { get; set; } = string.Empty;
+        public string Governorate { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public OrderAddress()
         {
@@ -22,7 +22,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
             Street = street;
             City = city;
             Country = country;
-            Government = government;
+            Governorate = government;
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOrderAggregateMOdels : Migration
+    public partial class AddOrderAggregateAndMorethan3MigrationsWasDeletedAndReturnIt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                 name: "DeliveryMethods",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     ShortName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -41,11 +40,12 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     DliveryAddress_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DliveryAddress_Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DliveryAddress_City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DliveryAddress_Government = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DliveryAddress_Governorate = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DliveryAddress_Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Unpaid"),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FarmerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeliveryMethodId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -73,16 +73,26 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     PickupAddressId = table.Column<int>(type: "int", nullable: false),
                     DeliveryAddressId = table.Column<int>(type: "int", nullable: false),
-                    DriverName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DriverPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    DriverName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    DriverPhone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     EstimatedDelivery = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ActualDelivery = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Notes = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Logistics", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Logistics_Addresses_DeliveryAddressId",
+                        column: x => x.DeliveryAddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Logistics_Addresses_PickupAddressId",
+                        column: x => x.PickupAddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Logistics_Orders_OrderId",
                         column: x => x.OrderId,
@@ -100,6 +110,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     ItemOrdered_ProductId = table.Column<int>(type: "int", nullable: false),
                     ItemOrdered_ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ItemOrdered_PictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ItemOrdered_Unit = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     UnitPriceAtOrder = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     Subtotal = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
@@ -117,9 +128,21 @@ namespace T3awuny.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Logistics_DeliveryAddressId",
+                table: "Logistics",
+                column: "DeliveryAddressId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Logistics_OrderId",
                 table: "Logistics",
                 column: "OrderId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Logistics_PickupAddressId",
+                table: "Logistics",
+                column: "PickupAddressId",
                 unique: true);
 
             migrationBuilder.CreateIndex(

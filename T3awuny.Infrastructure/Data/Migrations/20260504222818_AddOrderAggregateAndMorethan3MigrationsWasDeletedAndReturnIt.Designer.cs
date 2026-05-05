@@ -12,8 +12,8 @@ using T3awuny.Infrastructure.Data;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(T3awunyDbContext))]
-    [Migration("20260430223647_AddUnitPropertyToOrderItemModel")]
-    partial class AddUnitPropertyToOrderItemModel
+    [Migration("20260504222818_AddOrderAggregateAndMorethan3MigrationsWasDeletedAndReturnIt")]
+    partial class AddOrderAggregateAndMorethan3MigrationsWasDeletedAndReturnIt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -192,10 +192,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.DeliveryMethod", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
@@ -235,16 +232,19 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("DriverName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("DriverPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("EstimatedDelivery")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -252,12 +252,20 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.Property<int>("PickupAddressId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeliveryAddressId")
+                        .IsUnique();
+
                     b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("PickupAddressId")
                         .IsUnique();
 
                     b.ToTable("Logistics");
@@ -285,6 +293,9 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.Property<int?>("DeliveryMethodId")
                         .HasColumnType("int");
+
+                    b.Property<string>("FarmerId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(100)
@@ -707,10 +718,22 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Logistics", b =>
                 {
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "DeliveryAddressId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", null)
                         .WithOne("Logistics")
                         .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "PickupAddressId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -738,7 +761,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("Government")
+                            b1.Property<string>("Governorate")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 

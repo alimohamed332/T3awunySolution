@@ -28,14 +28,16 @@ namespace T3awuny.Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
+        private readonly IPaymentService _paymentService;
 
-        public OrderService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IEmailService emailService)
+        public OrderService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IEmailService emailService, IPaymentService paymentService)
         {
             _basketRepo = basketRepository;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _emailService = emailService;
+            _paymentService = paymentService;
         }
 
         public async Task<ApiResponse<OrderSummaryDto>> PlaceOrderAsync(string buyerId, CreateOrderDto dto)
@@ -48,6 +50,9 @@ namespace T3awuny.Application.Services
             var basket = await _basketRepo.GetBasketAsync(dto.BasketId);
             if (basket is null)
                 return ApiResponse<OrderSummaryDto>.Fail("اختر منتجاتك من مزراع واحد في المرة واضفها الي السلة لاستكمال العملية");
+
+            if (string.IsNullOrEmpty(basket.PaymentIntentId))
+                return ApiResponse<OrderSummaryDto>.Fail("يجب الحصول علي نية دفع أولاً");
 
             //2. Get the items from the product repository
             var orderItems = new List<OrderItem>();
@@ -69,18 +74,21 @@ namespace T3awuny.Application.Services
                     farmerIds.Add(product.FarmerId);
                 }
             }
+
             var farmerIdsCount = farmerIds.Distinct().Count();
             if (farmerIdsCount > 1 )
                 return ApiResponse<OrderSummaryDto>.Fail("يجب ان يحتوي الطلب الواحد منتجات مزارع واحد فقط");
+
             if (farmerIdsCount == 0)
                 return ApiResponse<OrderSummaryDto>.Fail("يجب ان يحتوي الطلب علي منتجات لم تنفذ وصالحة للبيع عدل في عربتك ثم اعد المحاولة");
+
             var farmerId = farmerIds.First();
             //3. Calculate the subtotal
             //var orderSubtotal = orderItems.Sum(orderItem => orderItem.UnitPriceAtOrder * orderItem.Quantity);
             var orderSubtotal = orderItems.Sum(orderItem => orderItem.Subtotal);
 
             //4. Get DeliveryMethod from the delivery method repository
-            var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(dto.DeliveryMethodId);
+            var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(basket.DeliveryMethodId ?? 4);
             if (deliveryMethod is null)
                 return ApiResponse<OrderSummaryDto>.Fail("فشل الحصول علي طريقة التوصيل هذه");
 
@@ -99,14 +107,25 @@ namespace T3awuny.Application.Services
             { 
                 Street = defaultBuyerAddress.Street, 
                 City =defaultBuyerAddress.City, 
-                Government = defaultBuyerAddress.Governorate, 
+                Governorate = defaultBuyerAddress.Governorate, 
                 Country = defaultBuyerAddress.Country,
                 Name = buyer.Name
             };
+
+            var orderRepo = _unitOfWork.Repository<Order>();
+            var orderSpecs = new BaseSpecifications<Order>(o => o.PaymentIntentId == basket.PaymentIntentId);
+            var existingOrder = await orderRepo.GetByIdWithSpecAsync(orderSpecs);
+            if (existingOrder is not null)
+            {
+                orderRepo.Delete(existingOrder);
+                await _paymentService.CreateOrUpdatePaymentIntentAsync(dto.BasketId);
+            }
+                
+
             //6. Create an order
-            var order = new Order(buyer.Email!, buyerId, orderSubtotal, dto.Notes, orderAddress, orderItems, deliveryMethod );
+            var order = new Order(buyer.Email!, buyerId, orderSubtotal, dto.Notes, orderAddress, orderItems, deliveryMethod,basket.PaymentIntentId);
             order.FarmerId = farmerId;
-            await _unitOfWork.Repository<Order>().AddAsync(order);
+            await orderRepo.AddAsync(order);
             var result = await _unitOfWork.CompleteAsync();
             if (result <= 0)
                 return ApiResponse<OrderSummaryDto>.Fail("حدثت مشكلة أثناء حفظ البيانات حاول لاحقاً");
@@ -121,7 +140,19 @@ namespace T3awuny.Application.Services
                 EstimatedDelivery = GetEstimetedDeliveryTime(deliveryMethod)
             };
             await _unitOfWork.Repository<Logistics>().AddAsync(logistics);
+
             //8. Payment Record
+            var payment = new Payment()
+            {
+                OrderId = order.Id,
+                PayerId = buyerId,
+                Amount = order.GetTotal(),
+                Method = dto.PaymentMethod,
+                Status = PaymentStatus.Unpaid,
+                PaymentIntentId = basket.PaymentIntentId
+            };
+            await _unitOfWork.Repository<Payment>().AddAsync(payment);
+
             //9. Save to the database
             await _unitOfWork.CompleteAsync();
 
@@ -154,7 +185,7 @@ namespace T3awuny.Application.Services
                 return ApiResponse<string>.Fail($"لا يمكن الغاء الطلب ");
 
             order.Status = OrderStatus.Cancelled;
-            order.Logistics!.Status = LogisticsStatus.Failed;
+            order.Logistics!.Status = LogisticsStatus.Failed;           
             var productRepo = _unitOfWork.Repository<Product>();
             foreach (var item in order.Items)
             {
@@ -168,6 +199,8 @@ namespace T3awuny.Application.Services
             //if(order.PaymentStatus == PaymentStatus.Paid)
             //    //refund logic
             //    order.PaymentStatus = PaymentStatus.Refunded;
+            order.Payment!.Status = PaymentStatus.Failed; // لو مكانتش اتدفعت
+
             if (await _unitOfWork.CompleteAsync() <= 0)
                 return ApiResponse<string>.Fail("حدثت مشكلة أثناء حفظ البيانات حاول لاحقاً");
 
@@ -222,6 +255,11 @@ namespace T3awuny.Application.Services
             orderDto.Logistics.Notes = order.Logistics?.Notes ?? "";
             orderDto.Logistics.EstimatedDelivery = order.Logistics?.EstimatedDelivery;
             orderDto.Logistics.LogisticsId = order.Logistics?.Id??0;
+            //////////////////////////
+            orderDto.Payment.PaymentStatus = order.PaymentStatus.ToString();
+            orderDto.Payment.PaymentMethod = order.Payment!.Method.ToString() ?? "";
+            orderDto.Payment.PaymentIntentId = order.PaymentIntentId;
+            orderDto.Payment.Id = order.Payment?.Id??0;
 
             return ApiResponse<OrderResponseDto>.Ok(orderDto,"تم الحصول علي الطلب بنجاح");
         }
@@ -232,12 +270,10 @@ namespace T3awuny.Application.Services
             var order = await _unitOfWork.Repository<Order>().GetByIdWithSpecAsync(orderSpecs); 
             if(order == null)
                 return ApiResponse<string>.Fail("هذا الطلب غير موجود");
-            var productId = order?.Items?.FirstOrDefault()?.ItemOrdered.ProductId ?? 0;
-            var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productId);
-            if(product == null)
-                return ApiResponse<string>.Fail("هناك مشكلة في احدي المنتجات المطلوبة");
 
-            if (product.FarmerId != farmerId)
+           
+
+            if (order!.FarmerId != farmerId)
                 return ApiResponse<string>.Fail("لا يمكنك تأكيد طلب علي منتجات ليست ملكك");
 
             if(OrderStatusValidator.IsValidTransition(order!.Status,OrderStatus.Confirmed))
@@ -248,17 +284,16 @@ namespace T3awuny.Application.Services
             var buyerEmail = order.BuyerEmail;
             //logistics and payment creation or edit if it created in place order which one i implmented
             order.Logistics!.Status = LogisticsStatus.Scheduled;
-            //. Payment Record Payment Record Payment Record Payment Record Payment Record Payment Record Payment Record update it 
             //Update product quantity and status
              var productRepo = _unitOfWork.Repository<Product>();
             foreach (var item in order.Items)
             {
                 var productSpec = new BaseSpecifications<Product>(p => p.Id == item.ItemOrdered.ProductId);
                 var productFromDb = await productRepo.GetByIdWithSpecAsync(productSpec);
-                if (product is null || product.Status != ProductStatus.Active) continue;
-                product.Quantity = 0; //if sell all offered quantity once بيع جملة بس
+                if (productFromDb is null || productFromDb.Status != ProductStatus.Active) continue;
+                productFromDb.Quantity = 0; //if sell all offered quantity once بيع جملة بس
                 //item.Quantity if sell as buyer need بيع تجزئة  in this case i must enforce that available in DB > quantity > 0
-                product.Status = ProductStatus.SoldOut;
+                productFromDb.Status = ProductStatus.SoldOut;
             }
 
             if (await _unitOfWork.CompleteAsync() <= 0)
@@ -287,7 +322,7 @@ namespace T3awuny.Application.Services
                 return ApiResponse<string>.Fail("هناك مشكلة في احدي المنتجات المطلوبة");
 
             if (product.FarmerId != farmerId)
-                return ApiResponse<string>.Fail("لا يمكنك إلغاء طلب علي منتجات ليست ملكك");
+                return ApiResponse<string>.Fail("لا يمكنك رفض طلب علي منتجات ليست ملكك");
 
             if (OrderStatusValidator.IsValidTransition(order!.Status, OrderStatus.Rejected))
                 order!.Status = OrderStatus.Rejected;
@@ -297,6 +332,7 @@ namespace T3awuny.Application.Services
             var buyerEmail = order.BuyerEmail;
             //logistics and payment creation or edit if it created in place order which one i implmented
             order.Logistics!.Status = LogisticsStatus.Failed;
+            order.Payment!.Status = PaymentStatus.Failed;
             order.Notes = $"سبب رفض الطلب من المزارع هو  {reason}";
             
             if (await _unitOfWork.CompleteAsync() <= 0)
@@ -330,9 +366,29 @@ namespace T3awuny.Application.Services
                 order!.Status = newStatus;
             else
                 return ApiResponse<string>.Fail("لا يمكن تحديث حالة الطلب لهذه الحالة مباشرةً");
-            //if (order.PaymentStatus.PaymentMethod == PaymentMethod.CashOnDelivery && order.Status == OrderStatus.Delivered)
-            //    order.PaymentStatus = PaymentStatus.Paid;
-            if(await _unitOfWork.CompleteAsync() <= 0)
+            
+            if (order.Status == OrderStatus.Delivered)
+            {
+                var logisticsSpec = new BaseSpecifications<Logistics>(lo => lo.OrderId == orderId);
+                var logistics = await _unitOfWork.Repository<Logistics>().GetByIdWithSpecAsync(logisticsSpec);
+                if (logistics is not null)
+                {
+                    logistics.Status = LogisticsStatus.Delivered;
+                    logistics.ActualDelivery = DateTime.UtcNow;
+                }
+
+                var paymentSpec = new BaseSpecifications<Payment>(p => p.OrderId == orderId);
+                var payment = await _unitOfWork.Repository<Payment>().GetByIdWithSpecAsync(paymentSpec);
+                if (payment is not null && payment.Method == PaymentMethod.CashOnDelivery)
+                {
+                    payment.Status = PaymentStatus.Paid;
+                    payment.PaidAt = DateTime.UtcNow;
+                }
+                    
+
+            }
+
+            if (await _unitOfWork.CompleteAsync() <= 0)
                 return ApiResponse<string>.Fail("حدث خطأ أثناء حفظ البيانات حاول مرة اخرى لاحقاً");
 
             if(order.Status == OrderStatus.ReadyForPickup && !roles.Contains("Admin"))
@@ -341,7 +397,7 @@ namespace T3awuny.Application.Services
                    "3li3320043li@gmail.com",
                    "الطلب جاهز",
                    $"قام المزارع صاحب المعرف {userId} بتغير حالة الطلب واصبح جاهز للشحن يمكنك التواصل معه لشحن الطلب");
-            }
+            }        
                
             return ApiResponse<string>.Ok(string.Empty, "تم تحديث حالة الطلب بنجاح");
         }

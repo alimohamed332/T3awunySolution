@@ -10,6 +10,7 @@ namespace T3awuny.Core.Entities.Enums
     {
         CashOnDelivery = 0,
         BankTransfer = 1,
-        Wallet = 2
+        Wallet = 2,
+        Card = 3,
     }
 }

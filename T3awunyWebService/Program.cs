@@ -85,10 +85,10 @@ namespace T3awunyWebService
                 options.AddPolicy("Allow", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:4200") //Angular
-                                                              //.AllowAnyOrigin() // Allow requests from any origin (for development purposes)
+                        .WithOrigins("http://localhost:4200", builder.Configuration["App:FrontendUrl"] ?? "https://ta3wuny.vercel.app", "http://127.0.0.1:5500")
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
             #endregion
@@ -253,6 +253,8 @@ namespace T3awunyWebService
 
             #region Register Order, Payment, and Logistics service
             builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<ILogisticsService, LogisticsService>();
+            builder.Services.AddScoped<IPaymentService,PaymentService>();
             #endregion
 
             var app = builder.Build();

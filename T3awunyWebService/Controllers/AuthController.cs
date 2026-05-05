@@ -72,14 +72,27 @@ namespace T3awunyWebService.Controllers
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
+
+        [HttpGet("is-logined")]
+        public async Task<ActionResult<bool>> IsLogined()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("ابعت الريفرش توكن يابيه في الكوكي ");
+
+            var result = await _authService.IsValidRefreshTokenAsync(refreshToken);
+            if (!result)
+                return BadRequest(result);
+            return Ok(result);
+        }
         [Authorize]
         [HttpPost("revoke-token")]
-        public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenDto model)
+        public async Task<ActionResult<string>> RevokeToken()
         {
-            var refreshToken = model.Token ?? Request.Cookies["refreshToken"];
+            var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
             {
-                return BadRequest("ابعت الريفرش توكن يابيه اما في الكوكي او في الريكوست بودي");
+                return BadRequest("ابعت الريفرش توكن يابيه في الكوكي");
             }
             var result = await _authService.RevokeTokenAsync(refreshToken);
             if (!result)
@@ -165,6 +178,8 @@ namespace T3awunyWebService.Controllers
             {
                 HttpOnly = true,
                 Expires = expiresOn.ToLocalTime(),
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }

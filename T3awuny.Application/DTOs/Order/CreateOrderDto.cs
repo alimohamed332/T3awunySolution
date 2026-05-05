@@ -15,9 +15,7 @@ namespace T3awuny.Application.DTOs.Order
         public PaymentMethod PaymentMethod { get; set; }
         //public List<CreateOrderItemDto> Items { get; set; }
         [Required]
-        public int DeliveryMethodId { get; set; }
-        [Required]
-        public string BasketId { get; set; }
+        public string BasketId { get; set; } = string.Empty;
     }
 
     //public class CreateOrderItemDto

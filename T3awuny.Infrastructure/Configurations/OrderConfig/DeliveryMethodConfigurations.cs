@@ -17,6 +17,7 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
             builder.Property(d => d.ShortName).HasMaxLength(30);
             builder.Property(d => d.DeliveryTime).HasMaxLength(60);
             builder.Property(d => d.Description).HasMaxLength(100);
+            builder.Property(d => d.Id).ValueGeneratedNever();
         }
     }
 }

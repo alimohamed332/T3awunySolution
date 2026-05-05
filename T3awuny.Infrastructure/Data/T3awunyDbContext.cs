@@ -26,6 +26,7 @@ namespace T3awuny.Infrastructure.Data
         public virtual DbSet<OrderItem> OrderItems { get; set; }
         public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public virtual DbSet<Logistics> Logistics { get; set; }
+        public virtual DbSet<Payment> Payments { get; set; }
 
 
         public T3awunyDbContext(DbContextOptions<T3awunyDbContext> options) : base(options) { }

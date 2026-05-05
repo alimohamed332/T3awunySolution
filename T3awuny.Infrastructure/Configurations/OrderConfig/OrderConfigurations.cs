@@ -44,9 +44,9 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
                    .WithOne()
                    .OnDelete(DeleteBehavior.Cascade);
 
-            //builder.HasOne(o => o.Payment)
-            //       .WithOne(p => p.Order)
-            //       .HasForeignKey<Payment>(p => p.OrderId);
+            builder.HasOne(o => o.Payment)
+                   .WithOne()
+                   .HasForeignKey<Payment>(p => p.OrderId);
 
             builder.HasOne(o => o.Logistics)
                    .WithOne()

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using T3awuny.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using T3awuny.Infrastructure.Data;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(T3awunyDbContext))]
-    partial class T3awunyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506150909_AddAuctionAndBidModels")]
+    partial class AddAuctionAndBidModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -533,9 +536,6 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("HarvestDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("HasActiveAcution")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

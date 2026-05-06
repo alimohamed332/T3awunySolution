@@ -26,5 +26,7 @@ namespace T3awuny.Core.Entities
         public ProductStatus Status { get; set; }    // enum
         public virtual DateTime CreatedAt { get; set; }
         public virtual ICollection<ProductImage> Images { get; set; } = new HashSet<ProductImage>();
+        // new column
+        public bool HasActiveAcution {  get; set; }
     }
 }

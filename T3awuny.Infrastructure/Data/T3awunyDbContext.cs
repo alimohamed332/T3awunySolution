@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.AuctionModule;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.ProductModule;
 using T3awuny.Core.Entities.UserModule;
@@ -27,8 +28,8 @@ namespace T3awuny.Infrastructure.Data
         public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public virtual DbSet<Logistics> Logistics { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
-
-
+        public virtual DbSet<Auction> Auctions { get; set; }
+        public virtual DbSet<Bid> Bids { get; set; }
         public T3awunyDbContext(DbContextOptions<T3awunyDbContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder builder)
         {

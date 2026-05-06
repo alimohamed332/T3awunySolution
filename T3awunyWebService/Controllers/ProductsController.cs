@@ -23,7 +23,7 @@ namespace T3awunyWebService.Controllers
             _productService = productService;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<Pagination<ProductSummaryDto>>>> GetAllAsync([FromQuery] ProductSpecParams filter)
         {
@@ -33,7 +33,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ProductResponseDto>>> GetByIdAsync(int id)
         {
@@ -43,7 +43,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("farmers/{id}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ProductSummaryDto>>>> GetByFarmerAsync(string id)
         {

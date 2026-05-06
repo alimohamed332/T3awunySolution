@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Farmer;
+using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
@@ -103,17 +104,25 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
                 .ForMember(dest => dest.Items, opt => opt.Ignore())
-                .ForMember(dest => dest.Logistics, opt => opt.Ignore());
+                .ForMember(dest => dest.Logistics, opt => opt.Ignore())
+                .ForMember(dest => dest.Payment, opt => opt.Ignore());
 
             CreateMap<Order, OrderSummaryDto>()
                .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
                .ForMember(dest => dest.Items, opt => opt.Ignore())
                .ForMember(dest => dest.LogisticsStatus, opt => opt.Ignore());
+
             CreateMap<OrderItem, OrderItemResponseDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ItemOrdered.ProductId))
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ItemOrdered.ProductName))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.ItemOrdered.PictureUrl))
                 .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.ItemOrdered.Unit));
+
+            CreateMap<Logistics, LogisticsResponseDto>()
+                .ForMember(dest => dest.PickupAddress, opt => opt.Ignore())
+                .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
+
+            CreateMap<Address, OrderAddress>();
         }
     }
 }

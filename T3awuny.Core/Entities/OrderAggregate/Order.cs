@@ -11,7 +11,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
     public class Order : BaseEntity
     {
         public Order(){}
-        public Order(string buyerEmail, string buyerId, decimal subTotal, string? notes, OrderAddress deliveryAddress, ICollection<OrderItem> items, DeliveryMethod? deliveryMethod)
+        public Order(string buyerEmail, string buyerId, decimal subTotal, string? notes, OrderAddress deliveryAddress, ICollection<OrderItem> items, DeliveryMethod? deliveryMethod, string paymentIntentId)
         {
             BuyerEmail = buyerEmail;
             BuyerId = buyerId;
@@ -20,6 +20,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
             DliveryAddress = deliveryAddress;
             Items = items;
             DeliveryMethod = deliveryMethod;
+            PaymentIntentId = paymentIntentId;
         }
 
         public int Id { get; set; }
@@ -37,7 +38,8 @@ namespace T3awuny.Core.Entities.OrderAggregate
         public string? FarmerId { get; set; }
         public virtual ICollection<OrderItem> Items { get; set; } = new HashSet<OrderItem>();
         //public int? PaymentId { get; set; }
-        //public virtual Payment? Payment { get; set; }
+        public virtual Payment? Payment { get; set; }
+        public string PaymentIntentId { get; set; }
         //public int? LogisticsId { get; set; }
         public virtual Logistics? Logistics { get; set; }
         public virtual DeliveryMethod? DeliveryMethod { get; set; }

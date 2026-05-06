@@ -16,7 +16,7 @@ namespace T3awuny.Application.DTOs.Order
         public DateTime OrderDate { get; set; }
         public decimal Total { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string PaymentStatus { get; set; } = string.Empty;
+        //public string PaymentStatus { get; set; } = string.Empty;
         public string? Notes { get; set; }
 
         public DeliveryMethod DeliveryMethod { get; set; } = default!;
@@ -24,6 +24,8 @@ namespace T3awuny.Application.DTOs.Order
         public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();//
         //public PaymentResponseDto? Payment { get; set; }
         public OrderLogisticsResponseDto Logistics { get; set; } = new OrderLogisticsResponseDto();
+
+        public PaymentResponseDto Payment { get; set; } = new PaymentResponseDto();
     }
 
     public class OrderItemResponseDto

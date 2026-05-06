@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.Helpers;
 using T3awuny.Core.Entities.Enums;
@@ -16,10 +17,12 @@ namespace T3awunyWebService.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly ILogisticsService _logisticsService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, ILogisticsService logisticsService)
         {
             _orderService = orderService;
+            _logisticsService = logisticsService;
         }
         [Authorize("TraderOnly")]
         [HttpPost] //  Post: /api/orders
@@ -152,6 +155,40 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
             var result = await _orderService.CancelOrderAsync(buyerId, orderId);
             if(!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("{orderId}/logistics")]
+        public async Task<ActionResult<ApiResponse<LogisticsResponseDto>>> GetOrderLogistics(int orderId)
+        {
+            var userId = GetUserIdFromClaims();
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest(ApiResponse<LogisticsResponseDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+
+            var logistics = await _logisticsService.GetByOrderIdAsync(userId,orderId);
+            if(!logistics.IsSuccess)
+                return BadRequest(logistics);
+            return Ok(logistics);
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpPut("{orderId}/logistics")]
+        public async Task<ActionResult<ApiResponse<string>>> UpdateOrder(int orderId, UpdateLogisticsDto dto)
+        {
+            var result = await _logisticsService.UpdateLogisticsAsync(orderId, dto);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpPatch("{orderId}/logistics/change-status")]
+        public async Task<ActionResult<ApiResponse<string>>> ChangeOrderLogisticsStatus(int orderId, LogisticsStatus status)
+        {
+            var result = await _logisticsService.UpdateStatusAsync(orderId,status);
+            if (!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);
         }

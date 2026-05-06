@@ -189,10 +189,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.DeliveryMethod", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
@@ -232,16 +229,19 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("DriverName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("DriverPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("EstimatedDelivery")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -249,12 +249,20 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.Property<int>("PickupAddressId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeliveryAddressId")
+                        .IsUnique();
+
                     b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("PickupAddressId")
                         .IsUnique();
 
                     b.ToTable("Logistics");
@@ -289,6 +297,10 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.Property<string>("Notes")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -343,6 +355,59 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(11, 3)
+                        .HasColumnType("decimal(11,3)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Card");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PayerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Unpaid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("PayerId")
+                        .IsUnique();
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Product", b =>
@@ -707,10 +772,22 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Logistics", b =>
                 {
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "DeliveryAddressId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", null)
                         .WithOne("Logistics")
                         .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "PickupAddressId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -738,7 +815,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("Government")
+                            b1.Property<string>("Governorate")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -800,6 +877,21 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         });
 
                     b.Navigation("ItemOrdered")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Payment", b =>
+                {
+                    b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", null)
+                        .WithOne("Payment")
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Payment", "PayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -913,6 +1005,8 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Logistics");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Product", b =>

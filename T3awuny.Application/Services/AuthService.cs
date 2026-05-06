@@ -205,6 +205,20 @@ namespace T3awuny.Application.Services
             return authModel;
         }
 
+        public async Task<bool> IsValidRefreshTokenAsync(string token)
+        {
+            var authModel = new AuthModel();
+            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+            if (user is null)
+           return false;
+
+            var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+            if (!refreshToken.IsActive)
+            return false;
+
+            return true;
+        }
+
         public async Task<bool> RevokeTokenAsync(string token)
         {
             var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));

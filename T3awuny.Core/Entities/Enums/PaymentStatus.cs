@@ -11,6 +11,6 @@ namespace T3awuny.Core.Entities.Enums
         Unpaid = 0,
         Paid = 1,
         Refunded = 2,
-        Failed = 3
+        Failed = 3   // حصل مشكلة قبل الدفع او تم رفض الاوردر او الغائه
     }
 }

@@ -79,7 +79,7 @@ namespace T3awuny.Application.Services
             //foreach(var add in  model.Addresses)
             await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
 
-            var role = model.Role?.ToLower().Contains("ta") == true ? "Trader" : "Farmer";
+            var role = model.Role?.ToLower().Contains("tr") == true ? "Trader" : "Farmer";
 
             await _userManager.AddToRoleAsync(user, role);
 

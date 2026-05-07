@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Basket;
 using T3awuny.Core.Entities.BasketModule;
 using T3awuny.Core.Repository.Contracts;
 
@@ -19,9 +20,13 @@ namespace T3awuny.Application.Services
             _basketRepo = basketRepository;
         }
 
-        public async Task<ApiResponse<CustomerBasket>> CreateOrUpdateBasketAsync(CustomerBasket basket)
+        public async Task<ApiResponse<CustomerBasket>> CreateOrUpdateBasketAsync(CreateBasketDto basket)
         {
-            var basketFromRepo = await _basketRepo.CreateOrUpdateBasketAsync(basket);
+            var createbasket = new CustomerBasket();
+            createbasket.Id = basket.Id;
+            createbasket.Items = basket.Items;
+            createbasket.DeliveryMethodId = basket.DeliveryMethodId;
+            var basketFromRepo = await _basketRepo.CreateOrUpdateBasketAsync(createbasket);
             if (basketFromRepo is null)
                 return ApiResponse<CustomerBasket>.Fail("هذه العربة غير موجودة");
             return ApiResponse<CustomerBasket>.Ok(basketFromRepo,"تم اضافة العربة بنجاح");

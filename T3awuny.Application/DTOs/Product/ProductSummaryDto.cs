@@ -18,5 +18,6 @@ namespace T3awuny.Application.DTOs.Product
         public string? CategoryName { get; set; } = string.Empty;
         public string? FarmerName { get; set; } 
         public string? MainImageUrl { get; set; }
+        public bool HasActiveAcution { get; set; }
     }
 }

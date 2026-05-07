@@ -26,5 +26,6 @@ namespace T3awuny.Application.DTOs.Product
         public string FarmerGovernorate { get; set; } = string.Empty;
         public List<string>? ImageUrls { get; set; } 
         public string? MainImageUrl { get; set; }
+        public bool HasActiveAcution { get; set; }
     }
 }

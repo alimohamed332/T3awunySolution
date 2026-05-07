@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auth;
+using T3awuny.Application.DTOs.Category;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
@@ -99,6 +100,8 @@ namespace T3awuny.Application.Helpers
                 ;
             //.ForAllMembers(opt => opt.Condition((src,dest,srcMember) => srcMember is not null && (!(srcMember is string
             //str) || !string.IsNullOrEmpty(str)) ));
+
+            CreateMap<Category, CategoryDto>();
 
             CreateMap<Order, OrderResponseDto>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))

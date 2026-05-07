@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Basket;
 using T3awuny.Core.Entities.BasketModule;
 
 namespace T3awunyWebService.Controllers
@@ -21,8 +22,9 @@ namespace T3awunyWebService.Controllers
             return Ok(basket);
         }
         [HttpPost] // Post : /api/Basket
-        public async Task<ActionResult<CustomerBasket>> CreateOrUpdateBasket(CustomerBasket basket)
+        public async Task<ActionResult<CustomerBasket>> CreateOrUpdateBasket(CreateBasketDto basket)
         {
+            if(string.IsNullOrEmpty(basket.Id))
             basket.Id = Guid.NewGuid().ToString();
             var result = await _basketService.CreateOrUpdateBasketAsync(basket);
             if (!result.IsSuccess)

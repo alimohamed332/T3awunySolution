@@ -7,7 +7,7 @@ using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Core.Entities.AuctionModule
 {
-    public class Bid
+    public class Bid : BaseEntity
     {
         public int Id { get; set; }
         public int AuctionId { get; set; }

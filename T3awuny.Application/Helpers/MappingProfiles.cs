@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
+using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Category;
 using T3awuny.Application.DTOs.Farmer;
@@ -14,6 +15,7 @@ using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.AuctionModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.UserModule;
@@ -126,6 +128,28 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
 
             CreateMap<Address, OrderAddress>();
+
+            /////////Auction
+            CreateMap<CreateAuctionDto, Auction>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.CurrentPrice, opt => opt.MapFrom(src => src.StartingPrice))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => AuctionStatus.Scheduled))
+                .ForMember(dest => dest.FarmerId, opt => opt.Ignore());
+
+            CreateMap<Auction, AuctionResponseDto>()
+                .ForMember(dest => dest.TotalBids, opt => opt.MapFrom(src => src.Bids.Count()))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.Name))
+                .ForMember(dest => dest.ProductUnit, opt => opt.MapFrom(src => src.Product!.Unit))
+                .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Product!.Quantity))
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
+                .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name))
+                .ForMember(dest => dest.Bids, opt => opt.Ignore())
+                .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
+
+            CreateMap<Bid, BidResponseDto>();
+            //.ForMember(dest => dest.BidderName, opt => opt.Ignore());
+
+            CreateMap<Auction, AuctionSummaryDto>();
         }
     }
 }

@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +19,7 @@ using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
 using T3awuny.Infrastructure.Services;
 using T3awunyWebService.Helpers;
+using T3awunyWebService.Hubs;
 
 namespace T3awunyWebService
 {
@@ -75,7 +75,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterConnection"));//MonsterConnection
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection
                 });
             #endregion
 
@@ -257,6 +257,11 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IPaymentService,PaymentService>();
             #endregion
 
+            #region Register Auction Service and related services
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IAuctionService, AuctionService>();
+            #endregion
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
@@ -294,7 +299,7 @@ namespace T3awunyWebService
             app.UseCors("Allow");
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.MapHub<AuctionHub>("/hubs/auction");
 
             app.MapControllers();
 

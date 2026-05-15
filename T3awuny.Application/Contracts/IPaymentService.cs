@@ -17,5 +17,6 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<IReadOnlyList<Payment>>> GetPaymentsAsync();
         Task<ApiResponse<Payment>> GetPaymentByOrderAsync(int orderId);
         Task<ApiResponse<string>> UpdatePaymentStatusAsync(int orderId, PaymentStatus status);
+        Task<KeyValuePair<string, string>> CreatePaymentIntentAutomaticAsync(decimal amount);
     }
 }

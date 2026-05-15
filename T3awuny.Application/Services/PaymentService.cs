@@ -167,5 +167,25 @@ namespace T3awuny.Application.Services
 
         }
 
+        public async Task<KeyValuePair<string,string>> CreatePaymentIntentAutomaticAsync(decimal amount)
+        {
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+
+            PaymentIntentService paymentIntentService = new PaymentIntentService();
+
+            PaymentIntent paymentIntent;
+
+            // Create new payment intent 
+
+            var createOptions = new PaymentIntentCreateOptions()
+            {
+                Amount = (long)amount * 100 /*/ 53*/,
+                Currency = "usd",
+                PaymentMethodTypes = new List<string>() { "card" }//, "paypal"
+            };
+            paymentIntent = await paymentIntentService.CreateAsync(createOptions);       
+            return new KeyValuePair<string, string> (paymentIntent.Id,paymentIntent.ClientSecret);
+        }
+
     }
 }

@@ -15,12 +15,13 @@ namespace T3awuny.Application.Contracts
 
         // Public — buyers browse
         Task<ApiResponse<AuctionResponseDto>> GetByIdAsync(int auctionId);
+        Task<ApiResponse<AuctionResponseDto>> GetByProductIdAsync(int productId);
         Task<ApiResponse<Pagination<AuctionSummaryDto>>> GetAllAsync(AuctionSpecParams filter);
 
         // Bidding
         Task<ApiResponse<BidResponseDto>> PlaceBidAsync(string bidderId, int auctionId, PlaceBidDto dto);
-        //Task<ApiResponse<IEnumerable<BidResponseDto>>> GetBidsAsync(int auctionId);
-        //Task<ApiResponse<IEnumerable<AuctionSummaryDto>>> GetMyBidsAsync(string bidderId);
+        Task<ApiResponse<IReadOnlyList<BidResponseDto>>> GetBidsAsync(int auctionId);
+        Task<ApiResponse<IReadOnlyList</*AuctionSummaryDto*/BidResponseDto>>> GetMyBidsAsync(string bidderId);
 
         // System actions (called by background service)
         Task ProcessAuctionStartsAsync();   // Scheduled → Active

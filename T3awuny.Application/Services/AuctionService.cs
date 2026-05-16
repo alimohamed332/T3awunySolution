@@ -317,6 +317,23 @@ namespace T3awuny.Application.Services
             return ApiResponse<AuctionResponseDto>.Ok(auctionDto, "تم الحصول علي تفاصيل المزاد بنجاح");
         }
 
+        public async Task<ApiResponse<AuctionResponseDto>> GetByProductIdAsync(int productId)
+        {
+            var auctionSpecs = new AuctionSpecifications(a => a.ProductId == productId);
+            var auction = await _unitOfWork.Repository<Auction>().GetByIdWithSpecAsync(auctionSpecs);
+
+            if (auction is null)
+                return ApiResponse<AuctionResponseDto>.Fail("هذا المزاد غير موجود");
+
+            var auctionDto = _mapper.Map<AuctionResponseDto>(auction);
+            auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+            var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
+            var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
+            auctionDto.MainImageUrl = mainProductImage?.ImageUrl ?? "";
+
+            return ApiResponse<AuctionResponseDto>.Ok(auctionDto, "تم الحصول علي تفاصيل المزاد بنجاح");
+        }
+
         public async Task<ApiResponse<Pagination<AuctionSummaryDto>>> GetAllAsync(AuctionSpecParams filter)
         {
             var auctionSpecs = new AuctionSpecifications(filter);
@@ -332,5 +349,29 @@ namespace T3awuny.Application.Services
 
             return ApiResponse<Pagination<AuctionSummaryDto>>.Ok(pagination, "تم الحصول علي المزادات بنجاح");
         }
+
+        public async Task<ApiResponse<IReadOnlyList<BidResponseDto>>> GetBidsAsync(int auctionId)
+        {
+            var bidSpecs = new BaseSpecifications<Bid>(b => b.AuctionId == auctionId);
+            var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidSpecs);
+            if (!bids.Any())
+                return ApiResponse<IReadOnlyList<BidResponseDto>>.Fail("لا يوجد مزايدات علي هذا المزاد");
+            var bidDtos = bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+
+            return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(bidDtos, "تم الحصول علي المزايدات بنجاح");
+        }
+
+        public async Task<ApiResponse<IReadOnlyList<BidResponseDto>>> GetMyBidsAsync(string bidderId)
+        {
+            var bidSpecs = new BaseSpecifications<Bid>(b => b.BidderId == bidderId);
+            var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidSpecs);
+            if (!bids.Any())
+                return ApiResponse<IReadOnlyList<BidResponseDto>>.Fail("لا يوجد مزادات مرتبطة بهذا التاجر");
+
+            var bidDtos = bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+            return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(bidDtos,"تم الحصول علي كل المزيدات التي قمت بها");
+        }
+
+       
     }
 }

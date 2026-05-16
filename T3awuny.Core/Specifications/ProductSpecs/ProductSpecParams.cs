@@ -14,6 +14,7 @@ namespace T3awuny.Core.Specifications.ProductSpecs
         public bool SortDescending { get; set; }
         public int? CategoryId { get; set; }
         public string? FarmerId { get; set; }
+        public bool? HasActiveAuction { get; set; } = null;
 
         private int PageSize = 10;
 

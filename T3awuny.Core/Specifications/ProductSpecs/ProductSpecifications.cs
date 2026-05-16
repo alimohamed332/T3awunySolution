@@ -17,6 +17,7 @@ namespace T3awuny.Core.Specifications.ProductSpecs
                (!specs.CategoryId.HasValue || P.CategoryId == specs.CategoryId) &&
                (!specs.MinPrice.HasValue || P.UnitPrice >= specs.MinPrice) &&
                (!specs.MaxPrice.HasValue || P.UnitPrice <= specs.MaxPrice) &&
+               (!specs.HasActiveAuction.HasValue || P.HasActiveAcution == specs.HasActiveAuction) &&
                (!specs.Status.HasValue || P.Status == specs.Status)
                
             )

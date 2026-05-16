@@ -18,7 +18,6 @@ namespace T3awunyWebService.Controllers
         {
             _categoryService = categoryService;
         }
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<CategoryDto>>>> GetCategories()
         {
@@ -28,7 +27,6 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<Category>>> GetCategory(int id)
         {

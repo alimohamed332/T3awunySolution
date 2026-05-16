@@ -28,6 +28,12 @@ namespace T3awuny.Core.Specifications.ProductSpecs
                 Includes.Add(p => p.Farmer);
                 Includes.Add(p => p.Images);
             }
+            else
+            {
+                Includes.Add(p => p.Category);
+                //Includes.Add(p => p.Images);
+                Includes.Add(p => p.Images.Where(i => i.IsMain));
+            }
 
             if (!string.IsNullOrEmpty(specs.Sort))
             {

@@ -21,11 +21,14 @@ namespace T3awuny.Application.DTOs.Product
         public DateTime CreatedAt { get; set; }
 
         // Related data
+        public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
+        public string FarmerId { get; set; } = string.Empty;
         public string FarmerName { get; set; } = string.Empty;
-        public string FarmerGovernorate { get; set; } = string.Empty;
+        public string FarmerGovernorate { get; set; } = string.Empty; ///////
+        public string FarmerCity { get; set; } = string.Empty; /////
         public List<string>? ImageUrls { get; set; } 
-        public string? MainImageUrl { get; set; }
+        public string? MainImageUrl { get; set; } /////
         public bool HasActiveAcution { get; set; }
     }
 }

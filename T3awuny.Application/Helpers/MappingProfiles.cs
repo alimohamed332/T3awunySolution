@@ -1,10 +1,4 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
@@ -67,15 +61,14 @@ namespace T3awuny.Application.Helpers
             CreateMap<Product, ProductSummaryDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
-                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer.Name))
+                .ForMember(dest => dest.FarmerName, opt => opt.Ignore()) // I can get it from the internal farmer but in  i didn't catch it from DB in some functions for light retreive
                 .ReverseMap();
 
             CreateMap<Product, ProductResponseDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault(i => i.IsMain)!.ImageUrl))
                 .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl)))
-                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer.Name))
-                .ForMember(dest => dest.FarmerGovernorate, opt => opt.MapFrom(src => src.Farmer.Addresses.FirstOrDefault(a => a.IsDefault)!.Governorate))
+                .ForMember(dest => dest.FarmerName, opt => opt.Ignore()) // I can get it from the internal farmer but in  i didn't catch it from DB in some functions for light retreive
                 .ReverseMap();
 
             CreateMap<CreateProductDto, Product>()

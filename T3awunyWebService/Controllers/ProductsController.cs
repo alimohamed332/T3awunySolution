@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
-using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.Helpers;
-using T3awuny.Core.Entities;
-using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Specifications.ProductSpecs;
 
 namespace T3awunyWebService.Controllers
@@ -22,7 +18,18 @@ namespace T3awunyWebService.Controllers
         {
             _productService = productService;
         }
-
+        /// <summary>
+        /// Get all products pagination , sorting , and searching
+        /// Sort possible values : price, date (sort by harvest date), name (default)
+        /// Draft = 0 
+        /// Active = 1 
+        /// SoldOut = 2 
+        /// Archived = 3
+        /// Deleted = 4  
+        /// UnderReview = 5
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         //[Authorize]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<Pagination<ProductSummaryDto>>>> GetAllAsync([FromQuery] ProductSpecParams filter)
@@ -107,6 +114,18 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get my products as a farmer (must be loged in) pagination , sorting , and searching
+        /// Sort possible values : price, date (sort by harvest date), name (default)
+        /// Status Values Draft = 0  
+        /// Active = 1 
+        /// SoldOut = 2 
+        /// Archived = 3 
+        /// Deleted = 4  
+        /// UnderReview = 5 
+        /// </summary>
+        /// <param name="specs"></param>
+        /// <returns></returns>
         [Authorize("FarmerOnly")]
         [HttpGet("my-products")]
         public async Task<ActionResult<ApiResponse<Pagination<ProductResponseDto>>>> GetMyProductsAsync([FromQuery] ProductSpecParams specs)

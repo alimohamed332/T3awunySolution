@@ -74,8 +74,16 @@ namespace T3awunyWebService.Controllers
 
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم تحديث البروفايل بنجاح"));
         }
-   
 
+        [HttpGet("verified-farmers")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
+        {
+            var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
+            if (!verifiedFarmers.IsSuccess)
+                return NotFound(verifiedFarmers);
+
+            return Ok(verifiedFarmers);
+        }
         private string GetUserIdFromClaims()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

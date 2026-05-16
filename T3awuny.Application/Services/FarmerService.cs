@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
-using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Farmer;
-using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core;
 using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Specifications;
@@ -21,12 +18,14 @@ namespace T3awuny.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly string _baseUrl;
 
-        public FarmerService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public FarmerService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _baseUrl = configuration["App:ApplicationUrl"] ?? "";
         }
 
         public async Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetAllVerifiedAsync()
@@ -37,7 +36,7 @@ namespace T3awuny.Application.Services
 
             if (!mappedFarmerProfiles.Any())
                 return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
-
+            mappedFarmerProfiles.Select(mfp => mfp.ProfileImageUrl = $"{_baseUrl}{mfp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(mappedFarmerProfiles.ToList(), "تم العثور على المزارعين الموثقين بنجاح");
         }
 
@@ -46,7 +45,9 @@ namespace T3awuny.Application.Services
             var farmerSpecification = new FarmerSpecifications(f => f.FarmerId == userId);
             var farmerProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdWithSpecAsync(farmerSpecification);
             if (farmerProfile is null) return null;
-            return _mapper.Map<FarmerProfileDto>(farmerProfile);
+            var farmerDto = _mapper.Map<FarmerProfileDto>(farmerProfile);
+            farmerDto.ProfileImageUrl = $"{_baseUrl}{farmerDto.ProfileImageUrl}";
+            return farmerDto;
         }
 
         //public Task<FarmerProfileDto> GetPublicProfileAsync(int farmerId)
@@ -74,7 +75,9 @@ namespace T3awuny.Application.Services
             // Add the new farmer profile to the repository
             await _unitOfWork.Repository<FarmerProfile>().AddAsync(farmerProfile);
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<FarmerProfileDto>(farmerProfile);
+            var farmerDto = _mapper.Map<FarmerProfileDto>(farmerProfile);
+            farmerDto.ProfileImageUrl = $"{_baseUrl}{farmerDto.ProfileImageUrl}";
+            return farmerDto;
         }
 
         public async Task<FarmerProfileDto> UpdateProfileAsync(string userId, UpdateFarmerProfileDto dto)
@@ -92,7 +95,9 @@ namespace T3awuny.Application.Services
             existingProfile.Description = dto.Description ?? existingProfile.Description;
             existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<FarmerProfileDto>(existingProfile);
+            var farmerDto = _mapper.Map<FarmerProfileDto>(existingProfile);
+            farmerDto.ProfileImageUrl = $"{_baseUrl}{farmerDto.ProfileImageUrl}";
+            return farmerDto;
         }
     }
 }

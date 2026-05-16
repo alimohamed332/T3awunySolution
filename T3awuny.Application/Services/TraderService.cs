@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,12 +21,13 @@ namespace T3awuny.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
-
-        public TraderService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        private readonly string _baseUrl;
+        public TraderService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _baseUrl = configuration["App:ApplicationUrl"] ?? "";
         }
 
         public async Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetAllVerifiedAsync()
@@ -36,7 +38,7 @@ namespace T3awuny.Application.Services
 
             if (!mappedTraderProfiles.Any())
                 return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
-
+            mappedTraderProfiles.Select(mtp => mtp.ProfileImageUrl = $"{_baseUrl}{mtp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles.ToList(), "تم العثور على التجار الموثقين بنجاح");
         }
 
@@ -45,7 +47,9 @@ namespace T3awuny.Application.Services
             var traderSpecification = new TraderSpecifications(t => t.TraderId == userId);
             var traderProfile = await _unitOfWork.Repository<TraderProfile>().GetByIdWithSpecAsync(traderSpecification);
             if (traderProfile is null) return null;
-            return _mapper.Map<TraderProfileDto>(traderProfile);
+            var traderDto = _mapper.Map<TraderProfileDto>(traderProfile);
+            traderDto.ProfileImageUrl = $"{_baseUrl}{traderDto.ProfileImageUrl}";
+            return traderDto;
         }
         public async Task<TraderProfileDto> CreateProfileAsync(string userId, CreateTraderProfileDto dto)
         {
@@ -70,7 +74,9 @@ namespace T3awuny.Application.Services
             // Add the new trader profile to the repository
             await _unitOfWork.Repository<TraderProfile>().AddAsync(traderProfile);
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<TraderProfileDto>(traderProfile);
+            var traderDto = _mapper.Map<TraderProfileDto>(traderProfile);
+            traderDto.ProfileImageUrl = $"{_baseUrl}{traderDto.ProfileImageUrl}";
+            return traderDto;
         }
  
         public async Task<TraderProfileDto> UpdateProfileAsync(string userId, UpdateTraderProfileDto dto)
@@ -88,7 +94,9 @@ namespace T3awuny.Application.Services
             existingProfile.Description = dto.Description ?? existingProfile.Description;
             existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<TraderProfileDto>(existingProfile);
+            var traderDto = _mapper.Map<TraderProfileDto>(existingProfile);
+            traderDto.ProfileImageUrl = $"{_baseUrl}{traderDto.ProfileImageUrl}";
+            return traderDto;
         }
     }
 }

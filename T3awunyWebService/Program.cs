@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
@@ -68,6 +69,8 @@ namespace T3awunyWebService
                       new string[] {}
                    }
                 });
+                var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,xmlFileName));
             });
             //builder.Services.AddEndpointsApiExplorer();
             #endregion

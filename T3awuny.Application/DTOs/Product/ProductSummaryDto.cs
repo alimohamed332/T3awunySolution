@@ -15,8 +15,12 @@ namespace T3awuny.Application.DTOs.Product
         public decimal Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
+        public int CategorId { get; set; }
         public string? CategoryName { get; set; } = string.Empty;
-        public string? FarmerName { get; set; } 
+        public string FarmerId { get; set; } = string.Empty;
+        public string? FarmerName { get; set; } ///////
+        public string FarmerGovernorate { get; set; } = string.Empty; ///////
+        public string FarmerCity { get; set; } = string.Empty; /////
         public string? MainImageUrl { get; set; }
         public bool HasActiveAcution { get; set; }
     }

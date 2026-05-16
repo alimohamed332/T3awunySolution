@@ -27,7 +27,7 @@ namespace T3awuny.Application.Services
             _imageService = imageService;
             _unitOfWork = unitOfWork;
         }
-
+        //
         public async Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllNonVerifiedUsersAsync()
         {
             var users = await _unitOfWork.UserRepository.GetAllNonVerifiedUsersAsync();

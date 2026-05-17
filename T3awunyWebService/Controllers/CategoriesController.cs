@@ -28,7 +28,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Category>>> GetCategory(int id)
+        public async Task<ActionResult<ApiResponse<CategoryDto>>> GetCategory(int id)
         {
             var result = await _categoryService.GetCategoryByIdAsync(id);
             if (!result.IsSuccess)

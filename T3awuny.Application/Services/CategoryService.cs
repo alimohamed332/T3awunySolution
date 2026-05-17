@@ -33,13 +33,13 @@ namespace T3awuny.Application.Services
             return ApiResponse<IReadOnlyList<CategoryDto>>.Ok(categoriesDto, "تم العثور علي الفئات المتاحة بنجاح");
         }
 
-        public async Task<ApiResponse<Category>> GetCategoryByIdAsync(int id)
+        public async Task<ApiResponse<CategoryDto>> GetCategoryByIdAsync(int id)
         {
             var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
             if (category is null)
-                return ApiResponse<Category>.Fail("هذه الفئة غير موجودة");
+                return ApiResponse<CategoryDto>.Fail("هذه الفئة غير موجودة");
 
-            return ApiResponse<Category>.Ok(category, "تم العثور علي الفئة بنجاح");
+            return ApiResponse<CategoryDto>.Ok(_mapper.Map<CategoryDto>(category), "تم العثور علي الفئة بنجاح");
         }
     }
 }

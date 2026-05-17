@@ -203,9 +203,10 @@ namespace T3awuny.Application.Services
             {
                 auction.StartDate = DateTime.UtcNow; // I can leave it as it is
                 auction.Status = AuctionStatus.Active; // now it can recive bids 
+                await _unitOfWork.Repository<Auction>().AddAsync(auction);
             }
-
-            await _unitOfWork.CompleteAsync();
+           
+             await _unitOfWork.CompleteAsync();
         }
 
         private async Task CreateOrderForWinnerAsync(Auction auction, Bid winningBid)

@@ -12,6 +12,6 @@ namespace T3awuny.Application.Contracts
     public interface ICategoryService
     {
         Task<ApiResponse<IReadOnlyList<CategoryDto>>> GetCategoriesAsync();
-        Task<ApiResponse<Category>> GetCategoryByIdAsync(int id);
+        Task<ApiResponse<CategoryDto>> GetCategoryByIdAsync(int id);
     }
 }

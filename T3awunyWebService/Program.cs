@@ -19,6 +19,7 @@ using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
 using T3awuny.Infrastructure.Services;
+using T3awunyWebService.BackgroundServices;
 using T3awunyWebService.Helpers;
 using T3awunyWebService.Hubs;
 
@@ -28,6 +29,8 @@ namespace T3awunyWebService
     {
         public static async Task Main(string[] args)
         {
+            //Console.WriteLine(DateTime.UtcNow.AddMinutes(2));
+            //Console.WriteLine(DateTime.Now.AddMinutes(2));
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -78,7 +81,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection
                 });
             #endregion
 
@@ -263,6 +266,7 @@ namespace T3awunyWebService
             #region Register Auction Service and related services
             builder.Services.AddSignalR();
             builder.Services.AddScoped<IAuctionService, AuctionService>();
+            builder.Services.AddHostedService<AuctionBackgroundService>();
             #endregion
 
             var app = builder.Build();

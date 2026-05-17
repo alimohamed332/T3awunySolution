@@ -8,7 +8,7 @@ namespace T3awuny.Application.Contracts
 {
     public interface IAuctionService
     {
-        // Farmer actions
+        // Farmer actions 
         Task<ApiResponse<Auction>> CreateAuctionAsync(string farmerId, CreateAuctionDto dto);
         Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId); // Active → Canceled
         Task<ApiResponse<IReadOnlyList<AuctionSummaryDto>>> GetMyAuctionsAsync(string farmerId);

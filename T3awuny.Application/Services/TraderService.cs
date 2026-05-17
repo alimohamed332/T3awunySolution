@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core;
@@ -32,19 +33,20 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetAllVerifiedAsync()
         {
-            var traderSpecification = new TraderSpecifications(t => t.IsVerified); // you can use only base spec but will not include user inside but it lighter if you didn't need it 
+            var traderSpecification = new TraderSpecifications(t => t.IsVerified); //user and default address 
             var traderProfiles = await _unitOfWork.Repository<TraderProfile>().GetAllWithSpecAsync(traderSpecification);
             var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
 
             if (!mappedTraderProfiles.Any())
                 return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
+
             mappedTraderProfiles.Select(mtp => mtp.ProfileImageUrl = $"{_baseUrl}{mtp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles.ToList(), "تم العثور على التجار الموثقين بنجاح");
-        }
+        } 
 
         public async Task<TraderProfileDto?> GetProfileAsync(string userId)
         {
-            var traderSpecification = new TraderSpecifications(t => t.TraderId == userId);
+            var traderSpecification = new TraderSpecifications(t => t.TraderId == userId); //user and default address
             var traderProfile = await _unitOfWork.Repository<TraderProfile>().GetByIdWithSpecAsync(traderSpecification);
             if (traderProfile is null) return null;
             var traderDto = _mapper.Map<TraderProfileDto>(traderProfile);
@@ -74,26 +76,30 @@ namespace T3awuny.Application.Services
             // Add the new trader profile to the repository
             await _unitOfWork.Repository<TraderProfile>().AddAsync(traderProfile);
             await _unitOfWork.CompleteAsync();
+
             var traderDto = _mapper.Map<TraderProfileDto>(traderProfile);
+            var addSpecs = new BaseSpecifications<Address>(a => a.UserId == userId && a.IsDefault);
+            var address = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
+            traderDto.Address = _mapper.Map<AddressDetailsDto>(address ?? new Address());
             traderDto.ProfileImageUrl = $"{_baseUrl}{traderDto.ProfileImageUrl}";
             return traderDto;
         }
  
         public async Task<TraderProfileDto> UpdateProfileAsync(string userId, UpdateTraderProfileDto dto)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null) return new TraderProfileDto { Messsage = "هذا المستخدم غير موجود" };
-            //await _userManager.AddToRoleAsync(user, "Trader"); we can move assign role here 
-            if (!await _userManager.IsInRoleAsync(user, "Trader")) return new TraderProfileDto { Messsage = "هذا المستخدم ليس تاجر" };
+            var profileSpecs = new TraderSpecifications(tp => tp.TraderId == userId); // user and default add
+            var existingProfile = await _unitOfWork.Repository<TraderProfile>().GetByIdWithSpecAsync(profileSpecs);
 
-            var existingProfile = await _unitOfWork.Repository<TraderProfile>().GetByIdAsync(userId);
             if (existingProfile is null) return new TraderProfileDto { Messsage = "هذا التاجر ليس لديه بروفايل" };
-
+            if (existingProfile.User is null) return new TraderProfileDto { Messsage = "هذا المستخدم غير موجود" };
+            if (!await _userManager.IsInRoleAsync(existingProfile.User, "Trader")) return new TraderProfileDto { Messsage = "هذا المستخدم ليس تاجر" };
+           
             existingProfile.BusinessName = dto.BusinessName ?? existingProfile.BusinessName;
             existingProfile.BusinessType = dto.BusinessType;
             existingProfile.Description = dto.Description ?? existingProfile.Description;
             existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
             await _unitOfWork.CompleteAsync();
+
             var traderDto = _mapper.Map<TraderProfileDto>(existingProfile);
             traderDto.ProfileImageUrl = $"{_baseUrl}{traderDto.ProfileImageUrl}";
             return traderDto;

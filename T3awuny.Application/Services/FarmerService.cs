@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Core;
 using T3awuny.Core.Entities.UserModule;
@@ -30,19 +31,20 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetAllVerifiedAsync()
         {
-            var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
+            var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// I can use only base spec but will not include user and default add inside but it lighter if I didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
             var mappedFarmerProfiles = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
 
             if (!mappedFarmerProfiles.Any())
                 return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
+
             mappedFarmerProfiles.Select(mfp => mfp.ProfileImageUrl = $"{_baseUrl}{mfp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(mappedFarmerProfiles.ToList(), "تم العثور على المزارعين الموثقين بنجاح");
         }
 
         public async Task<FarmerProfileDto?> GetProfileAsync(string userId)
         {
-            var farmerSpecification = new FarmerSpecifications(f => f.FarmerId == userId);
+            var farmerSpecification = new FarmerSpecifications(f => f.FarmerId == userId); //user
             var farmerProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdWithSpecAsync(farmerSpecification);
             if (farmerProfile is null) return null;
             var farmerDto = _mapper.Map<FarmerProfileDto>(farmerProfile);
@@ -76,25 +78,35 @@ namespace T3awuny.Application.Services
             await _unitOfWork.Repository<FarmerProfile>().AddAsync(farmerProfile);
             await _unitOfWork.CompleteAsync();
             var farmerDto = _mapper.Map<FarmerProfileDto>(farmerProfile);
-            farmerDto.ProfileImageUrl = $"{_baseUrl}{farmerDto.ProfileImageUrl}";
+            //farmerDto.Name = user.Name;
+            //farmerDto.Email = user.Email!;
+            //farmerDto.UserName = user.UserName!;
+            //farmerDto.JoinDate = user.JoinDate;
+            var addSpecs = new BaseSpecifications<Address>(a => a.UserId == userId && a.IsDefault);
+            var address = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
+            farmerDto.Address = _mapper.Map<AddressDetailsDto>(address ?? new Address());
+            farmerDto.ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
             return farmerDto;
         }
 
         public async Task<FarmerProfileDto> UpdateProfileAsync(string userId, UpdateFarmerProfileDto dto)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null) return new FarmerProfileDto { Messsage = "هذا المستخدم غير موجود" };
-            //await _userManager.AddToRoleAsync(user, "Farmer"); we can move assign role here 
-
-            if (!await _userManager.IsInRoleAsync(user, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
-
-            var existingProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdAsync(userId);
+            //var user = await _userManager.FindByIdAsync(userId);
+            //if (user is null) return new FarmerProfileDto { Messsage = "هذا المستخدم غير موجود" };
+            //await _userManager.AddToRoleAsync(user, "Farmer"); we can move assign role here  but the intial design خلاني مضطر 
+            //if (!await _userManager.IsInRoleAsync(user, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
+            var profileSpecs = new FarmerSpecifications(fp => fp.FarmerId == userId); // user and default add
+            var existingProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdWithSpecAsync(profileSpecs);
+           
             if (existingProfile is null) return new FarmerProfileDto { Messsage = "هذا المزارع ليس لديه بروفايل" };
-
+            if (existingProfile.User is null) return new FarmerProfileDto { Messsage = "هذا المستخدم غير موجود" };
+            if (!await _userManager.IsInRoleAsync(existingProfile.User, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
+            
             existingProfile.FarmName = dto.FarmName ?? existingProfile.FarmName;
             existingProfile.Description = dto.Description ?? existingProfile.Description;
             existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
             await _unitOfWork.CompleteAsync();
+
             var farmerDto = _mapper.Map<FarmerProfileDto>(existingProfile);
             farmerDto.ProfileImageUrl = $"{_baseUrl}{farmerDto.ProfileImageUrl}";
             return farmerDto;

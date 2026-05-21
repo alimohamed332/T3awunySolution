@@ -17,6 +17,7 @@ namespace T3awuny.Core.Specifications.ProductSpecs
                (!specs.CategoryId.HasValue || P.CategoryId == specs.CategoryId) &&
                (!specs.MinPrice.HasValue || P.UnitPrice >= specs.MinPrice) &&
                (!specs.MaxPrice.HasValue || P.UnitPrice <= specs.MaxPrice) &&
+               (!specs.HasActiveAuction.HasValue || P.HasActiveAcution == specs.HasActiveAuction) &&
                (!specs.Status.HasValue || P.Status == specs.Status)
                
             )
@@ -26,6 +27,12 @@ namespace T3awuny.Core.Specifications.ProductSpecs
                 Includes.Add(p => p.Category);
                 Includes.Add(p => p.Farmer);
                 Includes.Add(p => p.Images);
+            }
+            else
+            {
+                Includes.Add(p => p.Category);
+                //Includes.Add(p => p.Images);
+                Includes.Add(p => p.Images.Where(i => i.IsMain));
             }
 
             if (!string.IsNullOrEmpty(specs.Sort))

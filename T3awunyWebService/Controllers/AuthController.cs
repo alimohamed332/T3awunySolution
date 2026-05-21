@@ -1,17 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.Net;
 using System.Security.Claims;
-using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
-using T3awuny.Application.Services;
 using T3awuny.Core.Entities;
 
 namespace T3awunyWebService.Controllers
@@ -26,6 +19,11 @@ namespace T3awunyWebService.Controllers
         {
             _authService = authService;
         }
+        /// <summary>
+        /// Address Label Values : Farm = 0 (farmer), Warehouse = 1 (trader) ,Home = 2 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<ActionResult<AuthModel>> RegisterAsync([FromForm] RegisterDto model)
         {

@@ -8,6 +8,8 @@ namespace T3awuny.Core.Entities.Enums
 {
     public enum BusinessType
     {
-        Restaurant, Wholesaler, Retailer
+        Restaurant = 0,
+        Wholesaler = 1,
+        Retailer = 2
     }
 }

@@ -29,7 +29,7 @@ namespace T3awuny.Application.Helpers
     {
         public string Resolve(NominatimResponse source, AddressDetailsDto destination, string destMember, ResolutionContext context)
         {
-            return source?.Address?.State ?? "محافظة الفيوم";
+            return source?.Address?.State ?? "الفيوم";
         }
     }
     public class CountryResolver : IValueResolver<NominatimResponse, AddressDetailsDto, string>

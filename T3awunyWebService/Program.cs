@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
@@ -19,7 +19,9 @@ using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
 using T3awuny.Infrastructure.Services;
+using T3awunyWebService.BackgroundServices;
 using T3awunyWebService.Helpers;
+using T3awunyWebService.Hubs;
 
 namespace T3awunyWebService
 {
@@ -27,6 +29,8 @@ namespace T3awunyWebService
     {
         public static async Task Main(string[] args)
         {
+            //Console.WriteLine(DateTime.UtcNow.AddMinutes(2));
+            //Console.WriteLine(DateTime.Now.AddMinutes(2));
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -68,6 +72,8 @@ namespace T3awunyWebService
                       new string[] {}
                    }
                 });
+                var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,xmlFileName));
             });
             //builder.Services.AddEndpointsApiExplorer();
             #endregion
@@ -75,7 +81,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection
                 });
             #endregion
 
@@ -257,6 +263,12 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IPaymentService,PaymentService>();
             #endregion
 
+            #region Register Auction Service and related services
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IAuctionService, AuctionService>();
+            builder.Services.AddHostedService<AuctionBackgroundService>();
+            #endregion
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
@@ -294,7 +306,7 @@ namespace T3awunyWebService
             app.UseCors("Allow");
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.MapHub<AuctionHub>("/hubs/auction");
 
             app.MapControllers();
 

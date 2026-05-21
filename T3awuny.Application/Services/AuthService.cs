@@ -1,25 +1,16 @@
 ﻿using AutoMapper;
-using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-
-//using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Data;
-//using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.UserModule;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace T3awuny.Application.Services
 {
@@ -75,11 +66,18 @@ namespace T3awuny.Application.Services
                 _fileStorageService.DeleteImage(user.ProfileImageUrl!);
                 return new AuthModel { Message = errors.ToString() };
             }
-            
-            //foreach(var add in  model.Addresses)
-            await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
 
-            var role = model.Role?.ToLower().Contains("ta") == true ? "Trader" : "Farmer";
+            //foreach(var add in  model.Addresses)
+            try 
+            {
+                await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
+            }
+            catch
+            { 
+                await _userManager.DeleteAsync(user);
+                return new AuthModel { Message = "حدثت مشكلة أثناء الحصول علي العنوان" };
+            }       
+            var role = model.Role?.ToLower().Contains("tr") == true ? "Trader" : "Farmer";
 
             await _userManager.AddToRoleAsync(user, role);
 

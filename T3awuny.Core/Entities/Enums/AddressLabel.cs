@@ -8,6 +8,8 @@ namespace T3awuny.Core.Entities.Enums
 {
     public enum AddressLabel
     {
-        Farm, Warehouse , Home
+        Farm = 0, 
+        Warehouse = 1 ,
+        Home = 2 
     }
 }

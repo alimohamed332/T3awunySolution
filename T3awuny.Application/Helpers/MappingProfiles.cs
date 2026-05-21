@@ -1,18 +1,15 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using T3awuny.Application.DTOs.Address;
+using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
+using T3awuny.Application.DTOs.Category;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.AuctionModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.UserModule;
@@ -38,24 +35,23 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.PostalCode, opt => opt.MapFrom<PostalCodeResolver>())
                 .ForMember(dest => dest.Country, opt => opt.MapFrom<CountryResolver>())
                 .ReverseMap();
-            CreateMap<Address, AddressDetailsDto>()
-                .ReverseMap();
+            CreateMap<Address, AddressDetailsDto>();
 
             CreateMap<FarmerProfile, FarmerProfileDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User!.Name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User!.Email))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName))
-                .ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.User!.Addresses))
                 .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.User!.ProfileImageUrl))
                 .ForMember(dest => dest.JoinDate, opt => opt.MapFrom(src => src.User!.JoinDate))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.User!.Addresses.FirstOrDefault()))
                 .ForMember(dest => dest.Messsage, opt => opt.Ignore())
-                .ReverseMap();
+                ;
 
             CreateMap<TraderProfile,TraderProfileDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User!.Name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User!.Email))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName))
-                .ForMember(dest => dest.Addresses, opt => opt.MapFrom(src => src.User!.Addresses))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.User!.Addresses))
                 .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.User!.ProfileImageUrl))
                 .ForMember(dest => dest.JoinDate, opt => opt.MapFrom(src => src.User!.JoinDate))
                 .ForMember(dest => dest.Messsage, opt => opt.Ignore())
@@ -64,15 +60,14 @@ namespace T3awuny.Application.Helpers
             CreateMap<Product, ProductSummaryDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
-                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer.Name))
+                .ForMember(dest => dest.FarmerName, opt => opt.Ignore()) // I can get it from the internal farmer but in  i didn't catch it from DB in some functions for light retreive
                 .ReverseMap();
 
             CreateMap<Product, ProductResponseDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault(i => i.IsMain)!.ImageUrl))
                 .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl)))
-                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer.Name))
-                .ForMember(dest => dest.FarmerGovernorate, opt => opt.MapFrom(src => src.Farmer.Addresses.FirstOrDefault(a => a.IsDefault)!.Governorate))
+                .ForMember(dest => dest.FarmerName, opt => opt.Ignore()) // I can get it from the internal farmer but in  i didn't catch it from DB in some functions for light retreive
                 .ReverseMap();
 
             CreateMap<CreateProductDto, Product>()
@@ -100,6 +95,8 @@ namespace T3awuny.Application.Helpers
             //.ForAllMembers(opt => opt.Condition((src,dest,srcMember) => srcMember is not null && (!(srcMember is string
             //str) || !string.IsNullOrEmpty(str)) ));
 
+            CreateMap<Category, CategoryDto>();
+
             CreateMap<Order, OrderResponseDto>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.BuyerName, opt => opt.Ignore())
@@ -123,6 +120,28 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
 
             CreateMap<Address, OrderAddress>();
+
+            /////////Auction
+            CreateMap<CreateAuctionDto, Auction>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.CurrentPrice, opt => opt.MapFrom(src => src.StartingPrice))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => AuctionStatus.Scheduled))
+                .ForMember(dest => dest.FarmerId, opt => opt.Ignore());
+
+            CreateMap<Auction, AuctionResponseDto>()
+                .ForMember(dest => dest.TotalBids, opt => opt.MapFrom(src => src.Bids.Count()))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.Name))
+                .ForMember(dest => dest.ProductUnit, opt => opt.MapFrom(src => src.Product!.Unit))
+                .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Product!.Quantity))
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
+                .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name))
+                .ForMember(dest => dest.Bids, opt => opt.Ignore())
+                .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
+
+            CreateMap<Bid, BidResponseDto>();
+            //.ForMember(dest => dest.BidderName, opt => opt.Ignore());
+
+            CreateMap<Auction, AuctionSummaryDto>();
         }
     }
 }

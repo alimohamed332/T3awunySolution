@@ -79,17 +79,23 @@ namespace T3awuny.Infrastructure.Data
         {
             if (!_dbContext.DeliveryMethods.Any())
             {
-                
-                var deliveryMethodData = File.ReadAllText("../T3awuny.Infrastructure/Data/DataSeed/delivery.json");
-                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodData);
-                if (deliveryMethods is not null && deliveryMethods.Any())
+                _dbContext.AddRange(new List<DeliveryMethod>()
                 {
-                    foreach (var delivery in deliveryMethods)
-                    {
-                        _dbContext.Set<DeliveryMethod>().Add(delivery);
-                    }
-                    //await _dbContext.SaveChangesAsync();
-                }             
+                    new DeliveryMethod(){ Id = 1,ShortName = "UPS1",Description = "أسرع وقت توصيل",DeliveryTime = "من يوم الي يومين",Cost = 100},
+                    new DeliveryMethod(){ Id = 2,ShortName = "UPS2",Description = "أحصل عليها في غضون خمس ايام",DeliveryTime = "من يومين لأربع أيام",Cost = 55},
+                    new DeliveryMethod(){ Id = 3,ShortName = "UPS3",Description = "ابطأ لاكن أرخص",DeliveryTime = "من أربع أيام لأسبوع",Cost = 30},
+                    new DeliveryMethod(){ Id = 4,ShortName = "FREE",Description = "أدفع علي ما تحصل عليه فقط",DeliveryTime = "من أسبوع لعشر أيام",Cost = 0}
+                });
+                //var deliveryMethodData = File.ReadAllText("../T3awuny.Infrastructure/Data/DataSeed/delivery.json");
+                //var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodData);
+                //if (deliveryMethods is not null && deliveryMethods.Any())
+                //{
+                //    foreach (var delivery in deliveryMethods)
+                //    {
+                //        _dbContext.Set<DeliveryMethod>().Add(delivery);
+                //    }
+                //    //await _dbContext.SaveChangesAsync();
+                //}             
 
                 await _dbContext.SaveChangesAsync();
             }

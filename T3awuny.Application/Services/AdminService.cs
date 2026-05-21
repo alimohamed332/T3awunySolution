@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Farmer;
@@ -12,7 +8,6 @@ using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Core;
 using T3awuny.Core.Entities.UserModule;
-using T3awuny.Core.Repository.Contracts;
 using T3awuny.Core.Specifications;
 
 namespace T3awuny.Application.Services
@@ -22,23 +17,25 @@ namespace T3awuny.Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly string _baseUrl;
 
-        public AdminService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IMapper mapper)
+        public AdminService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _baseUrl = configuration["App:ApplicationUrl"] ?? "";
         }
 
         public async Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetPendingFarmersAsync()
         {
-            var farmerSpecification = new FarmerSpecifications(f => !f.IsVerified);// you can use only base spec but will not include user inside but it lighter if you didn't need it
+            var farmerSpecification = new FarmerSpecifications(f => !f.IsVerified); //user and address
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
             var farmerProfilesDtos = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
 
             if (!farmerProfilesDtos.Any())
                 return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد حسابات مزارعين في انتظار التحقق حاليا");
-
+            farmerProfilesDtos.Select(fp => fp.ProfileImageUrl = $"{_baseUrl}{fp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(farmerProfilesDtos.ToList(), "تم العثور على حسابات المزارعين في انتظار التحقق بنجاح");
         }
 
@@ -50,12 +47,13 @@ namespace T3awuny.Application.Services
 
             if (!traderProfilesDtos.Any()) 
                 return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد حسابات تجار في انتظار التحقق حاليا");
+            traderProfilesDtos.Select(tp => tp.ProfileImageUrl = $"{_baseUrl}{tp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(traderProfilesDtos.ToList(), "تم العثور على حسابات التجار في انتظار التحقق بنجاح");
         }
 
         public async Task<ApiResponse<bool>> VerifyFarmerAsync(string farmerId)
         {
-            var farmerSpecification = new FarmerSpecifications(f => f.FarmerId == farmerId);
+            var farmerSpecification = new FarmerSpecifications(f => f.FarmerId == farmerId);//user and defaul add
             var farmerProfile = await _unitOfWork.Repository<FarmerProfile>().GetByIdWithSpecAsync(farmerSpecification);
             if (farmerProfile is null)
                 return ApiResponse<bool>.Fail("هذا المزارع لا يملك بروفايل ");
@@ -66,8 +64,8 @@ namespace T3awuny.Application.Services
             var result = _unitOfWork.Repository<FarmerProfile>().Update(farmerProfile);
             // you can use user manager to update the user but it will make 2 calls to the database so i prefer to update the user with the unit of work and then call complete async once to save all changes
             //await _userManager.UpdateAsync(farmerProfile.User);
-            await _unitOfWork.CompleteAsync();
-            if (!result.IsVerified)
+            var saveresult = await _unitOfWork.CompleteAsync();
+            if (!result.IsVerified || saveresult <= 0)
                 return ApiResponse<bool>.Fail("فشل في تحديث حالة المزارع حاول مرة اخرى لاحقاَ");
 
             return ApiResponse<bool>.Ok(true,"تم التحقق من المزارع بنجاح");
@@ -86,8 +84,8 @@ namespace T3awuny.Application.Services
             var result = _unitOfWork.Repository<TraderProfile>().Update(traderProfile);
             // you can use user manager to update the user but it will make 2 calls to the database so i prefer to update the user with the unit of work and then call complete async once to save all changes
             //await _userManager.UpdateAsync(traderProfile.User);
-            await _unitOfWork.CompleteAsync();
-            if (!result.IsVerified)
+            var saveResult = await _unitOfWork.CompleteAsync();
+            if (!result.IsVerified || saveResult <= 0)
                 return ApiResponse<bool>.Fail("فشل في تحديث حالة التاجر حاول مرة اخرى لاحقاَ");
 
             return ApiResponse<bool>.Ok(true, "تم التحقق من التاجر بنجاح");
@@ -172,8 +170,7 @@ namespace T3awuny.Application.Services
         private async Task RevokeAllRefreshTokensAsync(string userId)
         {
             var refreshTokenSpecObject = new BaseSpecifications<RefreshToken>(r => r.UserId == userId && r.IsActive);
-            var token = await _unitOfWork.Repository<RefreshToken>()
-                                          .GetByIdWithSpecAsync(refreshTokenSpecObject);
+            var token = await _unitOfWork.Repository<RefreshToken>().GetByIdWithSpecAsync(refreshTokenSpecObject);
             if (token is not null)
             {
                 token.RevokedOn = DateTime.UtcNow;

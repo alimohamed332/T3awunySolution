@@ -155,6 +155,100 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("T3awuny.Core.Entities.AuctionModule.Auction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<decimal>("CurrentPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FarmerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("ReservePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("StartingPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Scheduled");
+
+                    b.Property<string>("WinnerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FarmerId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("WinnerId");
+
+                    b.ToTable("Auctions", (string)null);
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.AuctionModule.Bid", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("AuctionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("BidTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("BidderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsWinning")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuctionId");
+
+                    b.HasIndex("BidderId");
+
+                    b.ToTable("Bids", (string)null);
+                });
+
             modelBuilder.Entity("T3awuny.Core.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -183,7 +277,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("ParentCategoryId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.DeliveryMethod", b =>
@@ -211,7 +305,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeliveryMethods");
+                    b.ToTable("DeliveryMethods", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Logistics", b =>
@@ -265,7 +359,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.HasIndex("PickupAddressId")
                         .IsUnique();
 
-                    b.ToTable("Logistics");
+                    b.ToTable("Logistics", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Order", b =>
@@ -327,7 +421,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("DeliveryMethodId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.OrderItem", b =>
@@ -354,7 +448,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Payment", b =>
@@ -407,7 +501,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.HasIndex("PayerId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Product", b =>
@@ -439,6 +533,9 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("HarvestDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasActiveAcution")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -475,7 +572,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.ProductModule.ProductImage", b =>
@@ -503,7 +600,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.UserModule.Address", b =>
@@ -565,7 +662,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.UserModule.ApplicationUser", b =>
@@ -673,7 +770,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasKey("FarmerId");
 
-                    b.ToTable("FarmerProfiles");
+                    b.ToTable("FarmerProfiles", (string)null);
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.UserModule.TraderProfile", b =>
@@ -706,7 +803,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasKey("TraderId");
 
-                    b.ToTable("TraderProfiles");
+                    b.ToTable("TraderProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -757,6 +854,47 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.AuctionModule.Auction", b =>
+                {
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "Farmer")
+                        .WithMany()
+                        .HasForeignKey("FarmerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "Winner")
+                        .WithMany()
+                        .HasForeignKey("WinnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Farmer");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Winner");
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.AuctionModule.Bid", b =>
+                {
+                    b.HasOne("T3awuny.Core.Entities.AuctionModule.Auction", null)
+                        .WithMany("Bids")
+                        .HasForeignKey("AuctionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("BidderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -829,7 +967,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Orders", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -870,7 +1008,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                             b1.HasKey("OrderItemId");
 
-                            b1.ToTable("OrderItems");
+                            b1.ToTable("OrderItems", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderItemId");
@@ -962,7 +1100,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                             b1.HasKey("UserId", "Id");
 
-                            b1.ToTable("RefreshToken");
+                            b1.ToTable("RefreshToken", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -991,6 +1129,11 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("T3awuny.Core.Entities.AuctionModule.Auction", b =>
+                {
+                    b.Navigation("Bids");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Category", b =>

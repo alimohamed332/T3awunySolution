@@ -16,7 +16,7 @@ namespace T3awuny.Application.DTOs.Trader
         public string? Description { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
-        public List<AddressDetailsDto> Addresses { get; set; } = new List<AddressDetailsDto>();
+        public AddressDetailsDto Address { get; set; } = new AddressDetailsDto();
         public string? ProfileImageUrl { get; set; } = string.Empty;
         public int? TaxNumber { get; set; }
         public DateTime JoinDate { get; set; }

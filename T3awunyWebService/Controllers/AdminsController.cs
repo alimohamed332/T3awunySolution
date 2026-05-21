@@ -102,27 +102,29 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
-        [HttpGet("verified-farmers")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
-        {
-            var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
-            if (!verifiedFarmers.IsSuccess)
-                return NotFound(verifiedFarmers);
+        #region Farmer & Trader controllers
+        //[Authorize("AdminOnly")]
+        //[HttpGet("verified-farmers")]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
+        //{
+        //    var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
+        //    if (!verifiedFarmers.IsSuccess)
+        //        return NotFound(verifiedFarmers);
 
-            return Ok(verifiedFarmers);
-        }
+        //    return Ok(verifiedFarmers);
+        //}
 
-        [Authorize]
-        [HttpGet("verified-traders")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetVerifiedTraders()
-        {
-            var verifiedTraders = await _traderService.GetAllVerifiedAsync();
-            if (!verifiedTraders.IsSuccess)
-                return NotFound(verifiedTraders);
+        //[Authorize]
+        //[HttpGet("verified-traders")]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetVerifiedTraders()
+        //{
+        //    var verifiedTraders = await _traderService.GetAllVerifiedAsync();
+        //    if (!verifiedTraders.IsSuccess)
+        //        return NotFound(verifiedTraders);
 
-            return Ok(verifiedTraders);
-        }
+        //    return Ok(verifiedTraders);
+        //}
+        #endregion
 
         [Authorize("AdminOnly")]
         [HttpGet("verified-users")]

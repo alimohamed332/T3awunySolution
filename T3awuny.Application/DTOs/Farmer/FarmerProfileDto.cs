@@ -16,7 +16,7 @@ namespace T3awuny.Application.DTOs.Farmer
         public string? Description { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
-        public List<AddressDetailsDto> Addresses { get; set; } = new List<AddressDetailsDto>();
+        public AddressDetailsDto Address { get; set; } = new AddressDetailsDto();
         public string? ProfileImageUrl { get; set; } = string.Empty;
         public DateTime JoinDate { get; set; }
         public bool IsVerified { get; set; }

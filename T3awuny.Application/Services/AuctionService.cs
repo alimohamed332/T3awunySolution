@@ -202,8 +202,8 @@ namespace T3awuny.Application.Services
             foreach (var auction in startedAuctions)
             {
                 auction.StartDate = DateTime.UtcNow; // I can leave it as it is
-                auction.Status = AuctionStatus.Active; // now it can recive bids 
-                await _unitOfWork.Repository<Auction>().AddAsync(auction);
+                auction.Status = AuctionStatus.Active; // now it can receive bids 
+                _unitOfWork.Repository<Auction>().Update(auction);
             }
            
              await _unitOfWork.CompleteAsync();

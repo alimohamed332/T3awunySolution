@@ -269,6 +269,10 @@ namespace T3awunyWebService
             builder.Services.AddHostedService<AuctionBackgroundService>();
             #endregion
 
+            #region Register Review service
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            #endregion
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application

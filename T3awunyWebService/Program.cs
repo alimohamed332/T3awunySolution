@@ -229,6 +229,9 @@ namespace T3awunyWebService
                 options.AddPolicy("TraderOrAdmin",
                    policy => policy.RequireRole("Trader", "Admin"));
 
+                options.AddPolicy("FarmerOrTrader",
+                   policy => policy.RequireRole("Trader", "Farmer"));
+
                 options.AddPolicy("VerifiedFarmer", policy =>
                     policy.RequireRole("Farmer")
                           .RequireClaim("IsVerified", "true")); // add this claim in JWT
@@ -267,6 +270,10 @@ namespace T3awunyWebService
             builder.Services.AddSignalR();
             builder.Services.AddScoped<IAuctionService, AuctionService>();
             builder.Services.AddHostedService<AuctionBackgroundService>();
+            #endregion
+
+            #region Register Review service
+            builder.Services.AddScoped<IReviewService, ReviewService>();
             #endregion
 
             var app = builder.Build();

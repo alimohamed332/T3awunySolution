@@ -33,13 +33,19 @@ namespace T3awuny.Application.Services
         {
             var farmerSpecification = new FarmerSpecifications(f => f.IsVerified);// I can use only base spec but will not include user and default add inside but it lighter if I didn't need it
             var farmerProfiles = await _unitOfWork.Repository<FarmerProfile>().GetAllWithSpecAsync(farmerSpecification);
-            var mappedFarmerProfiles = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
+            var mappedFarmerProfiles = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f)).ToList();
 
             if (!mappedFarmerProfiles.Any())
                 return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد مزارعين موثقين");
 
-            mappedFarmerProfiles.Select(mfp => mfp.ProfileImageUrl = $"{_baseUrl}{mfp.ProfileImageUrl}");
-            return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(mappedFarmerProfiles.ToList(), "تم العثور على المزارعين الموثقين بنجاح");
+            foreach (var farmer in mappedFarmerProfiles)
+            {
+                if (!string.IsNullOrEmpty(farmer.ProfileImageUrl))
+                {
+                    farmer.ProfileImageUrl =$"{_baseUrl}{farmer.ProfileImageUrl}";
+                }
+            }
+            return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(mappedFarmerProfiles, "تم العثور على المزارعين الموثقين بنجاح");
         }
 
         public async Task<FarmerProfileDto?> GetProfileAsync(string userId)

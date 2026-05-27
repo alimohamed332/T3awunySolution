@@ -35,13 +35,19 @@ namespace T3awuny.Application.Services
         {
             var traderSpecification = new TraderSpecifications(t => t.IsVerified); //user and default address 
             var traderProfiles = await _unitOfWork.Repository<TraderProfile>().GetAllWithSpecAsync(traderSpecification);
-            var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
+            var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t)).ToList();
 
             if (!mappedTraderProfiles.Any())
                 return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
+            foreach (var trader in mappedTraderProfiles)
+            {
+                if (!string.IsNullOrEmpty(trader.ProfileImageUrl))
+                {
+                    trader.ProfileImageUrl =$"{_baseUrl}{trader.ProfileImageUrl}";
+                }
+            }
 
-            mappedTraderProfiles.Select(mtp => mtp.ProfileImageUrl = $"{_baseUrl}{mtp.ProfileImageUrl}");
-            return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles.ToList(), "تم العثور على التجار الموثقين بنجاح");
+            return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles, "تم العثور على التجار الموثقين بنجاح");
         } 
 
         public async Task<TraderProfileDto?> GetProfileAsync(string userId)

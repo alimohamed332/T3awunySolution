@@ -10,15 +10,12 @@ namespace T3awuny.Application.Contracts
 {
     public interface IReviewService
     {
-    //    // Buyer actions
-    //    Task<ApiResponse<ReviewResponseDto>> CreateReviewAsync(
-    //        string reviewerId, CreateReviewDto dto);
+        // Buyer actions
+        Task<ApiResponse<ReviewResponseDto>> CreateReviewAsync(string reviewerId, CreateReviewDto dto);
 
-    //    // Public
-    //    Task<ApiResponse<IEnumerable<ReviewResponseDto>>> GetFarmerReviewsAsync(
-    //        string farmerId);
-    //    Task<ApiResponse<UserRatingSummaryDto>> GetFarmerRatingSummaryAsync(
-    //        string farmerId);
+        // Public
+        Task<ApiResponse<IReadOnlyList<ReviewResponseDto>>> GetUserReviewsAsync(string userId);
+        Task<ApiResponse<UserRatingSummaryDto>> GetUserRatingSummaryAsync(string userId);
 
     //    // Admin
     //    Task<ApiResponse<string>> ApproveReviewAsync(int reviewId);

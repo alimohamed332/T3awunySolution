@@ -4,7 +4,8 @@ namespace T3awuny.Application.DTOs.Review
     public class UserRatingSummaryDto
     {
         public string UserId { get; set; } = string.Empty;
-        public string UserName { get; set; } = string.Empty;
+        //public string UserName { get; set; } = string.Empty;
+        //public string UserEmail { get; set; } = string.Empty;
         public double AverageRating { get; set; }
         public int TotalReviews { get; set; }
         public int FiveStars { get; set; }

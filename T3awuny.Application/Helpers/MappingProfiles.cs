@@ -7,11 +7,13 @@ using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
+using T3awuny.Application.DTOs.Review;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.AuctionModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
+using T3awuny.Core.Entities.ReviewModule;
 using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Helpers
@@ -51,7 +53,7 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User!.Name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User!.Email))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName))
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.User!.Addresses))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.User!.Addresses.FirstOrDefault()))
                 .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.User!.ProfileImageUrl))
                 .ForMember(dest => dest.JoinDate, opt => opt.MapFrom(src => src.User!.JoinDate))
                 .ForMember(dest => dest.Messsage, opt => opt.Ignore())
@@ -142,6 +144,12 @@ namespace T3awuny.Application.Helpers
             //.ForMember(dest => dest.BidderName, opt => opt.Ignore());
 
             CreateMap<Auction, AuctionSummaryDto>();
+
+            //Review
+            CreateMap<Review,ReviewResponseDto>()
+                .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Reviewer!.Name ?? ""))             
+                .ForMember(dest => dest.ReviewerImageUrl, opt => opt.MapFrom(src => src.Reviewer!.ProfileImageUrl ?? ""))             
+                ;
         }
     }
 }

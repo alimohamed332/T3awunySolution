@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using T3awuny.Core.Entities.ReviewModule;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Configurations
 {
@@ -26,7 +27,7 @@ namespace T3awuny.Infrastructure.Configurations
                    .HasForeignKey(r => r.ReviewerId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(r => r.TargetUser)
+            builder.HasOne<ApplicationUser>()//(r => r.TargetUser)
                    .WithMany()
                    .HasForeignKey(r => r.TargetUserId)
                    .OnDelete(DeleteBehavior.Restrict);

@@ -229,6 +229,9 @@ namespace T3awunyWebService
                 options.AddPolicy("TraderOrAdmin",
                    policy => policy.RequireRole("Trader", "Admin"));
 
+                options.AddPolicy("FarmerOrTrader",
+                   policy => policy.RequireRole("Trader", "Farmer"));
+
                 options.AddPolicy("VerifiedFarmer", policy =>
                     policy.RequireRole("Farmer")
                           .RequireClaim("IsVerified", "true")); // add this claim in JWT

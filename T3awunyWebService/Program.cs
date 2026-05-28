@@ -314,7 +314,7 @@ namespace T3awunyWebService
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapHub<AuctionHub>("/hubs/auction");
-
+            app.MapHub<ChatHub>("/hubs/chat");
             app.MapControllers();
 
             app.Run();

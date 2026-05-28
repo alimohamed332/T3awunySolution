@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.AuctionModule;
+using T3awuny.Core.Entities.ChatModule;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.ProductModule;
 using T3awuny.Core.Entities.ReviewModule;
@@ -32,6 +33,8 @@ namespace T3awuny.Infrastructure.Data
         public virtual DbSet<Auction> Auctions { get; set; }
         public virtual DbSet<Bid> Bids { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
+        public virtual DbSet<Conversation> Conversations { get; set; }
+        public virtual DbSet<Message> Messages { get; set; }
         public T3awunyDbContext(DbContextOptions<T3awunyDbContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder builder)
         {

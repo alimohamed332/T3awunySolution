@@ -17,9 +17,9 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<IReadOnlyList<ReviewResponseDto>>> GetUserReviewsAsync(string userId);
         Task<ApiResponse<UserRatingSummaryDto>> GetUserRatingSummaryAsync(string userId);
 
-    //    // Admin
-    //    Task<ApiResponse<string>> ApproveReviewAsync(int reviewId);
-    //    Task<ApiResponse<string>> DeleteReviewAsync(int reviewId);
-    //    Task<ApiResponse<IEnumerable<ReviewResponseDto>>> GetPendingReviewsAsync();
+        // Admin
+        Task<ApiResponse<string>> ApproveReviewAsync(int reviewId);
+        Task<ApiResponse<string>> DeleteReviewAsync(int reviewId);
+        Task<ApiResponse<IReadOnlyList<ReviewResponseDto>>> GetPendingReviewsAsync();
     }
 }

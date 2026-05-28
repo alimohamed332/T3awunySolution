@@ -134,5 +134,48 @@ namespace T3awuny.Application.Services
                 OneStar = reviewList.Count(r => r.Rating == 1)
             },"تم الحصول على ملخص التقييمات بنجاح");
         }
+
+        public async Task<ApiResponse<string>> ApproveReviewAsync(int reviewId)
+        {
+            var review = await _unitOfWork.Repository<Review>().GetByIdAsync(reviewId);
+            if (review is null)
+                return ApiResponse<string>.Fail("التقييم غير موجود");
+
+            review.IsApproved = true;
+            if (await _unitOfWork.CompleteAsync() <= 0)
+                return ApiResponse<string>.Fail("فشل في اعتماد التقييم حاول لاحقاً");
+
+            return ApiResponse<string>.Ok(reviewId.ToString(),"تم اعتماد التقييم بنجاح");
+        }
+
+        public async Task<ApiResponse<string>> DeleteReviewAsync(int reviewId)
+        {
+            var review =  await _unitOfWork.Repository<Review>().GetByIdAsync(reviewId);
+            if(review is null)
+                return ApiResponse<string>.Fail("التقييم غير موجود");
+
+            _unitOfWork.Repository<Review>().Delete(review);
+            if (await _unitOfWork.CompleteAsync() <= 0)
+                return ApiResponse<string>.Fail("فشل في حذف التقييم حاول لاحقاً");
+
+            return ApiResponse<string>.Ok(reviewId.ToString(),"تم حذف التقييم بنجاح");
+        }
+
+        public async Task<ApiResponse<IReadOnlyList<ReviewResponseDto>>> GetPendingReviewsAsync()
+        {
+            var reviewsSpec = new ReviewSpecifications(r => !r.IsApproved);
+            var reviews =  await _unitOfWork.Repository<Review>().GetAllWithSpecAsync(reviewsSpec);//reviewer
+
+            if(!reviews.Any())
+                return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Fail("لا يوجد تقييمات قيد الانتظار");
+            var reviewDtos =new List<ReviewResponseDto>();
+            foreach (var review in reviews)
+            {
+                var reviewDto = _mapper.Map<ReviewResponseDto>(review);
+                reviewDto.ReviewerImageUrl = $"{_baseUrl}{reviewDto.ReviewerImageUrl}";
+                reviewDtos.Add(reviewDto);
+            }
+            return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Ok(reviewDtos, "تم الحصول على التقييمات قيد الانتظار بنجاح");
+        }
     }
 }

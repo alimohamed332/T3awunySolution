@@ -46,5 +46,46 @@ namespace T3awunyWebService.Controllers
                 return NotFound(result);
             return Ok(result);
         }
+        /// <summary>
+        /// Admins only
+        /// </summary>
+        /// <param name="reviewId"></param>
+        /// <returns></returns>
+        [Authorize("AdminOnly")]
+        [HttpPost("{reviewId}/approve")]
+        public async Task<ActionResult<ApiResponse<string>>> ApproveReview(int reviewId)
+        {
+            var result = await _reviewService.ApproveReviewAsync(reviewId);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+        /// <summary>
+        /// Allowed for admins to delete inappropriate reviews. This action will permanently remove the review from the system.
+        /// </summary>
+        /// <param name="reviewId"></param>
+        /// <returns></returns>
+        [Authorize("AdminOnly")]
+        [HttpDelete("{reviewId}")]
+        public async Task<ActionResult<ApiResponse<string>>> DeleteReview(int reviewId)
+        {
+            var result = await _reviewService.DeleteReviewAsync(reviewId);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+        /// <summary>
+        /// Admins only 
+        /// </summary>
+        /// <returns></returns>
+        //[Authorize("AdminOnly")]
+        [HttpGet("pending")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<ReviewResponseDto>>>> GetPendingReviews()
+        {
+            var result = await _reviewService.GetPendingReviewsAsync();
+            if (!result.IsSuccess)
+                return NotFound(result);
+            return Ok(result);
+        }
     }
 }

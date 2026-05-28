@@ -37,7 +37,7 @@ namespace T3awunyWebService.Controllers
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم العثور على بروفايل المزارع بنجاح"));
         }
         /// <summary>
-        /// if the current loged farmer who create the profile you ignore the userId
+        /// if the current loged farmer who create the profile you can ignore the userId
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>

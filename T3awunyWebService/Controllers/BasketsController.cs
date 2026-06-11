@@ -14,10 +14,10 @@ namespace T3awunyWebService.Controllers
     public class BasketsController(IBaskeetService _basketService) : ControllerBase
     {
         [Authorize("TraderOnly")]
-        [HttpGet("{userId?}")] // Get : /api/Basket/basketId
+        [HttpGet] // Get : /api/Basket/basketId
         public async Task<ActionResult<ApiResponse<CustomerBasket>>> GetBasket(string? userId)
         {
-            if (userId is null)
+            if (string.IsNullOrEmpty(userId))
                 userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? "";
             var basket = await _basketService.GetBasketAsync(userId);
             if (!basket.IsSuccess)
@@ -38,9 +38,11 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
         [Authorize("TraderOnly")]
-        [HttpDelete("{basketId}")] // Delete : /api/Basket/basketID
-        public async Task<ActionResult> DeleteBasket(string userId)
+        [HttpDelete] // Delete : /api/Basket/basketID
+        public async Task<ActionResult> DeleteBasket(string? userId)
         {
+            if (string.IsNullOrEmpty(userId))
+                userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? "";
             var result = await _basketService.DeleteBasketAsync(userId);
             if (!result.IsSuccess)
                 return BadRequest(result);

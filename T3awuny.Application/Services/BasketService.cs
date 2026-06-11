@@ -23,7 +23,7 @@ namespace T3awuny.Application.Services
         public async Task<ApiResponse<CustomerBasket>> CreateOrUpdateBasketAsync(CreateBasketDto basket)
         {
             var createbasket = new CustomerBasket();
-            createbasket.Id = basket.Id;
+            createbasket.Id = basket.Id ?? "";
             createbasket.Items = basket.Items;
             createbasket.DeliveryMethodId = basket.DeliveryMethodId;
             var basketFromRepo = await _basketRepo.CreateOrUpdateBasketAsync(createbasket);

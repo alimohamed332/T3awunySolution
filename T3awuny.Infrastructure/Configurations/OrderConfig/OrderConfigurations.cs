@@ -16,11 +16,14 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
         public void Configure(EntityTypeBuilder<T3awuny.Core.Entities.OrderAggregate.Order> builder)
         {
             builder.Property(o => o.SubTotal)
-                   .HasPrecision(10, 2);
+                   .HasPrecision(12, 2);
 
             builder.Property(o => o.Status)
                    .HasConversion<string>()
                    .HasDefaultValue(OrderStatus.Pending);
+
+            builder.Property(o => o.PaymentIntentId)
+                   .HasDefaultValue("");
 
             builder.Property(o => o.Notes)
                    .HasMaxLength(100);
@@ -45,11 +48,11 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(o => o.Payment)
-                   .WithOne()
+                   .WithOne(p => p.Order)
                    .HasForeignKey<Payment>(p => p.OrderId);
 
             builder.HasOne(o => o.Logistics)
-                   .WithOne()
+                   .WithOne(l => l.Order)
                    .HasForeignKey<Logistics>(l => l.OrderId);
         }
     }

@@ -14,7 +14,7 @@ namespace T3awuny.Core.Entities.UserModule
         public string? BusinessName { get; set; } = string.Empty;
         public BusinessType? BusinessType { get; set; }
         public string? Description { get; set; } = string.Empty;
-        public int? TaxNumber { get; set; }
+        public string? TaxNumber { get; set; }
         public bool IsVerified { get; set; }
         public DateTime VerifiedAt { get; set; }
     }

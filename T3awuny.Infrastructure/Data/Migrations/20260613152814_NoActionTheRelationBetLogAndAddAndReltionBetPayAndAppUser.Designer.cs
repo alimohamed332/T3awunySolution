@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using T3awuny.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using T3awuny.Infrastructure.Data;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(T3awunyDbContext))]
-    partial class T3awunyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613152814_NoActionTheRelationBetLogAndAddAndReltionBetPayAndAppUser")]
+    partial class NoActionTheRelationBetLogAndAddAndReltionBetPayAndAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -510,7 +513,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(12,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("UnitPriceAtOrder")
                         .HasColumnType("decimal(10,2)");

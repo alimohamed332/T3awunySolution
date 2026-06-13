@@ -71,7 +71,8 @@ namespace T3awuny.Application.Services
             var addSpecs = new BaseSpecifications<Address>(a => a.UserId == farmerId && a.IsDefault);
             var farmerAdd = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
 
-            var productDtos = products.Select(p =>_mapper.Map<ProductSummaryDto>(p));
+            var productDtos = products.Select(p =>_mapper.Map<ProductSummaryDto>(p)).ToList();
+
             foreach (var productDto in productDtos)
             {
                 productDto.FarmerName = farmer.Name;
@@ -79,7 +80,7 @@ namespace T3awuny.Application.Services
                 productDto.FarmerGovernorate = farmerAdd?.Governorate??"";
                 productDto.MainImageUrl = $"{_baseUrl}{productDto.MainImageUrl}";
             }
-            return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Ok(productDtos.ToList(), "تم العثور علي محاصيل المزارع بنجاح");
+            return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Ok(productDtos, "تم العثور علي محاصيل المزارع بنجاح");
         }
 
         public async Task<ApiResponse<ProductResponseDto>> GetByIdAsync(int productId)

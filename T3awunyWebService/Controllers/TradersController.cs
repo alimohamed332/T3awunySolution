@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("trader-profiles/{id?}")]
+        [HttpGet("trader-profile")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> GetTraderProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))

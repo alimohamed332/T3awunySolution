@@ -30,7 +30,7 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
                 .HasDefaultValueSql("GETUTCDATE()");
 
             builder.HasOne<ApplicationUser>()
-                .WithOne().HasForeignKey<Payment>(p => p.PayerId);
+                .WithMany().HasForeignKey(p => p.PayerId);
         }
     }
 }

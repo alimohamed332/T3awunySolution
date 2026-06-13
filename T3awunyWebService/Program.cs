@@ -18,6 +18,7 @@ using T3awuny.Core.Repository.Contracts;
 using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
+using T3awuny.Infrastructure.Seed;
 using T3awuny.Infrastructure.Services;
 using T3awunyWebService.BackgroundServices;
 using T3awunyWebService.Helpers;
@@ -82,6 +83,7 @@ namespace T3awunyWebService
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection
+                    //new DB Server=db55925.databaseasp.net; Database=db55925; User Id=db55925; Password=7Yz_w-E4#K8j; Encrypt=False; MultipleActiveResultSets=True; 
                 });
             #endregion
 
@@ -276,14 +278,22 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IReviewService, ReviewService>();
             #endregion
 
+            #region Register Chat Service and repo
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatService, ChatService>();
+            #endregion
+
+            builder.Services.AddScoped<DataSeeder>();
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
-            var scope = app.Services.CreateScope();
+            using var scope = app.Services.CreateScope();
             var services = scope.ServiceProvider;
             var _dbContext = services.GetRequiredService<T3awunyDbContext>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var seeder = services.GetRequiredService<DataSeeder>();
             var logger = loggerFactory.CreateLogger<Program>();
             try
             {
@@ -292,6 +302,7 @@ namespace T3awunyWebService
                 await T3awunyContextSeed.SeedAdminAsync(userManager); // data seeding
                 await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedDeliveryMethodsAsync(_dbContext); // data seeding
+                await seeder.SeedAsync();
             }
             catch (Exception ex)
             {

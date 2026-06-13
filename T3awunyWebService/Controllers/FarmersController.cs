@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("farmer-profiles/{id?}")]
+        [HttpGet("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> GetFarmerProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))

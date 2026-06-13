@@ -13,28 +13,37 @@ namespace T3awunyWebService.Controllers
     [Authorize("TraderOnly")]
     public class BasketsController(IBaskeetService _basketService) : ControllerBase
     {
-        [HttpGet("{basketId}")] // Get : /api/Basket/basketId
-        public async Task<ActionResult<ApiResponse<CustomerBasket>>> GetBasket(string basketId)
+        [Authorize("TraderOnly")]
+        [HttpGet] // Get : /api/Basket/basketId
+        public async Task<ActionResult<ApiResponse<CustomerBasket>>> GetBasket(string? userId)
         {
-            var basket = await _basketService.GetBasketAsync(basketId);
+            if (string.IsNullOrEmpty(userId))
+                userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? "";
+            var basket = await _basketService.GetBasketAsync(userId);
             if (!basket.IsSuccess)
                 return BadRequest(basket);
             return Ok(basket);
         }
+        [Authorize("TraderOnly")]
         [HttpPost] // Post : /api/Basket
         public async Task<ActionResult<CustomerBasket>> CreateOrUpdateBasket(CreateBasketDto basket)
         {
-            if(string.IsNullOrEmpty(basket.Id))
-            basket.Id = Guid.NewGuid().ToString();
+            //if(string.IsNullOrEmpty(basket.Id))
+            //basket.Id = Guid.NewGuid().ToString();
+            var traderId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty; //will work as basket and user id at the same time
+            basket.Id = traderId;
             var result = await _basketService.CreateOrUpdateBasketAsync(basket);
             if (!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);
         }
-        [HttpDelete("{basketId}")] // Delete : /api/Basket/basketID
-        public async Task<ActionResult> DeleteBasket(string basketId)
+        [Authorize("TraderOnly")]
+        [HttpDelete] // Delete : /api/Basket/basketID
+        public async Task<ActionResult> DeleteBasket(string? userId)
         {
-            var result = await _basketService.DeleteBasketAsync(basketId);
+            if (string.IsNullOrEmpty(userId))
+                userId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? "";
+            var result = await _basketService.DeleteBasketAsync(userId);
             if (!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);

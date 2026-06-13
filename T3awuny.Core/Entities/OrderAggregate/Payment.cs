@@ -12,7 +12,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        //public Order Order { get; set; }
+        public Order Order { get; set; } = new Order();
         public string PayerId { get; set; } = string.Empty;
         //public ApplicationUser Payer { get; set; }
         public decimal Amount { get; set; }

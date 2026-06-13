@@ -28,13 +28,13 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
                 .HasMaxLength(20);
 
             builder.HasOne<Address>()
-                .WithOne()
-                .HasForeignKey<Logistics>(lo => lo.PickupAddressId)
+                .WithMany()
+                .HasForeignKey(lo => lo.PickupAddressId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne<Address>()
-                .WithOne()
-                .HasForeignKey<Logistics>(lo => lo.DeliveryAddressId)
+                .WithMany()
+                .HasForeignKey(lo => lo.DeliveryAddressId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

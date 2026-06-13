@@ -21,7 +21,7 @@ namespace T3awuny.Infrastructure.Configurations.Order
                 .HasColumnType("decimal(10,2)");
 
             builder.Property(orderItem => orderItem.Subtotal)
-                .HasColumnType("decimal(10,2)");
+                .HasColumnType("decimal(12,2)");
         }
     }
 }

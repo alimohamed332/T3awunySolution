@@ -9,7 +9,7 @@ namespace T3awuny.Application.DTOs.Basket
 {
     public class CreateBasketDto
     {
-        public string Id { get; set; } = default!; //GUID  Generated in client side or server side still not decided
+        public string? Id { get; set; }  // this now the userId to bind each basket to user
         public ICollection<BasketItem> Items { get; set; } = [];
         public int? DeliveryMethodId { get; set; }
     }

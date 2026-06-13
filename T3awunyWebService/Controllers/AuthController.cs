@@ -79,7 +79,7 @@ namespace T3awunyWebService.Controllers
                 return BadRequest("ابعت الريفرش توكن يابيه في الكوكي ");
 
             var result = await _authService.IsValidRefreshTokenAsync(refreshToken);
-            if (!result)
+            if (!result.Key)
                 return BadRequest(result);
             return Ok(result);
         }

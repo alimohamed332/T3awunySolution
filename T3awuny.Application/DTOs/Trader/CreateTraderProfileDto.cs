@@ -13,7 +13,7 @@ namespace T3awuny.Application.DTOs.Trader
         public string BusinessName { get; set; } = string.Empty;
         public BusinessType BusinessType { get; set; }   // Restaurant, Wholesaler, Retailer
         public string? Description { get; set; }
-        public int? TaxNumber { get; set; }
+        public string? TaxNumber { get; set; }
     }
 
 }

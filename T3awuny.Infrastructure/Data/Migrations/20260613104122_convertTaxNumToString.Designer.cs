@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using T3awuny.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using T3awuny.Infrastructure.Data;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(T3awunyDbContext))]
-    partial class T3awunyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613104122_convertTaxNumToString")]
+    partial class convertTaxNumToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -421,12 +424,14 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeliveryAddressId");
+                    b.HasIndex("DeliveryAddressId")
+                        .IsUnique();
 
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.HasIndex("PickupAddressId");
+                    b.HasIndex("PickupAddressId")
+                        .IsUnique();
 
                     b.ToTable("Logistics");
                 });
@@ -463,9 +468,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
                     b.Property<string>("PaymentIntentId")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -480,8 +483,8 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasDefaultValue("Pending");
 
                     b.Property<decimal>("SubTotal")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -510,7 +513,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(12,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("UnitPriceAtOrder")
                         .HasColumnType("decimal(10,2)");
@@ -569,7 +572,8 @@ namespace T3awuny.Infrastructure.Data.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.HasIndex("PayerId");
+                    b.HasIndex("PayerId")
+                        .IsUnique();
 
                     b.ToTable("Payments");
                 });
@@ -1064,24 +1068,22 @@ namespace T3awuny.Infrastructure.Data.Migrations
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Logistics", b =>
                 {
                     b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
-                        .WithMany()
-                        .HasForeignKey("DeliveryAddressId")
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "DeliveryAddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", "Order")
+                    b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", null)
                         .WithOne("Logistics")
                         .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
-                        .WithMany()
-                        .HasForeignKey("PickupAddressId")
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Logistics", "PickupAddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Order", b =>
@@ -1175,19 +1177,17 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Payment", b =>
                 {
-                    b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", "Order")
+                    b.HasOne("T3awuny.Core.Entities.OrderAggregate.Order", null)
                         .WithOne("Payment")
                         .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Payment", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("PayerId")
+                        .WithOne()
+                        .HasForeignKey("T3awuny.Core.Entities.OrderAggregate.Payment", "PayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Product", b =>

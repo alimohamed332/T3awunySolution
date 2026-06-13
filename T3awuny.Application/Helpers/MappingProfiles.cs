@@ -3,6 +3,7 @@ using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Category;
+using T3awuny.Application.DTOs.Chat;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
@@ -11,6 +12,7 @@ using T3awuny.Application.DTOs.Review;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.AuctionModule;
+using T3awuny.Core.Entities.ChatModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.ReviewModule;
@@ -150,6 +152,10 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Reviewer!.Name ?? ""))             
                 .ForMember(dest => dest.ReviewerImageUrl, opt => opt.MapFrom(src => src.Reviewer!.ProfileImageUrl ?? ""))             
                 ;
+
+            //Chat
+            CreateMap<Message, MessageResponseDto>()
+                .ForMember(dest => dest.ReceiverId, opt => opt.Ignore());
         }
     }
 }

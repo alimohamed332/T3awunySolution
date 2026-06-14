@@ -78,7 +78,7 @@ namespace T3awunyWebService.Controllers
         /// Admins only 
         /// </summary>
         /// <returns></returns>
-        //[Authorize("AdminOnly")]
+        [Authorize("AdminOnly")]
         [HttpGet("pending")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ReviewResponseDto>>>> GetPendingReviews()
         {

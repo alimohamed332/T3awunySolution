@@ -26,7 +26,7 @@ namespace T3awuny.Core.Entities.OrderAggregate
         public int Id { get; set; }
         public string BuyerEmail { get; set; } = string.Empty;
         public string? BuyerId { get; set; } 
-        //public virtual ApplicationUser Buyer { get; set; } = default!;
+        public virtual ApplicationUser Buyer { get; set; } = default!;
         //public decimal TotalAmount { get; set; }
         public decimal SubTotal { get; set; }
         public OrderStatus Status { get; set; }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Chat;
 
@@ -15,7 +14,6 @@ namespace T3awunyWebService.Hubs
         {
             _chatService = chatService;
         }
-        [HubMethodName("onconnected")]
         public override async Task OnConnectedAsync() //once he open the chat view that display all his chats
         {
             // each user joins their own personal group so we can send them messages directly

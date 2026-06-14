@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace T3awuny.Application.DTOs.Auction
 {
-    public class AuctionSummaryDto
+    public class AuctionSummaryDto 
     {
-        public int Id { get; set; }
+        public int Id { get; set; } 
         public int ProductId { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }

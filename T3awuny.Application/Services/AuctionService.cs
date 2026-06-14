@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auction;
@@ -21,13 +22,15 @@ namespace T3awuny.Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IPaymentService _paymentService;
+        private readonly string _baseUrl;
         //private readonly IHubContext<AuctionHub> _hubContext;  // SignalR
-        public AuctionService(IUnitOfWork unitOfWork/*, IHubContext<AuctionHub> hubContext*/, IMapper mapper, IEmailService emailService, IPaymentService paymentService)
+        public AuctionService(IUnitOfWork unitOfWork/*, IHubContext<AuctionHub> hubContext*/, IMapper mapper, IEmailService emailService, IPaymentService paymentService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
             _paymentService = paymentService;
+            _baseUrl = configuration["App:ApplicationUrl"]??"";
         }
         // HasActiveAcution in product model false => in ProcessAuctionEndsAsync and CancelAuctionAsync and true only in CreateAuctionAsync
         // ده عشان اللي انا عايزه دلوقتي ان اعرف اذا كان المنتج عليه مزاد او هيبقي عليه ولا لا انما لو غيرت اللوجيك لهل عليه (حاليا) اي مزاد اكتف ولا لا ساعتها
@@ -304,16 +307,29 @@ namespace T3awuny.Application.Services
         public async Task<ApiResponse<AuctionResponseDto>> GetByIdAsync(int auctionId)
         {
            var auctionSpecs = new AuctionSpecifications(a => a.Id  == auctionId);
-           var auction = await _unitOfWork.Repository<Auction>().GetByIdWithSpecAsync(auctionSpecs);
+           var auction = await _unitOfWork.Repository<Auction>().GetByIdWithSpecAsync(auctionSpecs);// with bids(مش محتاجها هنا لاني بضطر اجيببها تاني بس مع bidder), product, farmer,winner if exist
 
             if (auction is null)
                 return ApiResponse<AuctionResponseDto>.Fail("هذا المزاد غير موجود");
 
             var auctionDto = _mapper.Map<AuctionResponseDto>(auction);
-            auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+            //auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+            var bidSpecs = new BidSpecifications(b => b.AuctionId == auctionId);
+            var bidsWithBiders = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidSpecs);
+
+            foreach (var b in bidsWithBiders)
+            {
+                var bidDto = _mapper.Map<BidResponseDto>(b);
+                bidDto.BidderName = b.Bidder.Name;
+                bidDto.BidderImage = $"{_baseUrl}{b.Bidder.ProfileImageUrl}" ??" ";
+                auctionDto.Bids.Add(bidDto);
+            }
+                
             var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
             var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
-            auctionDto.MainImageUrl = mainProductImage?.ImageUrl ?? "";
+            auctionDto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl}" ?? "";
+            auctionDto.FarmerImage = $"{_baseUrl}{auction.Farmer?.ProfileImageUrl}" ?? "";
+            auctionDto.WinnerImage = $"{_baseUrl}{auction.Winner?.ProfileImageUrl}" ?? "";
 
             return ApiResponse<AuctionResponseDto>.Ok(auctionDto, "تم الحصول علي تفاصيل المزاد بنجاح");
         }
@@ -335,20 +351,30 @@ namespace T3awuny.Application.Services
             return ApiResponse<AuctionResponseDto>.Ok(auctionDto, "تم الحصول علي تفاصيل المزاد بنجاح");
         }
 
-        public async Task<ApiResponse<Pagination<AuctionSummaryDto>>> GetAllAsync(AuctionSpecParams filter)
+        public async Task<ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>> GetAllAsync(AuctionSpecParams filter) // with bids(مش محتاجها هنا), product, farmer,winner if exist
         {
             var auctionSpecs = new AuctionSpecifications(filter);
             var auctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs);
             if (!auctions.Any())
-                return ApiResponse<Pagination<AuctionSummaryDto>>.Fail("لا يوجد مزادات تم إنشائها لعرضها");
+                return ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>.Fail("لا يوجد مزادات تم إنشائها لعرضها");
+
             var countSpecs = new BaseSpecifications<Auction>(auctionSpecs.Criteria!);
             var count = await _unitOfWork.Repository<Auction>().GetCountAsync(countSpecs);
 
-            var auctionDtos = auctions.Select(a => _mapper.Map<AuctionSummaryDto>(a)).ToList();
+            var auctionDtos = new List<AuctionResponseWithNoBidsDto>(); 
+            foreach ( var auction in auctions)
+            {
+                var auctionDto = _mapper.Map<AuctionResponseWithNoBidsDto>(auction);
+                //auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+                var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
+                var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
+                auctionDto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl}"??"";
+                auctionDtos.Add(auctionDto);
+            }
 
-            var pagination = new Pagination<AuctionSummaryDto>(filter.PageIndex,filter.pageSize,count,auctionDtos);
+            var pagination = new Pagination<AuctionResponseWithNoBidsDto>(filter.PageIndex,filter.pageSize,count,auctionDtos);
 
-            return ApiResponse<Pagination<AuctionSummaryDto>>.Ok(pagination, "تم الحصول علي المزادات بنجاح");
+            return ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>.Ok(pagination, "تم الحصول علي المزادات بنجاح");
         }
 
         public async Task<ApiResponse<IReadOnlyList<BidResponseDto>>> GetBidsAsync(int auctionId)

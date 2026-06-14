@@ -138,12 +138,26 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.ProductUnit, opt => opt.MapFrom(src => src.Product!.Unit))
                 .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Product!.Quantity))
                 .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
-                .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name))
+                .ForMember(dest => dest.FarmerImage, opt => opt.MapFrom(src => src.Farmer!.ProfileImageUrl??""))
+                .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name??""))
+                .ForMember(dest => dest.WinnerImage, opt => opt.MapFrom(src => src.Winner!.ProfileImageUrl??""))
                 .ForMember(dest => dest.Bids, opt => opt.Ignore())
                 .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
 
-            CreateMap<Bid, BidResponseDto>();
-            //.ForMember(dest => dest.BidderName, opt => opt.Ignore());
+            CreateMap<Auction, AuctionResponseWithNoBidsDto>()
+                .ForMember(dest => dest.TotalBids, opt => opt.MapFrom(src => src.Bids.Count()))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.Name))
+                .ForMember(dest => dest.ProductUnit, opt => opt.MapFrom(src => src.Product!.Unit))
+                .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Product!.Quantity))
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
+                .ForMember(dest => dest.FarmerImage, opt => opt.MapFrom(src => src.Farmer!.ProfileImageUrl ?? ""))
+                .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name ?? ""))
+                .ForMember(dest => dest.WinnerImage, opt => opt.MapFrom(src => src.Winner!.ProfileImageUrl ?? ""))
+                .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
+
+            CreateMap<Bid, BidResponseDto>()
+            .ForMember(dest => dest.BidderName, opt => opt.Ignore())
+            .ForMember(dest => dest.BidderImage, opt => opt.Ignore());
 
             CreateMap<Auction, AuctionSummaryDto>();
 

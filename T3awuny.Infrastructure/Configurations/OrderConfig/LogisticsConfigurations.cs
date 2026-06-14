@@ -27,12 +27,12 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
             builder.Property(lo => lo.DriverPhone)
                 .HasMaxLength(20);
 
-            builder.HasOne<Address>()
+            builder.HasOne(a => a.PickupAddress)
                 .WithMany()
                 .HasForeignKey(lo => lo.PickupAddressId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne<Address>()
+            builder.HasOne(a => a.DeliveryAddress)
                 .WithMany()
                 .HasForeignKey(lo => lo.DeliveryAddressId)
                 .OnDelete(DeleteBehavior.NoAction);

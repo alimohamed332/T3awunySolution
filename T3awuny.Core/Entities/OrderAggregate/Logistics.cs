@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using T3awuny.Core.Entities.Enums;
+﻿using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Core.Entities.OrderAggregate
@@ -12,11 +7,11 @@ namespace T3awuny.Core.Entities.OrderAggregate
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        public virtual Order Order { get; set; } = new Order();
+        public virtual Order Order { get; set; } = default!;
         public int PickupAddressId { get; set; }
-        //public Address PickupAddress { get; set; }
+        public virtual Address PickupAddress { get; set; } = default!;
         public int DeliveryAddressId { get; set; }
-        //public virtual Address DeliveryAddress { get; set; }
+        public virtual Address DeliveryAddress { get; set; } = default!;
         public string? DriverName { get; set; }//
         public string? DriverPhone { get; set; }//
         public LogisticsStatus Status { get; set; }

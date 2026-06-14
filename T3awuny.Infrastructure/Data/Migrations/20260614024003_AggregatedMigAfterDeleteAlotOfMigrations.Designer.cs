@@ -12,8 +12,8 @@ using T3awuny.Infrastructure.Data;
 namespace T3awuny.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(T3awunyDbContext))]
-    [Migration("20260613152814_NoActionTheRelationBetLogAndAddAndReltionBetPayAndAppUser")]
-    partial class NoActionTheRelationBetLogAndAddAndReltionBetPayAndAppUser
+    [Migration("20260614024003_AggregatedMigAfterDeleteAlotOfMigrations")]
+    partial class AggregatedMigAfterDeleteAlotOfMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -513,7 +513,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<decimal>("UnitPriceAtOrder")
                         .HasColumnType("decimal(10,2)");
@@ -1009,11 +1009,13 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "Bidder")
                         .WithMany()
                         .HasForeignKey("BidderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Bidder");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Category", b =>
@@ -1066,7 +1068,7 @@ namespace T3awuny.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Logistics", b =>
                 {
-                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", "DeliveryAddress")
                         .WithMany()
                         .HasForeignKey("DeliveryAddressId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1078,18 +1080,22 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.Address", "PickupAddress")
                         .WithMany()
                         .HasForeignKey("PickupAddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("DeliveryAddress");
+
                     b.Navigation("Order");
+
+                    b.Navigation("PickupAddress");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.OrderAggregate.Order", b =>
                 {
-                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "Buyer")
                         .WithMany()
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1130,6 +1136,8 @@ namespace T3awuny.Infrastructure.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
                         });
+
+                    b.Navigation("Buyer");
 
                     b.Navigation("DeliveryMethod");
 
@@ -1184,13 +1192,15 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "Payer")
                         .WithMany()
                         .HasForeignKey("PayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
+
+                    b.Navigation("Payer");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.Product", b =>
@@ -1231,13 +1241,15 @@ namespace T3awuny.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", null)
+                    b.HasOne("T3awuny.Core.Entities.UserModule.ApplicationUser", "TargetUser")
                         .WithMany()
                         .HasForeignKey("TargetUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Reviewer");
+
+                    b.Navigation("TargetUser");
                 });
 
             modelBuilder.Entity("T3awuny.Core.Entities.UserModule.Address", b =>

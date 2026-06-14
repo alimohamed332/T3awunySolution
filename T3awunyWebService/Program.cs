@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -83,7 +84,7 @@ namespace T3awunyWebService
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection
-                    //new DB Server=db55925.databaseasp.net; Database=db55925; User Id=db55925; Password=7Yz_w-E4#K8j; Encrypt=False; MultipleActiveResultSets=True; 
+                     
                 });
             #endregion
 
@@ -150,6 +151,24 @@ namespace T3awunyWebService
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!)),
                     ClockSkew = TimeSpan.Zero
                 };
+                #region SignalR
+                op.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // إذا كان الطلب لـ Hub SignalR
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                }; 
+                #endregion
             });
             #endregion
 
@@ -284,6 +303,7 @@ namespace T3awunyWebService
             #endregion
 
             builder.Services.AddScoped<DataSeeder>();
+            //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 
             var app = builder.Build();
 
@@ -294,6 +314,7 @@ namespace T3awunyWebService
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
             var seeder = services.GetRequiredService<DataSeeder>();
+            //var seeder2 = services.GetRequiredService<ReviewsAndChatSeeder>();
             var logger = loggerFactory.CreateLogger<Program>();
             try
             {
@@ -303,6 +324,7 @@ namespace T3awunyWebService
                 await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedDeliveryMethodsAsync(_dbContext); // data seeding
                 await seeder.SeedAsync();
+                //await seeder2.SeedAsync();
             }
             catch (Exception ex)
             {

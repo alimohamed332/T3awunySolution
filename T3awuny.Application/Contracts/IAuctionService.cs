@@ -16,7 +16,7 @@ namespace T3awuny.Application.Contracts
         // Public — buyers browse
         Task<ApiResponse<AuctionResponseDto>> GetByIdAsync(int auctionId);
         Task<ApiResponse<AuctionResponseDto>> GetByProductIdAsync(int productId);
-        Task<ApiResponse<Pagination<AuctionSummaryDto>>> GetAllAsync(AuctionSpecParams filter);
+        Task<ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>> GetAllAsync(AuctionSpecParams filter);
 
         // Bidding
         Task<ApiResponse<BidResponseDto>> PlaceBidAsync(string bidderId, int auctionId, PlaceBidDto dto);

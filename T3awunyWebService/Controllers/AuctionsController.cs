@@ -44,7 +44,7 @@ namespace T3awunyWebService.Controllers
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<Pagination<AuctionSummaryDto>>>> GetAll([FromQuery] AuctionSpecParams filter)
+        public async Task<ActionResult<ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>>> GetAll([FromQuery] AuctionSpecParams filter)
         {
             var auctions = await _auctionService.GetAllAsync(filter);
             if (!auctions.IsSuccess)
@@ -62,7 +62,7 @@ namespace T3awunyWebService.Controllers
             var auction = await _auctionService.GetByIdAsync(auctionId);
             if (!auction.IsSuccess)
                 return NotFound(auction);
-            return BadRequest(auction);
+            return Ok(auction);
         }
         /// <summary>
         /// Get acution details by product id which the acution created on
@@ -116,7 +116,7 @@ namespace T3awunyWebService.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result);
             // Broadcast to all watchers via SignalR
-            await _hubContext.Clients.Group($"auction_{auctionId}").SendAsync("BidPlaced"
+            await _hubContext.Clients.Group($"auction_{auctionId}").SendAsync("bidplaced"
                 , new
                 {
                     AuctionId = auctionId,

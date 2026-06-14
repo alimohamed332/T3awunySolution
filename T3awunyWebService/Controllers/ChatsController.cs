@@ -32,7 +32,7 @@ namespace T3awunyWebService.Controllers
         }
 
         //api/chat/conversations/{id}/messages
-        [Authorize, HttpGet("conversations/{id}/messages")]
+        [Authorize, HttpGet("conversations/{conversationId}/messages")]
         public async Task<ActionResult<ApiResponse<Pagination<MessageResponseDto>>>> GetMyConversationMessages(int conversationId,int page = 1, int pageSize = 10)
         {
             var result = await _chatService.GetMessagesAsync(conversationId,page,pageSize);

@@ -1,13 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
-using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Configurations.OrderConfig
 {
@@ -29,7 +23,7 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
             builder.Property(p => p.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasOne<ApplicationUser>()
+            builder.HasOne(p => p.Payer)
                 .WithMany().HasForeignKey(p => p.PayerId);
         }
     }

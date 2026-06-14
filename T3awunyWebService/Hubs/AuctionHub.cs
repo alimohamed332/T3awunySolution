@@ -6,7 +6,7 @@ namespace T3awunyWebService.Hubs
 {
     public class AuctionHub : Hub
     {
-        // User joins auction room to watch live bids
+        // User joins auction room to watch live bids 
         [HubMethodName("joinauction")]
         public async Task JoinAuction(int auctionId)
         {

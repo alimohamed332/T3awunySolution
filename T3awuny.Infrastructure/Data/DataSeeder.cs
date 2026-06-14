@@ -35,6 +35,7 @@ namespace T3awuny.Infrastructure.Seed
 
             //await SeedRolesAsync();
             var users = await SeedUsersAsync();
+           //// _context.ChangeTracker.Clear();
             await SeedAddressesAsync(users);
             //await SeedCategoriesAsync();
             await SeedProductsAsync(users);
@@ -43,7 +44,7 @@ namespace T3awuny.Infrastructure.Seed
             await SeedReviewsAsync(users);
             //await SeedReportsAsync(users);
             //await SeedCommunityAsync(users);
-            await SeedChatAsync(users);
+           await SeedChatAsync(users);
         }
 
         // ══════════════════════════════════════════════════
@@ -512,9 +513,10 @@ namespace T3awuny.Infrastructure.Seed
         // ══════════════════════════════════════════════════
         private async Task SeedOrdersAsync(Dictionary<string, ApplicationUser> users)
         {
+            _context.ChangeTracker.Clear();
             var products = await _context.Products.Where(p => p.Status == ProductStatus.Active).ToListAsync();
 
-            var traderAddresses = await _context.Addresses.Where(a => a.IsDefault).ToListAsync();
+            var traderAddresses = await _context.Addresses.AsNoTracking().Where(a => a.IsDefault).ToListAsync();
 
             var orders = new List<Order>();
             var payments = new List<Payment>();
@@ -550,12 +552,20 @@ namespace T3awuny.Infrastructure.Seed
 
                 var itemordered = new ProductItemOrdered() { ProductId = product.Id, ProductName = product.Name, Unit = product.Unit};
 
+                var deliveryAddress = new OrderAddress
+                {
+                    Name = trader.Name,   // ← was missing
+                    Street = traderAddress.Street,
+                    City = traderAddress.City,
+                    Governorate = traderAddress.Governorate,
+                    Country = string.IsNullOrEmpty(traderAddress.Country) ? "مصر" : traderAddress.Country,
+                };
                 var order = new Order
                 {
                     BuyerId = trader.Id,
                     BuyerEmail = trader.Email!,
                     FarmerId = product.FarmerId,
-                    DliveryAddress = _mapper.Map<OrderAddress>(traderAddress),
+                    DliveryAddress = deliveryAddress,//_mapper.Map<OrderAddress>(traderAddress),
                     SubTotal = subtotal,
                     Status = status,
                     PaymentStatus = status == OrderStatus.Delivered ? PaymentStatus.Paid : PaymentStatus.Unpaid,
@@ -563,7 +573,7 @@ namespace T3awuny.Infrastructure.Seed
                     CreatedAt = orderDate,
                     UpdatedAt = orderDate.AddDays(Random.Shared.Next(1, 5)),
                     DeliveryMethod = _context.DeliveryMethods.Find(4),
-                    
+
                     Items = new List<OrderItem>
                     {
                         new OrderItem
@@ -688,6 +698,7 @@ namespace T3awuny.Infrastructure.Seed
         // ══════════════════════════════════════════════════
         // STEP 8 — REVIEWS + REPORTS
         // ══════════════════════════════════════════════════
+        #region MyRegion
         private async Task SeedReviewsAsync(Dictionary<string, ApplicationUser> users)
         {
             var deliveredOrders = await _context.Orders.Include(o => o.Items)/*.ThenInclude(i => i.Product)*/.Where(o => o.Status == OrderStatus.Delivered).ToListAsync();
@@ -735,7 +746,7 @@ namespace T3awuny.Infrastructure.Seed
                     CreatedAt = order.UpdatedAt?.AddDays(1) ?? DateTime.UtcNow
                 });
             }
-            
+
             await _context.Reviews.AddRangeAsync(reviews);
 
             //// Reports
@@ -763,6 +774,7 @@ namespace T3awuny.Infrastructure.Seed
             //await _context.Reports.AddRangeAsync(reports);
             await _context.SaveChangesAsync();
         }
+        #endregion
 
         // ══════════════════════════════════════════════════
         // STEP 9 — COMMUNITY POSTS + LIKES + COMMENTS
@@ -920,6 +932,7 @@ namespace T3awuny.Infrastructure.Seed
         // ══════════════════════════════════════════════════
         // STEP 10 — CONVERSATIONS + MESSAGES
         // ══════════════════════════════════════════════════
+        #region MyRegion
         private async Task SeedChatAsync(Dictionary<string, ApplicationUser> users)
         {
             var conversations = new List<Conversation>();
@@ -990,5 +1003,8 @@ namespace T3awuny.Infrastructure.Seed
             await _context.Messages.AddRangeAsync(messages);
             await _context.SaveChangesAsync();
         }
+        #endregion
+
+       
     }
 }

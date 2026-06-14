@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
@@ -6,6 +7,7 @@ using T3awuny.Application.DTOs.Chat;
 using T3awuny.Application.Helpers;
 using T3awuny.Core;
 using T3awuny.Core.Entities.ChatModule;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Core.Specifications;
 
@@ -17,13 +19,15 @@ namespace T3awuny.Application.Services
         private readonly IChatRepository _chatRepository;
         private readonly IMapper _mapper;
         private readonly string _baseUrl;
+        private readonly UserManager<ApplicationUser> _userManger;
 
-        public ChatService(IUnitOfWork unitOfWork, IChatRepository chatRepository, IMapper mapper, IConfiguration configuration)
+        public ChatService(IUnitOfWork unitOfWork, IChatRepository chatRepository, IMapper mapper, IConfiguration configuration, UserManager<ApplicationUser> userManger)
         {
             _unitOfWork = unitOfWork;
             _chatRepository = chatRepository;
             _mapper = mapper;
             _baseUrl = configuration["App:ApplicationUrl"] ?? "";
+            _userManger = userManger;
         }
 
 
@@ -37,19 +41,29 @@ namespace T3awuny.Application.Services
             var firstId = string.Compare(user1Id, user2Id) < 0 ? user1Id : user2Id;
             var secondId = string.Compare(user1Id, user2Id) < 0 ? user2Id : user1Id;
 
-            var converstionSpec = new BaseSpecifications<Conversation>(c => c.User1Id == firstId && c.User2Id == secondId);
-            var existing = await _unitOfWork.Repository<Conversation>().GetByIdWithSpecAsync(converstionSpec);
+            var existing = await _chatRepository.GetUserConverstionWithAnotherAsync(firstId, secondId);
 
             var conversionDto = new ConversationDto()
             {
-                SenderId = user1Id,
-                ReceiverId = user2Id
+                CurrentLoginedUserId = user1Id,
+                OtherUserId = user2Id
             };
 
             if (existing is not null)
             {
-                conversionDto.Id = existing.Id;            
-                conversionDto.LastMessageAt = existing.LastMessageAt;
+                conversionDto.Id = existing.Id;
+                conversionDto.Messages = existing.Messages;
+                if( user1Id == existing.User1Id)
+                {
+                    conversionDto.OtherUserName = existing.User2.UserName!;
+                    conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User2.ProfileImageUrl}";
+                }
+                else
+                {
+                    conversionDto.OtherUserName = existing.User1.UserName!;
+                    conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User1.ProfileImageUrl}";
+                }
+                
                 return ApiResponse<ConversationDto>.Ok(conversionDto,"تم العثور علي محادثة بالفعل");
             }
                 
@@ -61,12 +75,14 @@ namespace T3awuny.Application.Services
                 CreatedAt = DateTime.UtcNow,
                 LastMessageAt = DateTime.UtcNow
             };
-
+            var user = await _userManger.FindByIdAsync(user2Id);
             await _unitOfWork.Repository<Conversation>().AddAsync(conversation);
-            await _unitOfWork.CompleteAsync();
+            if (await _unitOfWork.CompleteAsync() <= 0 || user is null)
+                return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او جدثت مشكلة أثناء الحفظ");
 
             conversionDto.Id = conversation.Id;
-            conversionDto.LastMessageAt = conversation.LastMessageAt;
+            conversionDto.OtherUserName =user.UserName!;
+            conversionDto.OtherUserImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
             return ApiResponse<ConversationDto>.Ok(conversionDto,"تم إنشاء محادثة بنجاح");
         }
 
@@ -84,7 +100,7 @@ namespace T3awuny.Application.Services
                 conDto.LastMessage = con.Messages?.FirstOrDefault()?.Content;
                 conDto.UnreadCount = con.Messages?.Count(m => !m.IsRead)??0;
                 conDto.LastMessageAt = con.LastMessageAt;
-                if(con.User1 is null)
+                if(con.User1Id == userId)
                 {
                     conDto.OtherUserId = con.User2Id;
                     conDto.OtherUserName = con.User2.Name;

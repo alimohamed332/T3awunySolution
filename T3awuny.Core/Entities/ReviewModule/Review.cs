@@ -8,9 +8,9 @@ namespace T3awuny.Core.Entities.ReviewModule
     {
         public int Id { get; set; }
         public string ReviewerId { get; set; } = string.Empty;
-        public ApplicationUser Reviewer { get; set; } = new ApplicationUser();
+        public ApplicationUser Reviewer { get; set; } = default!;
         public string TargetUserId { get; set; } = string.Empty;
-        public ApplicationUser TargetUser { get; set; } = new ApplicationUser();
+        public ApplicationUser TargetUser { get; set; } = default!;
         public int? OrderId { get; set; }
         //public Order? Order { get; set; } = new Order();       // linked to real transaction
         public int Rating { get; set; }           // 1 to 5

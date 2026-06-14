@@ -20,7 +20,7 @@ namespace T3awuny.Infrastructure.Configurations.AuctionConfig
             builder.Property(b => b.BidTime)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasOne<ApplicationUser>()
+            builder.HasOne(b => b.Bidder)
                    .WithMany()
                    .HasForeignKey(b => b.BidderId)
                    .OnDelete(DeleteBehavior.Restrict);

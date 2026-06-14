@@ -84,8 +84,7 @@ namespace T3awunyWebService
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection
-                    //Server=db47249.databaseasp.net; Database=db47249; User Id=db47249; Password=4x!Q%Hg8d9K=; Encrypt=False; MultipleActiveResultSets=True;
-                    //new DB Server=db55937.databaseasp.net; Database=db55937; User Id=db55937; Password=5Yh?o9#SXd6!; Encrypt=False; MultipleActiveResultSets=True; 
+                     
                 });
             #endregion
 
@@ -304,7 +303,7 @@ namespace T3awunyWebService
             #endregion
 
             builder.Services.AddScoped<DataSeeder>();
-            builder.Services.AddScoped<ReviewsAndChatSeeder>();
+            //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 
             var app = builder.Build();
 
@@ -315,7 +314,7 @@ namespace T3awunyWebService
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
             var seeder = services.GetRequiredService<DataSeeder>();
-            var seeder2 = services.GetRequiredService<ReviewsAndChatSeeder>();
+            //var seeder2 = services.GetRequiredService<ReviewsAndChatSeeder>();
             var logger = loggerFactory.CreateLogger<Program>();
             try
             {
@@ -325,7 +324,7 @@ namespace T3awunyWebService
                 await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedDeliveryMethodsAsync(_dbContext); // data seeding
                 await seeder.SeedAsync();
-                await seeder2.SeedAsync();
+                //await seeder2.SeedAsync();
             }
             catch (Exception ex)
             {

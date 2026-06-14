@@ -13,7 +13,7 @@ namespace T3awuny.Core.Entities.AuctionModule
         public int AuctionId { get; set; }
         //public virtual Auction Auction { get; set; }
         public string BidderId { get; set; } = default!;
-        //public virtual ApplicationUser Bidder { get; set; }
+        public virtual ApplicationUser Bidder { get; set; } = default!;
         public decimal Amount { get; set; }
         public bool IsWinning { get; set; }          // only one bid is winning at a time for the acution
         public DateTime BidTime { get; set; }

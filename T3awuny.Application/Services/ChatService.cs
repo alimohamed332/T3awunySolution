@@ -73,14 +73,15 @@ namespace T3awuny.Application.Services
         public async Task<ApiResponse<IReadOnlyList<ConversationResponseDto>>> GetMyConversationsAsync(string userId)
         {
             var conversations = await _chatRepository.GetUserConverstionsAsync(userId);
-            if (conversations == null)
+            if (conversations == null || !conversations.Any())
                 return ApiResponse<IReadOnlyList<ConversationResponseDto>>.Fail("لا يوجد محادثات خاصة بك");
+
             var conversationDtos = new List<ConversationResponseDto>();
             foreach(var con in conversations)
             {
                 var conDto = new ConversationResponseDto();
                 conDto.Id = con.Id;
-                conDto.LastMessage = con.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault()?.Content;
+                conDto.LastMessage = con.Messages?.FirstOrDefault()?.Content;
                 conDto.UnreadCount = con.Messages?.Count(m => !m.IsRead)??0;
                 conDto.LastMessageAt = con.LastMessageAt;
                 if(con.User1 is null)
@@ -93,7 +94,7 @@ namespace T3awuny.Application.Services
                 {
                     conDto.OtherUserId = con.User1Id;
                     conDto.OtherUserName = con.User1.Name;
-                    conDto.OtherUserImageUrl = con.User1.ProfileImageUrl;
+                    conDto.OtherUserImageUrl = $"{_baseUrl}{con.User1.ProfileImageUrl}";
                 }
 
                 conversationDtos.Add(conDto);

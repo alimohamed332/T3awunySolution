@@ -40,10 +40,10 @@ namespace T3awuny.Infrastructure.Seed
             await SeedProductsAsync(users);
             await SeedOrdersAsync(users);
             await SeedAuctionsAsync(users);
-            await SeedReviewsAsync(users);
+            //await SeedReviewsAsync(users);
             //await SeedReportsAsync(users);
             //await SeedCommunityAsync(users);
-            await SeedChatAsync(users);
+            //await SeedChatAsync(users);
         }
 
         // ══════════════════════════════════════════════════
@@ -688,81 +688,83 @@ namespace T3awuny.Infrastructure.Seed
         // ══════════════════════════════════════════════════
         // STEP 8 — REVIEWS + REPORTS
         // ══════════════════════════════════════════════════
-        private async Task SeedReviewsAsync(Dictionary<string, ApplicationUser> users)
-        {
-            var deliveredOrders = await _context.Orders.Include(o => o.Items)/*.ThenInclude(i => i.Product)*/.Where(o => o.Status == OrderStatus.Delivered).ToListAsync();
+        #region MyRegion
+        //private async Task SeedReviewsAsync(Dictionary<string, ApplicationUser> users)
+        //{
+        //    var deliveredOrders = await _context.Orders.Include(o => o.Items)/*.ThenInclude(i => i.Product)*/.Where(o => o.Status == OrderStatus.Delivered).ToListAsync();
 
-            var reviews = new List<Review>();
-            //var reports = new List<Report>();
+        //    var reviews = new List<Review>();
+        //    //var reports = new List<Report>();
 
-            var comments = new[]
-            {
-                "منتج ممتاز وطازج جداً، سأشتري مرة أخرى بالتأكيد",
-                "الجودة عالية والتوصيل في الموعد المحدد",
-                "تعامل راقي والمنتج طبق الوصف تماماً",
-                "سعر مناسب جداً مقارنة بالجودة المقدمة",
-                "المزارع محترف جداً ومنتجاته دائماً طازجة",
-                "أنصح الجميع بالتعامل مع هذا المزارع",
-                "المنتج وصل في حالة ممتازة والتغليف احترافي",
-                "جودة استثنائية وأسعار تنافسية",
-                "تجربة تسوق رائعة وسأكرر التعامل",
-                "المنتج طازج والكميات دقيقة كما طلبت"
-            };
+        //    var comments = new[]
+        //    {
+        //        "منتج ممتاز وطازج جداً، سأشتري مرة أخرى بالتأكيد",
+        //        "الجودة عالية والتوصيل في الموعد المحدد",
+        //        "تعامل راقي والمنتج طبق الوصف تماماً",
+        //        "سعر مناسب جداً مقارنة بالجودة المقدمة",
+        //        "المزارع محترف جداً ومنتجاته دائماً طازجة",
+        //        "أنصح الجميع بالتعامل مع هذا المزارع",
+        //        "المنتج وصل في حالة ممتازة والتغليف احترافي",
+        //        "جودة استثنائية وأسعار تنافسية",
+        //        "تجربة تسوق رائعة وسأكرر التعامل",
+        //        "المنتج طازج والكميات دقيقة كما طلبت"
+        //    };
 
-            //var reportReasons = new[]
-            //{
-            //    "المنتج لا يطابق الوصف المعلن",
-            //    "تأخر في التسليم بدون إشعار",
-            //    "جودة المنتج أقل من المتوقع",
-            //    "سلوك غير لائق من البائع",
-            //    "معلومات مضللة في الإعلان"
-            //};
+        //    //var reportReasons = new[]
+        //    //{
+        //    //    "المنتج لا يطابق الوصف المعلن",
+        //    //    "تأخر في التسليم بدون إشعار",
+        //    //    "جودة المنتج أقل من المتوقع",
+        //    //    "سلوك غير لائق من البائع",
+        //    //    "معلومات مضللة في الإعلان"
+        //    //};
 
-            for (int i = 0; i < deliveredOrders.Count && i < 100; i++)
-            {
-                var order = deliveredOrders[i];
-                var farmerId = order.FarmerId;
-                if (farmerId == null) continue;
+        //    for (int i = 0; i < deliveredOrders.Count && i < 100; i++)
+        //    {
+        //        var order = deliveredOrders[i];
+        //        var farmerId = order.FarmerId;
+        //        if (farmerId == null) continue;
 
-                reviews.Add(new Review
-                {
-                    ReviewerId = order.BuyerId!,
-                    TargetUserId = farmerId,
-                    OrderId = order.Id,
-                    Rating = Random.Shared.Next(3, 6),
-                    Comment = comments[i % comments.Length],
-                    IsApproved = true,
-                    CreatedAt = order.UpdatedAt?.AddDays(1) ?? DateTime.UtcNow
-                });
-            }
-            
-            await _context.Reviews.AddRangeAsync(reviews);
+        //        reviews.Add(new Review
+        //        {
+        //            ReviewerId = order.BuyerId!,
+        //            TargetUserId = farmerId,
+        //            OrderId = order.Id,
+        //            Rating = Random.Shared.Next(3, 6),
+        //            Comment = comments[i % comments.Length],
+        //            IsApproved = true,
+        //            CreatedAt = order.UpdatedAt?.AddDays(1) ?? DateTime.UtcNow
+        //        });
+        //    }
 
-            //// Reports
-            //var allProducts = await _context.Products.Take(20).ToListAsync();
-            //for (int i = 0; i < 30; i++)
-            //{
-            //    var reporterKey = $"trader_{(i % 15) + 1}";
-            //    var product = i % 2 == 0 ? allProducts[i % allProducts.Count] : null;
-            //    var reportedKey = i % 2 != 0 ? $"farmer_{(i % 20) + 1}" : null;
+        //    await _context.Reviews.AddRangeAsync(reviews);
 
-            //    reports.Add(new Report
-            //    {
-            //        ReporterId = users[reporterKey].Id,
-            //        ReportedUserId = reportedKey != null ? users[reportedKey].Id : null,
-            //        ReportedProductId = product?.Id,
-            //        Reason = (ReportReason)(i % 5),
-            //        Description = reportReasons[i % reportReasons.Length],
-            //        Status = (ReportStatus)(i % 4),
-            //        AdminNotes = i % 3 == 0 ? "تمت المراجعة واتخاذ الإجراء المناسب" : null,
-            //        CreatedAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 60)),
-            //        ResolvedAt = i % 4 > 1 ? DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 30)) : null
-            //    });
-            //}
+        //    //// Reports
+        //    //var allProducts = await _context.Products.Take(20).ToListAsync();
+        //    //for (int i = 0; i < 30; i++)
+        //    //{
+        //    //    var reporterKey = $"trader_{(i % 15) + 1}";
+        //    //    var product = i % 2 == 0 ? allProducts[i % allProducts.Count] : null;
+        //    //    var reportedKey = i % 2 != 0 ? $"farmer_{(i % 20) + 1}" : null;
 
-            //await _context.Reports.AddRangeAsync(reports);
-            await _context.SaveChangesAsync();
-        }
+        //    //    reports.Add(new Report
+        //    //    {
+        //    //        ReporterId = users[reporterKey].Id,
+        //    //        ReportedUserId = reportedKey != null ? users[reportedKey].Id : null,
+        //    //        ReportedProductId = product?.Id,
+        //    //        Reason = (ReportReason)(i % 5),
+        //    //        Description = reportReasons[i % reportReasons.Length],
+        //    //        Status = (ReportStatus)(i % 4),
+        //    //        AdminNotes = i % 3 == 0 ? "تمت المراجعة واتخاذ الإجراء المناسب" : null,
+        //    //        CreatedAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 60)),
+        //    //        ResolvedAt = i % 4 > 1 ? DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 30)) : null
+        //    //    });
+        //    //}
+
+        //    //await _context.Reports.AddRangeAsync(reports);
+        //    await _context.SaveChangesAsync();
+        //} 
+        #endregion
 
         // ══════════════════════════════════════════════════
         // STEP 9 — COMMUNITY POSTS + LIKES + COMMENTS
@@ -920,75 +922,77 @@ namespace T3awuny.Infrastructure.Seed
         // ══════════════════════════════════════════════════
         // STEP 10 — CONVERSATIONS + MESSAGES
         // ══════════════════════════════════════════════════
-        private async Task SeedChatAsync(Dictionary<string, ApplicationUser> users)
-        {
-            var conversations = new List<Conversation>();
-            var convPairs = new HashSet<string>();
+        #region MyRegion
+        //private async Task SeedChatAsync(Dictionary<string, ApplicationUser> users)
+        //{
+        //    var conversations = new List<Conversation>();
+        //    var convPairs = new HashSet<string>();
 
-            for (int i = 0; i < 50; i++)
-            {
-                var farmerKey = $"farmer_{(i % 20) + 1}";
-                var traderKey = $"trader_{(i % 15) + 1}";
-                var farmerId = users[farmerKey].Id;
-                var traderId = users[traderKey].Id;
+        //    for (int i = 0; i < 50; i++)
+        //    {
+        //        var farmerKey = $"farmer_{(i % 20) + 1}";
+        //        var traderKey = $"trader_{(i % 15) + 1}";
+        //        var farmerId = users[farmerKey].Id;
+        //        var traderId = users[traderKey].Id;
 
-                var firstId = string.Compare(farmerId, traderId) < 0 ? farmerId : traderId;
-                var secondId = string.Compare(farmerId, traderId) < 0 ? traderId : farmerId;
-                var pairKey = $"{firstId}_{secondId}";
+        //        var firstId = string.Compare(farmerId, traderId) < 0 ? farmerId : traderId;
+        //        var secondId = string.Compare(farmerId, traderId) < 0 ? traderId : farmerId;
+        //        var pairKey = $"{firstId}_{secondId}";
 
-                if (convPairs.Contains(pairKey)) continue;
-                convPairs.Add(pairKey);
+        //        if (convPairs.Contains(pairKey)) continue;
+        //        convPairs.Add(pairKey);
 
-                conversations.Add(new Conversation
-                {
-                    User1Id = firstId,
-                    User2Id = secondId,
-                    CreatedAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 60)),
-                    LastMessageAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(0, 5))
-                });
-            }
+        //        conversations.Add(new Conversation
+        //        {
+        //            User1Id = firstId,
+        //            User2Id = secondId,
+        //            CreatedAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(1, 60)),
+        //            LastMessageAt = DateTime.UtcNow.AddDays(-Random.Shared.Next(0, 5))
+        //        });
+        //    }
 
-            await _context.Conversations.AddRangeAsync(conversations);
-            await _context.SaveChangesAsync();
+        //    await _context.Conversations.AddRangeAsync(conversations);
+        //    await _context.SaveChangesAsync();
 
-            var savedConversations = await _context.Conversations.ToListAsync();
-            var messages = new List<Message>();
+        //    var savedConversations = await _context.Conversations.ToListAsync();
+        //    var messages = new List<Message>();
 
-            var msgTemplates = new[]
-            {
-                "مرحباً، أنا مهتم بمنتجاتك، هل متاح للتفاوض؟",
-                "نعم بالتأكيد، ما الكمية التي تحتاجها؟",
-                "نحتاج حوالي 500 كيلو أسبوعياً بشكل منتظم",
-                "ممتاز، سعرنا للكميات الكبيرة يختلف، سأرسل لك العرض",
-                "شكراً، هل يمكن الاطلاع على جودة المنتج أولاً؟",
-                "بالطبع، يمكنك زيارة المزرعة أي وقت أو نرسل لك عينة",
-                "متى يمكن بدء التوريد؟",
-                "يمكنني البدء من الأسبوع القادم إن شاء الله",
-                "هل التوصيل متاح لمنطقة القاهرة؟",
-                "نعم، لدينا سيارة توصيل مخصصة للقاهرة يومياً",
-                "ممتاز جداً، سنتفق على العقد إذن",
-                "بإذن الله، سأرسل لك العقد للمراجعة قريباً",
-            };
+        //    var msgTemplates = new[]
+        //    {
+        //        "مرحباً، أنا مهتم بمنتجاتك، هل متاح للتفاوض؟",
+        //        "نعم بالتأكيد، ما الكمية التي تحتاجها؟",
+        //        "نحتاج حوالي 500 كيلو أسبوعياً بشكل منتظم",
+        //        "ممتاز، سعرنا للكميات الكبيرة يختلف، سأرسل لك العرض",
+        //        "شكراً، هل يمكن الاطلاع على جودة المنتج أولاً؟",
+        //        "بالطبع، يمكنك زيارة المزرعة أي وقت أو نرسل لك عينة",
+        //        "متى يمكن بدء التوريد؟",
+        //        "يمكنني البدء من الأسبوع القادم إن شاء الله",
+        //        "هل التوصيل متاح لمنطقة القاهرة؟",
+        //        "نعم، لدينا سيارة توصيل مخصصة للقاهرة يومياً",
+        //        "ممتاز جداً، سنتفق على العقد إذن",
+        //        "بإذن الله، سأرسل لك العقد للمراجعة قريباً",
+        //    };
 
-            foreach (var conv in savedConversations)
-            {
-                int msgCount = Random.Shared.Next(6, 20);
-                for (int m = 0; m < msgCount; m++)
-                {
-                    var isUser1 = m % 2 == 0;
-                    messages.Add(new Message
-                    {
-                        ConversationId = conv.Id,
-                        SenderId = isUser1 ? conv.User1Id : conv.User2Id,
-                        Content = msgTemplates[m % msgTemplates.Length],
-                        IsRead = true,
-                        SentAt = conv.CreatedAt.AddHours(m + 1)
-                    });
-                }
-            }
+        //    foreach (var conv in savedConversations)
+        //    {
+        //        int msgCount = Random.Shared.Next(6, 20);
+        //        for (int m = 0; m < msgCount; m++)
+        //        {
+        //            var isUser1 = m % 2 == 0;
+        //            messages.Add(new Message
+        //            {
+        //                ConversationId = conv.Id,
+        //                SenderId = isUser1 ? conv.User1Id : conv.User2Id,
+        //                Content = msgTemplates[m % msgTemplates.Length],
+        //                IsRead = true,
+        //                SentAt = conv.CreatedAt.AddHours(m + 1)
+        //            });
+        //        }
+        //    }
 
-            await _context.Messages.AddRangeAsync(messages);
-            await _context.SaveChangesAsync();
-        }
+        //    await _context.Messages.AddRangeAsync(messages);
+        //    await _context.SaveChangesAsync();
+        //} 
+        #endregion
     }
 }

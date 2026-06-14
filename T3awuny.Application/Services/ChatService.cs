@@ -9,7 +9,6 @@ using T3awuny.Core;
 using T3awuny.Core.Entities.ChatModule;
 using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
-using T3awuny.Core.Specifications;
 
 namespace T3awuny.Application.Services
 {
@@ -140,7 +139,7 @@ namespace T3awuny.Application.Services
                 ConversationId = conversationId,
                 Content = dto.Content,
                 SentAt = DateTime.UtcNow,
-                IsRead = false
+                IsRead = true
             };
 
             await _unitOfWork.Repository<Message>().AddAsync(message);

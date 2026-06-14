@@ -39,7 +39,8 @@ namespace T3awuny.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<Message>> GetConversationMessagesAsync(int conversationId, int page, int pageSize)
         {
-            return await _dbContext.Messages.OrderBy(m => m.SentAt).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            return await _dbContext.Messages.Where(m => m.ConversationId == conversationId)
+                .OrderBy(m => m.SentAt).Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
         }
 
         public async Task MarkAsReadAsync(string userId, int conversationId)

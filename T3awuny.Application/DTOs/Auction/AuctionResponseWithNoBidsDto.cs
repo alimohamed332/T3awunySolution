@@ -1,7 +1,8 @@
 ﻿
+
 namespace T3awuny.Application.DTOs.Auction
 {
-    public class AuctionResponseDto
+    public class AuctionResponseWithNoBidsDto
     {
         public int Id { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -32,7 +33,5 @@ namespace T3awuny.Application.DTOs.Auction
         public string? WinnerName { get; set; }
         public string? WinnerImage { get; set; }
 
-        public List<BidResponseDto> Bids { get; set; } = new List<BidResponseDto>();
     }
-
 }

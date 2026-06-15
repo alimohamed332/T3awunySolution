@@ -106,11 +106,11 @@ namespace T3awuny.Application.Services
            
             if (existingProfile is null) return new FarmerProfileDto { Messsage = "هذا المزارع ليس لديه بروفايل" };
             if (existingProfile.User is null) return new FarmerProfileDto { Messsage = "هذا المستخدم غير موجود" };
-            if (!await _userManager.IsInRoleAsync(existingProfile.User, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
+            //if (!await _userManager.IsInRoleAsync(existingProfile.User, "Farmer")) return new FarmerProfileDto { Messsage = "هذا المستخدم ليس مزارع" };
             
-            existingProfile.FarmName = dto.FarmName ?? existingProfile.FarmName;
-            existingProfile.Description = dto.Description ?? existingProfile.Description;
-            existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
+            existingProfile.FarmName = string.IsNullOrEmpty(dto.FarmName) ? existingProfile.FarmName : dto.FarmName;
+            existingProfile.Description = string.IsNullOrEmpty(dto.Description) ? existingProfile.Description : dto.Description;
+            existingProfile.User!.Name = string.IsNullOrEmpty(dto.Name) ? existingProfile.User!.Name : dto.Name;
             await _unitOfWork.CompleteAsync();
 
             var farmerDto = _mapper.Map<FarmerProfileDto>(existingProfile);

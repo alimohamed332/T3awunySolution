@@ -23,7 +23,7 @@ namespace T3awunyWebService.Controllers
             _addressService = addressService;
         }
         [Authorize]
-        [HttpPut("{userId?}/profiles/images")]
+        [HttpPut("profiles/images")]
         public async Task<ActionResult<ApiResponse<string>>> UpdateProfileImageAsync(string? userId,[FromForm] UpdateProfileImageDto dto)
         {
             if (string.IsNullOrEmpty(userId))

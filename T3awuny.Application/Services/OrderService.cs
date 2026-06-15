@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Order;
@@ -29,8 +25,9 @@ namespace T3awuny.Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IPaymentService _paymentService;
+        private readonly string _baseUrl;
 
-        public OrderService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IEmailService emailService, IPaymentService paymentService)
+        public OrderService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IEmailService emailService, IPaymentService paymentService, IConfiguration configuration)
         {
             _basketRepo = basketRepository;
             _unitOfWork = unitOfWork;
@@ -38,6 +35,7 @@ namespace T3awuny.Application.Services
             _mapper = mapper;
             _emailService = emailService;
             _paymentService = paymentService;
+            _baseUrl = configuration["App:ApplicationUrl"] ??"";
         }
 
         public async Task<ApiResponse<OrderSummaryDto>> PlaceOrderAsync(string buyerId, CreateOrderDto dto)
@@ -211,9 +209,9 @@ namespace T3awuny.Application.Services
         //order specs وباصيله الباجينيشن اوبجكت
         public async Task<ApiResponse<IReadOnlyList<OrderSummaryDto>>> GetOrdersForBuyerAsync(string buyerId)
         {
-            var buyer = await _userManager.FindByIdAsync(buyerId);
-            if (buyer == null)
-                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("هذا المستخدم غير موجود");
+            //var buyer = await _userManager.FindByIdAsync(buyerId);
+            //if (buyer == null)
+            //    return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("هذا المستخدم غير موجود");
 
             var orderSpecs = new OrderSpecifications(o => o.BuyerId == buyerId);
             var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpecs);
@@ -224,9 +222,15 @@ namespace T3awuny.Application.Services
             foreach (var order in orders)
             {
                 var orderDto = _mapper.Map<OrderSummaryDto>(order);
-                orderDto.BuyerName = buyer.Name;
-                orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
-                orderDto.LogisticsStatus = order.Logistics?.Status.ToString() ?? "";
+                //orderDto.BuyerName = buyer.Name;
+                //orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
+                foreach (var item in order.Items)
+                {
+                    var itemDto = _mapper.Map<OrderItemResponseDto>(item);
+                    itemDto.MainImageUrl = $"{_baseUrl}{item.ItemOrdered.PictureUrl}";
+                    orderDto.Items.Add(itemDto);
+                }
+                orderDto.LogisticsStatus = order.Logistics?.Status.ToString() ?? LogisticsStatus.NotScheduled.ToString();
                 orderDtos.Add(orderDto);
                 
             }
@@ -418,7 +422,20 @@ namespace T3awuny.Application.Services
             if (!orders.Any())
                 return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("لا يوجد طلبات لهذا المزارع لعرضها");
 
-            var orderDtos = orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            var orderDtos = new List<OrderSummaryDto>();//= orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            foreach (var order in orders)
+            {
+                var orderDto = _mapper.Map<OrderSummaryDto>(order);
+                orderDto.LogisticsStatus = order.Logistics!.Status.ToString()??LogisticsStatus.NotScheduled.ToString();
+                foreach (var item in order.Items)
+                {
+                    var itemDto = _mapper.Map<OrderItemResponseDto>(item);
+                    itemDto.MainImageUrl = $"{_baseUrl}{item.ItemOrdered.PictureUrl}";
+                    orderDto.Items.Add(itemDto);
+                }
+                //orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
+                orderDtos.Add(orderDto);
+            }
 
             return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Ok(orderDtos, "تم الحصول علي الطلبات التي تمت علي منتحاتك");
         }
@@ -431,10 +448,24 @@ namespace T3awuny.Application.Services
 
             if (!orders.Any())
                 return ApiResponse<Pagination<OrderSummaryDto>>.Fail("لا يوجد طلبات بهذه الخصائص لعرضها");
+
             var countSpecs = new BaseSpecifications<Order>(orderSpecs.Criteria!);
             var count = await orderRepo.GetCountAsync(countSpecs);
 
-            var orderDtos = orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            var orderDtos = new List<OrderSummaryDto>();//= orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            foreach (var order in orders)
+            {
+                var orderDto = _mapper.Map<OrderSummaryDto>(order);
+                orderDto.LogisticsStatus = order.Logistics!.Status.ToString() ?? LogisticsStatus.NotScheduled.ToString();
+                foreach (var item in order.Items)
+                {
+                    var itemDto = _mapper.Map<OrderItemResponseDto>(item);
+                    itemDto.MainImageUrl = $"{_baseUrl}{item.ItemOrdered.PictureUrl}";
+                    orderDto.Items.Add(itemDto);
+                }
+                //orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
+                orderDtos.Add(orderDto);
+            }
 
             var pagination = new Pagination<OrderSummaryDto>(specs.PageIndex,specs.pageSize,count,orderDtos);
 

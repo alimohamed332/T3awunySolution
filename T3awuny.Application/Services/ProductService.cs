@@ -119,8 +119,14 @@ namespace T3awuny.Application.Services
             var count = await _unitOfWork.Repository<Product>().GetCountAsync(countSpec);
             if (!products.Any())
                 return ApiResponse<Pagination<ProductResponseDto>>.Fail("لا يوجد منتجات معروضة لهذا المزارع");
-            var productDtos = products.Select(p => _mapper.Map<ProductResponseDto>(p)).ToList();
-            productDtos.Select(pd => pd.MainImageUrl = $"{_baseUrl}{pd.MainImageUrl}"); 
+            var productDtos = new List<ProductResponseDto>();//products.Select(p => _mapper.Map<ProductResponseDto>(p)).ToList();
+            //productDtos.Select(pd => pd.MainImageUrl = $"{_baseUrl}{pd.MainImageUrl}"); 
+            foreach(var prod in products)
+            {
+                var prductDto = _mapper.Map<ProductResponseDto>(prod);
+                prductDto.MainImageUrl = $"{_baseUrl}{prductDto.MainImageUrl}";
+                productDtos.Add(prductDto);
+            }
             var pagination = new Pagination<ProductResponseDto>(specs.PageIndex, specs.pageSize, count, productDtos);
 
             return ApiResponse<Pagination<ProductResponseDto>>.Ok(pagination, "تم العثور علي محاصيل المزارع بنجاح");

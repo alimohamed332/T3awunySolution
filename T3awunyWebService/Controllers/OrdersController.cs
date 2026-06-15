@@ -38,7 +38,10 @@ namespace T3awunyWebService.Controllers
 
             return Ok(order);
         }
-
+        /// <summary>
+        /// Get my orders as trader
+        /// </summary>
+        /// <returns></returns>
         [Authorize("TraderOnly")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<OrderSummaryDto>>>> GetMyOrders()
@@ -46,6 +49,7 @@ namespace T3awunyWebService.Controllers
             var buyerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(buyerId))
                 return BadRequest(ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+
             var orders = await _orderService.GetOrdersForBuyerAsync(buyerId);
             if (!orders.IsSuccess)
                 return BadRequest(orders);
@@ -53,7 +57,7 @@ namespace T3awunyWebService.Controllers
         }
 
 
-        [Authorize("TraderOnly")]
+        [Authorize("TraderOrAdmin")]
         [HttpGet("{orderId}")]
         public async Task<ActionResult<ApiResponse<OrderResponseDto>>> GetOrder(int orderId)
         {
@@ -122,7 +126,10 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-
+        /// <summary>
+        /// Get my orders as farmer (orders created im my products)
+        /// </summary>
+        /// <returns></returns>
         [Authorize("FarmerOnly")]
         [HttpGet("my/farmer")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<OrderSummaryDto>>>> GetMyOrdersAsFarmer()
@@ -135,7 +142,11 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-
+        /// <summary>
+        /// Admin get all orders paginationed and filtered
+        /// </summary>
+        /// <param name="specs"></param>
+        /// <returns></returns>
         [Authorize("AdminOnly")]
         [HttpGet("admin")]
         public async Task<ActionResult<ApiResponse<Pagination<OrderSummaryDto>>>> GetAllOrders([FromQuery] OrderSpecParams specs)

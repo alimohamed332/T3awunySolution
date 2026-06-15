@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using T3awuny.Application.Common;
-using T3awuny.Application.DTOs.Auction;
-using T3awuny.Application.DTOs.Category;
+﻿using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.Farmer;
-using T3awuny.Application.DTOs.Order;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
-using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Contracts

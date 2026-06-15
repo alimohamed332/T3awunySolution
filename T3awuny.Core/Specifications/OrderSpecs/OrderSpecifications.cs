@@ -23,6 +23,7 @@ namespace T3awuny.Core.Specifications.OrderSpecs
                 Includes.Add(o => o.Logistics);
                 Includes.Add(o => o.Items);
                 Includes.Add(o => o.Payment);
+                Includes.Add(o => o.Buyer);
             }
            
         }
@@ -40,6 +41,7 @@ namespace T3awuny.Core.Specifications.OrderSpecs
             Includes.Add(o => o.Logistics);
             Includes.Add(o => o.Items);
             Includes.Add(o => o.Payment);
+            Includes.Add(o => o.Buyer);
 
             if (specs.SortDescending)
                 OrderByDesc = o => o.CreatedAt;

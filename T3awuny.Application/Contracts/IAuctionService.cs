@@ -11,7 +11,7 @@ namespace T3awuny.Application.Contracts
         // Farmer actions 
         Task<ApiResponse<Auction>> CreateAuctionAsync(string farmerId, CreateAuctionDto dto);
         Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId); // Active → Canceled
-        Task<ApiResponse<IReadOnlyList<AuctionSummaryDto>>> GetMyAuctionsAsync(string farmerId);
+        Task<ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>> GetMyAuctionsAsync(string farmerId);
 
         // Public — buyers browse
         Task<ApiResponse<AuctionResponseDto>> GetByIdAsync(int auctionId);
@@ -22,6 +22,7 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<BidResponseDto>> PlaceBidAsync(string bidderId, int auctionId, PlaceBidDto dto);
         Task<ApiResponse<IReadOnlyList<BidResponseDto>>> GetBidsAsync(int auctionId);
         Task<ApiResponse<IReadOnlyList</*AuctionSummaryDto*/BidResponseDto>>> GetMyBidsAsync(string bidderId);
+        Task<ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>> GetMyWinningtAuctions(string bidderId);
 
         // System actions (called by background service)
         Task ProcessAuctionStartsAsync();   // Scheduled → Active

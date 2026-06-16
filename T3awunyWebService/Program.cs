@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -300,6 +299,10 @@ namespace T3awunyWebService
             #region Register Chat Service and repo
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
             builder.Services.AddScoped<IChatService, ChatService>();
+            #endregion
+
+            #region Delivery Method Service
+            builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
 
             builder.Services.AddScoped<DataSeeder>();

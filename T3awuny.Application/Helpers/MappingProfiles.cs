@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using T3awuny.Application.DTOs.Address;
+using T3awuny.Application.DTOs.Admin;
 using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Category;
 using T3awuny.Application.DTOs.Chat;
+using T3awuny.Application.DTOs.DeliveryMethods;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Logistics;
 using T3awuny.Application.DTOs.Order;
+using T3awuny.Application.DTOs.Payment;
 using T3awuny.Application.DTOs.Product;
 using T3awuny.Application.DTOs.Review;
 using T3awuny.Application.DTOs.Trader;
@@ -100,6 +103,7 @@ namespace T3awuny.Application.Helpers
             //str) || !string.IsNullOrEmpty(str)) ));
 
             CreateMap<Category, CategoryDto>();
+            CreateMap<CreateCategoryDto, Category>();
 
             CreateMap<Order, OrderResponseDto>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
@@ -125,6 +129,13 @@ namespace T3awuny.Application.Helpers
 
             CreateMap<Address, OrderAddress>();
 
+            CreateMap<DeliveryMethod, DeliveryMethodResponseDto>();
+
+            CreateMap<CreateDeliveryMethodDto, DeliveryMethod>();
+
+            CreateMap<Payment,PaymentDto>()
+                //.ForMember(dest => dest.PayerImage, opt => opt.Ignore())
+                .ForMember(dest => dest.PayerName, opt => opt.MapFrom(src => src.Payer.Name));
             /////////Auction
             CreateMap<CreateAuctionDto, Auction>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
@@ -142,6 +153,17 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.WinnerName, opt => opt.MapFrom(src => src.Winner!.Name??""))
                 .ForMember(dest => dest.WinnerImage, opt => opt.MapFrom(src => src.Winner!.ProfileImageUrl??""))
                 .ForMember(dest => dest.Bids, opt => opt.Ignore())
+                .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
+
+
+            CreateMap<Auction, MyWinningtAuctionsDto>()
+                //.ForMember(dest => dest.TotalBids, opt => opt.MapFrom(src => src.Bids.Count()))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.Name))
+                .ForMember(dest => dest.ProductUnit, opt => opt.MapFrom(src => src.Product!.Unit))
+                .ForMember(dest => dest.ProductQuantity, opt => opt.MapFrom(src => src.Product!.Quantity))
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
+                .ForMember(dest => dest.FarmerImage, opt => opt.MapFrom(src => src.Farmer!.ProfileImageUrl ?? ""))
+                .ForMember(dest => dest.HighestBid, opt => opt.MapFrom(src => src.CurrentPrice))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.Ignore());
 
             CreateMap<Auction, AuctionResponseWithNoBidsDto>()
@@ -170,6 +192,12 @@ namespace T3awuny.Application.Helpers
             //Chat
             CreateMap<Message, MessageResponseDto>()
                 .ForMember(dest => dest.ReceiverId, opt => opt.Ignore());
+
+            CreateMap<ApplicationUser,AdminUserDto>()
+                .ForMember(dest => dest.ProfileImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalProducts, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
         }
     }
 }

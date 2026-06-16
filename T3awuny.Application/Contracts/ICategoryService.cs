@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using T3awuny.Application.Common;
+﻿using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.Category;
-using T3awuny.Core.Entities;
 
 namespace T3awuny.Application.Contracts
 {
@@ -13,5 +7,8 @@ namespace T3awuny.Application.Contracts
     {
         Task<ApiResponse<IReadOnlyList<CategoryDto>>> GetCategoriesAsync();
         Task<ApiResponse<CategoryDto>> GetCategoryByIdAsync(int id);
+        Task<ApiResponse<CategoryDto>> CreateCategory(CreateCategoryDto dto );
+        Task<ApiResponse<CategoryDto>> UpdateCategory(int categoryId,UpdateCategoryDto dto );
+        Task<ApiResponse<bool>> DeleteCategory(int categoryId);
     }
 }

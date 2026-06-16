@@ -80,7 +80,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("FarmerOnly")]
         [HttpGet("my")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AuctionSummaryDto>>>> GetMyAuctions()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>>> GetMyAuctions()
         {
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
@@ -150,6 +150,20 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(ApiResponse<Auction>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
             var result = await _auctionService.GetMyBidsAsync(traderId);
+            if (!result.IsSuccess)
+                return NotFound(result);
+            return Ok(result);
+        }
+
+        [Authorize("TraderOnly")]
+        [HttpGet("my-winning-auctions")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>>> GetMyWinningtAuctions()
+        {
+            var traderId = GetUserIdFromClaims();
+            if (string.IsNullOrEmpty(traderId))
+                return BadRequest(ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+
+            var result = await _auctionService.GetMyWinningtAuctions(traderId);
             if (!result.IsSuccess)
                 return NotFound(result);
             return Ok(result);

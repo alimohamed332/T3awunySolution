@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Infrastructure.Data;
@@ -32,5 +27,6 @@ namespace T3awuny.Infrastructure.Repositories
         {
             return await _dbContext.Users.Where(u => !u.IsActive).AsNoTracking().ToListAsync();
         }
+
     }
 }

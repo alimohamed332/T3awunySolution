@@ -90,7 +90,7 @@ namespace T3awuny.Application.Services
 
             auction.Status = AuctionStatus.Cancelled;
             auction.Product!.HasActiveAcution = false;
-
+            await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Ok(auctionId.ToString(), "تم إلغاء المزاد بنجاح");
         }
 
@@ -291,17 +291,27 @@ namespace T3awuny.Application.Services
             auction.Product.Quantity = 0;
         }
         //farmer
-        public async Task<ApiResponse<IReadOnlyList<AuctionSummaryDto>>> GetMyAuctionsAsync(string farmerId)
+        public async Task<ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>> GetMyAuctionsAsync(string farmerId)
         {
-            var auctionSpecs = new BaseSpecifications<Auction>(a => a.FarmerId == farmerId);
+            var auctionSpecs = new AuctionSpecifications(a => a.FarmerId == farmerId);//bids, product, farmer,winner if exist
             var auctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs);
 
             if (!auctions.Any())
-                return ApiResponse<IReadOnlyList<AuctionSummaryDto>>.Fail("لا يوجد مزادات لعرضها");
+                return ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>.Fail("لا يوجد مزادات لعرضها");
 
-            var auctionDtos = auctions.Select(a => _mapper.Map<AuctionSummaryDto>(a)).ToList();
-
-            return ApiResponse<IReadOnlyList<AuctionSummaryDto>>.Ok(auctionDtos,"تم الحصول علي مزاداتك بنجاح");
+            var auctionDtos = new List<AuctionResponseWithNoBidsDto>();//auctions.Select(a => _mapper.Map<AuctionResponseWithNoBidsDto>(a)).ToList();
+            foreach (var auction in auctions)
+            {
+                var auctionDto = _mapper.Map<AuctionResponseWithNoBidsDto>(auction);
+                //auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
+                var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
+                var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
+                auctionDto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl}";
+                auctionDto.FarmerImage = $"{_baseUrl}{auctionDto.FarmerImage}";
+                auctionDto.WinnerImage = $"{_baseUrl}{auctionDto.WinnerImage}";
+                auctionDtos.Add(auctionDto);
+            }
+            return ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>.Ok(auctionDtos,"تم الحصول علي مزاداتك بنجاح");
         }
 
         public async Task<ApiResponse<AuctionResponseDto>> GetByIdAsync(int auctionId)
@@ -368,7 +378,9 @@ namespace T3awuny.Application.Services
                 //auctionDto.Bids = auction.Bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
                 var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
                 var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
-                auctionDto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl}"??"";
+                auctionDto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl}";
+                auctionDto.FarmerImage = $"{_baseUrl}{auctionDto.FarmerImage}";
+                auctionDto.WinnerImage = $"{_baseUrl}{auctionDto.WinnerImage}";
                 auctionDtos.Add(auctionDto);
             }
 
@@ -399,6 +411,31 @@ namespace T3awuny.Application.Services
             return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(bidDtos,"تم الحصول علي كل المزيدات التي قمت بها");
         }
 
-       
+        public async Task<ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>> GetMyWinningtAuctions(string bidderId) // نخليها اللي فزت فيها
+        {
+            var bidsSpecs = new BaseSpecifications<Bid>(b => b.BidderId == bidderId && b.IsWinning);
+            var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidsSpecs);
+            if (!bids.Any())
+                return ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>.Fail("لا يوجد مزايدات فزت من خلالها بمزادات بعد");
+
+            var distincitAuctionIds = bids.Select(b => b.AuctionId)/*.Distinct()*/;
+            var dtos = new List<MyWinningtAuctionsDto>();
+            foreach(var id in distincitAuctionIds)
+            {
+                var auctionSpecs = new AuctionSpecifications(a => a.Id == id,verylighted:true); //product farmer
+                var auction = await _unitOfWork.Repository<Auction>().GetByIdWithSpecAsync(auctionSpecs);
+                var dto = _mapper.Map<MyWinningtAuctionsDto>(auction);
+                var productImageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction!.ProductId && pi.IsMain);
+                var mainProductImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(productImageSpecs);
+                dto.MainImageUrl = $"{_baseUrl}{mainProductImage?.ImageUrl??""}";
+                dto.FarmerImage = $"{_baseUrl}{dto.FarmerImage}";
+                dtos.Add(dto);
+            }
+
+            return ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>.Ok(dtos, "تم الحصول علي المزادات التي فزت بها");
+            
+             
+
+        }
     }
 }

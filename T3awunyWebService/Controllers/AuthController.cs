@@ -72,7 +72,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [HttpGet("is-logined")]
-        public async Task<ActionResult<bool>> IsLogined()
+        public async Task<ActionResult<KeyValuePair<bool,string>>> IsLogined()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))

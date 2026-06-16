@@ -146,6 +146,11 @@ namespace T3awuny.Application.Services
                 return ApiResponse<string>.Fail("هذا المستخدم لا يملك دور ");
             if (roles.Contains("Admin"))
             {
+                if(product.Status == ProductStatus.UnderReview && status == ProductStatus.UnderReview)
+                {
+                    product.Status = ProductStatus.Active;
+                }
+                else
                 product.Status = status;
                 _unitOfWork.Repository<Product>().Update(product);
                 await _unitOfWork.CompleteAsync();
@@ -242,14 +247,16 @@ namespace T3awuny.Application.Services
             productSum.MainImageUrl = $"{_baseUrl}{productSum.MainImageUrl}";
             return ApiResponse<ProductSummaryDto>.Ok(productSum,"تم تحديث البيانات بنجاح");
         }
-        public async Task<ApiResponse<string>> DeleteAsync(string farmerId, int productId)
+        public async Task<ApiResponse<string>> DeleteAsync(string farmerId, int productId) // farmer and admin can delete product but farmer can only delete his products and the delete is soft delete by changing the status to deleted
         {
             var farmer = await _userManager.FindByIdAsync(farmerId);
             if (farmer == null)
                 return ApiResponse<string>.Fail("هذا المستخدم غير موجود");
+
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productId);
             if (product == null)
                 return ApiResponse<string>.Fail("هذا المنتج غير موجود");
+
             var roles = await _userManager.GetRolesAsync(farmer);
             if (!roles.Contains("Admin"))
             {
@@ -261,7 +268,7 @@ namespace T3awuny.Application.Services
             // _unitOfWork.Repository<Product>().Delete(product);
             //await _unitOfWork.CompleteAsync();
             product.Status = ProductStatus.Deleted;
-            _unitOfWork.Repository<Product>().Update(product);
+            _unitOfWork.Repository<Product>().Update(product); //already tracked but to be sure
             await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Ok("تم حذف المنتج بنجاح");
         }

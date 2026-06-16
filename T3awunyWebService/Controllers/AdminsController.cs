@@ -3,17 +3,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Admin;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
+using T3awuny.Application.Helpers;
 using T3awuny.Application.Services;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.UserModule;
+using T3awuny.Core.Specifications.UserSpecs;
 
 namespace T3awunyWebService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize("AdminOnly")]
     public class AdminsController : ControllerBase
     {
         private readonly IAdminService _adminService;
@@ -30,7 +34,61 @@ namespace T3awunyWebService.Controllers
             _userService = userService;
             _productService = productService;
         }
-        [Authorize("AdminOnly")]
+
+
+        [HttpGet("dashboard-report")]
+        public async Task<ActionResult<ApiResponse<DashboardStatsDto>>> GetAdminDashboardStats()
+        {
+            var result = await _adminService.GetDashboardStatsAsync();
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+        /// <summary>
+        /// Admin only endpoint to retrieve a paginated list of all users on the platform, with optional filtering and sorting.
+        /// IsActive is the user banned or not
+        /// IsVerified is the user profile verified by admin or still pending
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        [HttpGet("users")]
+        public async Task<ActionResult<ApiResponse<Pagination<AdminUserDto>>>> GetAllUsers([FromQuery] AdminUserFilterDto filter)
+        {
+            var result = await _adminService.GetAllUsersAsync(filter);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        //[Authorize("AdminOnly")]
+        [HttpGet("admin/{id}")]
+        public async Task<ActionResult<ApiResponse<AdminUserDto>>> GetAdminById(string id)
+        {
+            var result = await _adminService.GetAdminByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+
+        //[Authorize("AdminOnly")]
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<ApiResponse<AdminUserDto>>> GetUserById(string id)
+        {
+            var result = await _adminService.GetUserByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        /// <summary>
+        /// Admin only endpoint to verify a farmer's account. This action will change the farmer's status to "Verified" and allow them to access all platform features.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize("AdminOnly")]
         [HttpPatch("verify-farmer/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> VerifyFarmer(string id)
         {
@@ -42,31 +100,36 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        /// <summary>
+        /// Admin only endpoint to verify a trader's account. This action will change the trader's status to "Verified" and allow them to access all platform features.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize("AdminOnly")]
         [HttpPatch("verify-trader/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> VerifyTrader(string id)
         {
             var result = await _adminService.VerifyTraderAsync(id);
             if (!result.IsSuccess)
-            {
                 return BadRequest(result);
-            }
             return Ok(result);
         }
-
-        [Authorize("AdminOnly")]
+        /// <summary>
+        /// Admin only endpoint to toggle a user's active status. This can be used to ban or unban a user from the platform. If the user is currently active, they will be banned and unable to log in. If the user is currently banned, they will be reactivated and able to log in again.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize("AdminOnly")]
         [HttpPatch("toggle-user-status/{id}")]
         public async Task<ActionResult<ApiResponse<string>>> ToggleUserStatus( string id)
         {
             var result = await _adminService.ToggleUserStatusAsync(id);
             if (!result.IsSuccess)
-            {
                 return BadRequest(result);
-            }
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet("pending-farmers")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetPendingFarmers()
         {
@@ -78,7 +141,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet("pending-traders")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetPendingTraders()
         {
@@ -90,7 +153,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet("banned-users")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetBannedUsers()
         {
@@ -126,7 +189,7 @@ namespace T3awunyWebService.Controllers
         //}
         #endregion
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet("verified-users")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
         {
@@ -137,7 +200,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpGet("non-verified-users")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
         {
@@ -148,31 +211,9 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
-        [HttpGet("admin/{id}")]
-        public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetAdminById(string id)
-        {
-            var result = await _adminService.GetAdminByIdAsync(id);
-            if (!result.IsSuccess)
-            {
-                return NotFound(result);
-            }
-            return Ok(result);
-        }
+       
 
-        [Authorize("AdminOnly")]
-        [HttpGet("users/{id}")]
-        public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetUserById(string id)
-        {
-            var result = await _adminService.GetUserByIdAsync(id);
-            if (!result.IsSuccess)
-            {
-                return NotFound(result);
-            }
-            return Ok(result);
-        }
-
-        [Authorize("AdminOnly")]
+        //[Authorize("AdminOnly")]
         [HttpDelete("users/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
         {
@@ -183,8 +224,12 @@ namespace T3awunyWebService.Controllers
             }
             return Ok(result);
         }
-
-        [Authorize("AdminOnly")]
+        /// <summary>
+        /// Admin only endpoint to flag a product for review. This action will change the product's status to "UnderReview" or return it to active status if it is already under review. This allows admins to manage product listings and ensure they meet platform standards.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        //[Authorize("AdminOnly")]
         [HttpPut("products/{productId}/review")]
         public async Task<ActionResult<ApiResponse<string>>> FlagProduct(int productId)
         {
@@ -196,5 +241,8 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
+
+
+        
     }
 }

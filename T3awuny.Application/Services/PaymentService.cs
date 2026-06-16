@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Stripe;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Payment;
 using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.BasketModule;
@@ -23,6 +25,7 @@ namespace T3awuny.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBasketRepository _basketRepository;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
         public PaymentService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
@@ -100,14 +103,15 @@ namespace T3awuny.Application.Services
             return ApiResponse<CustomerBasket>.Ok(basket,"تم إضافة نية الدفع بنجاح");
         }
 
-        public async Task<ApiResponse<Payment>> GetPaymentByOrderAsync(int orderId)
+        public async Task<ApiResponse<PaymentDto>> GetPaymentByOrderAsync(int orderId)
         {
-            var paymentSpecs = new BaseSpecifications<Payment>(p => p.OrderId == orderId);
+            var paymentSpecs = new PaymentSpecifications(p => p.OrderId == orderId); // Payer
             var payment = await _unitOfWork.Repository<Payment>().GetByIdWithSpecAsync(paymentSpecs);
             if (payment is null)
-                return ApiResponse<Payment>.Fail("بيانات الدفع غير متوفرة");
-
-            return ApiResponse<Payment>.Ok(payment,"تم الحصول علي بيانات عملية الدفع بنجاح");
+                return ApiResponse<PaymentDto>.Fail("بيانات الدفع غير متوفرة");
+            var paymentDto = _mapper.Map<PaymentDto>(payment);
+            //paymentDto.PayerImage = $"{_baseUrl}{payment.Payer.ProfileImageUrl}";
+            return ApiResponse<PaymentDto>.Ok(paymentDto,"تم الحصول علي بيانات عملية الدفع بنجاح");
         }
 
         public async Task<ApiResponse<IReadOnlyList<Payment>>> GetPaymentsAsync()

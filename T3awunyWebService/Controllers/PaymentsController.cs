@@ -5,6 +5,7 @@ using Stripe;
 using Stripe.V2.Core;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Payment;
 using T3awuny.Core.Entities.BasketModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
@@ -72,7 +73,7 @@ namespace T3awunyWebService.Controllers
         }
         [Authorize]
         [HttpGet("{orderId}")]
-        public async Task<ActionResult<IReadOnlyList<Payment>>> GetPayments(int orderId)
+        public async Task<ActionResult<IReadOnlyList<PaymentDto>>> GetPayment(int orderId)
         {
             var result = await _paymentService.GetPaymentByOrderAsync(orderId);
 

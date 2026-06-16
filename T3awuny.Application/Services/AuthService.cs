@@ -203,20 +203,20 @@ namespace T3awuny.Application.Services
             return authModel;
         }
 
-        public async Task<KeyValuePair<bool,List<string>>> IsValidRefreshTokenAsync(string token)
+        public async Task<KeyValuePair<bool, string>> IsValidRefreshTokenAsync(string token)
         {
             //var authModel = new AuthModel();
             var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
             if (user is null)
-           return new KeyValuePair<bool, List<string>>(false, new List<string> { "الريفرش توكن غير صالح" });
+           return new KeyValuePair<bool, string> (false, "الريفرش توكن غير صالح");
 
             var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
             if (!refreshToken.IsActive)
-            return new KeyValuePair<bool, List<string>>(false, new List<string> { "الريفرش توكن منتهي الصلاحية" });
+            return new KeyValuePair<bool, string>(false, "الريفرش توكن منتهي الصلاحية");
             var roles = await _userManager.GetRolesAsync(user);
 
             var accessToken = _jwtHandler.CreateToken(user, roles);
-            return new KeyValuePair<bool, List<string>>(true, roles.ToList());
+            return new KeyValuePair<bool,string>(true, roles.LastOrDefault()??"");
         }
 
         public async Task<bool> RevokeTokenAsync(string token)

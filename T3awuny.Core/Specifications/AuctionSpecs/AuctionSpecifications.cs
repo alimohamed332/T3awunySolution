@@ -18,8 +18,12 @@ namespace T3awuny.Core.Specifications.AuctionSpecs
             {
                 Includes.Add(a => a.Bids);   
             }
-            else if(verylighted)
+            else if (verylighted)
+            {
                 Includes.Add(a => a.Product!);
+                Includes.Add(a => a.Farmer!);
+            }
+                
             else
             {
                 Includes.Add(a => a.Bids);

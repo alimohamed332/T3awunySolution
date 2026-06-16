@@ -117,7 +117,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("delivery-methods/{deliveryMethodId}")]
         public async Task<ActionResult<ApiResponse<DeliveryMethod>>> GetDeliveryMethod(int deliveryMethodId)
         {

@@ -1,14 +1,23 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Admin;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
+using T3awuny.Application.Helpers;
 using T3awuny.Core;
+using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.AuctionModule;
+using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.OrderAggregate;
+using T3awuny.Core.Entities.ReviewModule;
 using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Specifications;
+using T3awuny.Core.Specifications.UserSpecs;
 
 namespace T3awuny.Application.Services
 {
@@ -147,26 +156,276 @@ namespace T3awuny.Application.Services
             return ApiResponse<bool>.Ok(true, "تم حذف المستخدم بنجاح");
         }
 
-        public async Task<ApiResponse<ApplicationUser>> GetUserByIdAsync(string userId)
+        public async Task<ApiResponse<AdminUserDto>> GetUserByIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
-                return ApiResponse<ApplicationUser>.Fail("هذا المستخدم غير موجود");
-            return ApiResponse<ApplicationUser>.Ok(user, "تم الحصول علي المستخدم بنجاح");
+                return ApiResponse<AdminUserDto>.Fail("هذا المستخدم غير موجود");
+            var adminUserDto = _mapper.Map<AdminUserDto>(user);
+            adminUserDto.ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
+            var roles = await _userManager.GetRolesAsync(user);
+            adminUserDto.Role = roles.FirstOrDefault() ?? "";
+            adminUserDto.TotalProducts = adminUserDto.Role == "Farmer" ? await _unitOfWork.Repository<Product>().CountAsync(p => p.FarmerId == userId) : 0;
+            adminUserDto.TotalOrders = adminUserDto.Role == "Trader" ? await _unitOfWork.Repository<Order>().CountAsync(o => o.BuyerId == userId) : 0;
+            return ApiResponse<AdminUserDto>.Ok(adminUserDto, "تم الحصول علي المستخدم بنجاح");
         }
 
-        public async Task<ApiResponse<ApplicationUser>> GetAdminByIdAsync(string adminId)
+        public async Task<ApiResponse<AdminUserDto>> GetAdminByIdAsync(string adminId)
         {
             var user = await _userManager.FindByIdAsync(adminId);
             if (user is null)
-                return ApiResponse<ApplicationUser>.Fail("هذا المسؤول غير موجود");
+                return ApiResponse<AdminUserDto>.Fail("هذا المسؤول غير موجود");
+
             var roles = await _userManager.GetRolesAsync(user);
             if (!roles.Contains("Admin"))
-                return ApiResponse<ApplicationUser>.Fail("هذا المستخدم ليس مسؤول");
+                return ApiResponse<AdminUserDto>.Fail("هذا المستخدم ليس مسؤول");
 
-            return ApiResponse<ApplicationUser>.Ok(user, "تم الحصول علي المسؤول بنجاح");
+            var adminUserDto = _mapper.Map<AdminUserDto>(user);
+            adminUserDto.ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
+            adminUserDto.Role = "Admin";
+            return ApiResponse<AdminUserDto>.Ok(adminUserDto, "تم الحصول علي المسؤول بنجاح");
         }
 
+        public async Task<ApiResponse<DashboardStatsDto>> GetDashboardStatsAsync()
+        {
+            var now = DateTime.UtcNow;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1);
+
+            var farmers = await _userManager.GetUsersInRoleAsync("Farmer");
+            var traders = await _userManager.GetUsersInRoleAsync("Trader");
+
+            var allUsers = await _userManager.Users.ToListAsync();
+
+            var stats = new DashboardStatsDto
+            {
+                // Users
+                TotalUsers = allUsers.Count,
+                TotalFarmers = farmers.Count,
+                TotalTraders = traders.Count,
+                BannedUsers = allUsers.Count(u => !u.IsActive),
+                PendingVerifications = farmers.Count(u => !u.IsVerified) + traders.Count(u => !u.IsVerified),
+                NewUsersThisMonth = allUsers.Count(u => u.JoinDate >= startOfMonth),
+
+                // Products
+                TotalProducts = await _unitOfWork.Repository<Product>().CountAsync(p => true),
+                ActiveProducts = await _unitOfWork.Repository<Product>().CountAsync(p => p.Status == ProductStatus.Active),
+                SoldOutProducts = await _unitOfWork.Repository<Product>().CountAsync(p => p.Status == ProductStatus.SoldOut),
+                UnderReviewProducts = await _unitOfWork.Repository<Product>().CountAsync(p => p.Status == ProductStatus.UnderReview),
+                NewProductsThisMonth = await _unitOfWork.Repository<Product>().CountAsync(p => p.CreatedAt >= startOfMonth),
+                // Orders
+                TotalOrders = await _unitOfWork.Repository<Order>().CountAsync(o => true),
+                PendingOrders = await _unitOfWork.Repository<Order>().CountAsync(o => o.Status == OrderStatus.Pending),
+                DeliveredOrders = await _unitOfWork.Repository<Order>().CountAsync(o => o.Status == OrderStatus.Delivered),
+                CancelledOrders = await _unitOfWork.Repository<Order>().CountAsync(o => o.Status == OrderStatus.Cancelled),
+                //TotalRevenue = await _unitOfWork.Repository<Order>().SumAsync(o => o.Status == OrderStatus.Delivered? o.SubTotal : 0),
+                //RevenueThisMonth = await _unitOfWork.Repository<Order>().SumAsync(o => o.Status == OrderStatus.Delivered &&o.CreatedAt >= startOfMonth? o.SubTotal : 0),
+                NewOrdersThisMonth = await _unitOfWork.Repository<Order>().CountAsync(o => o.CreatedAt >= startOfMonth),
+
+                // Auctions
+                TotalAuctions = await _unitOfWork.Repository<Auction>().CountAsync(a => true),
+                ActiveAuctions = await _unitOfWork.Repository<Auction>().CountAsync(a => a.Status == AuctionStatus.Active),
+                EndedAuctions = await _unitOfWork.Repository<Auction>().CountAsync(a => a.Status == AuctionStatus.Ended),
+
+                // Community
+                TotalPosts = 0,// await _unitOfWork.Repository<Post>().CountAsync(p => true),
+                PendingReviews = await _unitOfWork.Repository<Review>().CountAsync(r => !r.IsApproved)
+            };
+
+            return ApiResponse<DashboardStatsDto>.Ok(stats);
+        }
+
+
+        public async Task<ApiResponse<Pagination<AdminUserDto>>> GetAllUsersAsync(AdminUserFilterDto filter)
+        {
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+                query = query.Where(u => u.Name.Contains(filter.SearchTerm) ||
+                                         u.Email!.Contains(filter.SearchTerm));
+
+            if (filter.IsActive.HasValue)
+                query = query.Where(u => u.IsActive == filter.IsActive);
+
+            if (filter.IsVerified.HasValue)
+                query = query.Where(u => u.IsVerified == filter.IsVerified);
+
+            if (filter.JoinedFrom.HasValue)
+                query = query.Where(u => u.JoinDate >= filter.JoinedFrom);
+
+            if (filter.JoinedTo.HasValue)
+                query = query.Where(u => u.JoinDate <= filter.JoinedTo);
+
+            query = filter.SortBy switch
+            {
+                "name" => filter.SortDescending ? query.OrderByDescending(u => u.Name) : query.OrderBy(u => u.Name),
+                "joinDate" => filter.SortDescending ? query.OrderByDescending(u => u.JoinDate) : query.OrderBy(u => u.JoinDate),
+                _ => query.OrderByDescending(u => u.JoinDate)
+            };
+
+            var totalCount = await query.CountAsync();
+            var users = await query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync();
+
+            if (totalCount == 0)
+                return ApiResponse<Pagination<AdminUserDto>>.Fail("لايوجد مستخدمين حالين مستوفين هذه الشروط");
+            // Filter by role if specified
+            var result = new List<AdminUserDto>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!string.IsNullOrEmpty(filter.Role) && !roles.Contains(filter.Role)) continue;
+
+                var role = roles.FirstOrDefault() ?? "Unknown";
+                //var farmerProfile = role == "Farmer" ? await _unitOfWork.Repository<FarmerProfile>().GetByIdAsync(user.Id) : null;
+                //var traderProfile = role == "Trader" ? await _unitOfWork.Repository<TraderProfile>().GetByIdAsync(user.Id) : null;
+                var totalOrders = role == "Trader" ? await _unitOfWork.Repository<Order>().CountAsync(o => o.BuyerId == user.Id) : 0;
+                var totalProducts = role == "Farmer"? await _unitOfWork.Repository<Product>().CountAsync(p => p.FarmerId == user.Id) : 0;
+                //var totalSpent = await _unitOfWork.Repository<Order>().SumAsync(o => o.BuyerId == user.Id && o.Status == OrderStatus.Delivered? o.SubTotal : 0);
+
+                result.Add(new AdminUserDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email!,
+                    PhoneNumber = user.PhoneNumber??"",
+                    Role = role,
+                    IsActive = user.IsActive,
+                    IsVerified = user.IsVerified,
+                    JoinDate = user.JoinDate,
+                    ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}",
+                    //FarmName = farmerProfile?.FarmName,
+                    //BusinessName = traderProfile?.BusinessName,
+                    TotalOrders = totalOrders,
+                    TotalProducts = totalProducts,
+                });
+            }
+            return ApiResponse<Pagination<AdminUserDto>>.Ok(new Pagination<AdminUserDto>(filter.PageNumber, filter.PageSize, totalCount, result),"تم الحصول علي المستخدمين بنجاح");    
+        }
+
+        #region MyRegion
+        //public async Task<ApiResponse<string>> DeleteUserAsync(string userId)
+        //{
+        //    var user = await _userManager.FindByIdAsync(userId);
+        //    if (user is null)
+        //        return ApiResponse<string>.Fail("User not found");
+
+        //    var roles = await _userManager.GetRolesAsync(user);
+        //    if (roles.Contains("Admin"))
+        //        return ApiResponse<string>.Fail("Cannot delete an admin account");
+
+        //    // Soft delete — just deactivate instead of hard delete
+        //    // Hard delete would break order history, reviews, etc.
+        //    user.IsActive = false;
+        //    user.Email = $"deleted_{user.Id}@deleted.com";
+        //    user.UserName = $"deleted_{user.Id}";
+
+        //    var result = await _userManager.UpdateAsync(user);
+        //    if (!result.Succeeded)
+        //        return ApiResponse<string>.Fail("Failed to delete user");
+
+        //    return ApiResponse<string>.Ok("User deleted successfully");
+        //}
+        //        public async Task<ApiResponse<CategoryDto>> CreateCategoryAsync(
+        //        CreateCategoryDto dto)
+        //        {
+        //            // Check parent exists if provided
+        //            if (dto.ParentCategoryId.HasValue)
+        //            {
+        //                var parent = await _unitOfWork.Categories
+        //                                              .GetByIdAsync(dto.ParentCategoryId.Value);
+        //                if (parent is null)
+        //                    return ApiResponse<CategoryDto>.Fail("Parent category not found");
+        //            }
+
+        //            var category = new Category
+        //            {
+        //                Name = dto.Name,
+        //                NameAr = dto.NameAr,
+        //                ParentCategoryId = dto.ParentCategoryId
+        //            };
+
+        //            await _unitOfWork.Categories.AddAsync(category);
+        //            await _unitOfWork.SaveChangesAsync();
+
+        //            return ApiResponse<CategoryDto>.Ok(MapToCategoryDto(category));
+        //        }
+
+        //        public async Task<ApiResponse<string>> DeleteCategoryAsync(int id)
+        //        {
+        //            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+        //            if (category is null)
+        //                return ApiResponse<CategoryDto>.Fail("Category not found");
+
+        //            // Check if any products use this category
+        //            var hasProducts = await _unitOfWork.Products
+        //                                               .AnyAsync(p => p.CategoryId == id);
+        //            if (hasProducts)
+        //                return ApiResponse<string>.Fail(
+        //                    "Cannot delete category that has products. " +
+        //                    "Move products to another category first.");
+
+        //            // Check if has subcategories
+        //            var hasSubCategories = await _unitOfWork.Categories
+        //                                                    .AnyAsync(c => c.ParentCategoryId == id);
+        //            if (hasSubCategories)
+        //                return ApiResponse<string>.Fail(
+        //                    "Cannot delete category that has subcategories. " +
+        //                    "Delete subcategories first.");
+
+        //            _unitOfWork.Categories.Delete(category);
+        //            await _unitOfWork.SaveChangesAsync();
+
+        //            return ApiResponse<string>.Ok("Category deleted successfully");
+        //        }
+
+        //        // ── Community Moderation ─────────────────────────────
+        //        public async Task<ApiResponse<string>> DeletePostAsync(int postId)
+        //        {
+        //            var post = await _unitOfWork.Posts.GetByIdAsync(postId);
+        //            if (post is null)
+        //                return ApiResponse<string>.Fail("Post not found");
+
+        //            post.IsDeleted = true;  // soft delete
+        //            await _unitOfWork.SaveChangesAsync();
+
+        //            return ApiResponse<string>.Ok("Post removed successfully");
+        //        }
+
+        //        public async Task<ApiResponse<string>> DeleteCommentAsync(int commentId)
+        //        {
+        //            var comment = await _unitOfWork.PostComments.GetByIdAsync(commentId);
+        //            if (comment is null)
+        //                return ApiResponse<string>.Fail("Comment not found");
+
+        //            comment.IsDeleted = true;
+        //            await _unitOfWork.SaveChangesAsync();
+
+        //            return ApiResponse<string>.Ok("Comment removed successfully");
+        //        }
+
+        //        // ── Auction Management ───────────────────────────────
+        //        public async Task<ApiResponse<string>> CancelAuctionAsync(
+        //            int auctionId, string reason)
+        //        {
+        //            var auction = await _unitOfWork.Auctions.GetByIdAsync(auctionId);
+        //            if (auction is null)
+        //                return ApiResponse<string>.Fail("Auction not found");
+
+        //            if (auction.Status == AuctionStatus.Ended)
+        //                return ApiResponse<string>.Fail("Cannot cancel an ended auction");
+
+        //            auction.Status = AuctionStatus.Cancelled;
+
+        //            // Release the product
+        //            var product = await _unitOfWork.Products.GetByIdAsync(auction.ProductId);
+        //            if (product is not null)
+        //                product.Status = ProductStatus.Active;
+
+        //            await _unitOfWork.SaveChangesAsync();
+
+        //            return ApiResponse<string>.Ok($"Auction cancelled. Reason: {reason}");
+        //        }
+        //}
+        #endregion
         private async Task RevokeAllRefreshTokensAsync(string userId)
         {
             var refreshTokenSpecObject = new BaseSpecifications<RefreshToken>(r => r.UserId == userId && r.IsActive);

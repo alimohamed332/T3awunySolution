@@ -73,6 +73,11 @@ namespace T3awuny.Infrastructure.Repositories
             return await ApplySpecification(spec).CountAsync();
         }
 
+        public async Task<int> CountAsync(System.Linq.Expressions.Expression<Func<T, bool>> criteria)
+        {
+            return await _dbSet.CountAsync(criteria);
+        }
+
         private IQueryable<T> ApplySpecification(ISpecifications<T> spec)
         {
             return SpecificationsEvaluator<T>.GetQuery(_dbSet, spec);

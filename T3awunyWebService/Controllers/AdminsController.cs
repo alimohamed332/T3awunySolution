@@ -7,7 +7,8 @@ using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Application.DTOs.User;
 using T3awuny.Application.Services;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awunyWebService.Controllers
 {
@@ -19,13 +20,15 @@ namespace T3awunyWebService.Controllers
         private readonly IFarmerService _farmerService;
         private readonly ITraderService _traderService;
         private readonly IUserService _userService;
+        private readonly IProductService _productService;
 
-        public AdminsController(IAdminService adminService, IFarmerService farmerService, ITraderService traderService, IUserService userService)
+        public AdminsController(IAdminService adminService, IFarmerService farmerService, ITraderService traderService, IUserService userService, IProductService productService)
         {
             _adminService = adminService;
             _farmerService = farmerService;
             _traderService = traderService;
             _userService = userService;
+            _productService = productService;
         }
         [Authorize("AdminOnly")]
         [HttpPatch("verify-farmer/{id}")]
@@ -65,7 +68,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("pending-farmers")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetPendingFarmers()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetPendingFarmers()
         {
             var result = await _adminService.GetPendingFarmersAsync();
             if (!result.IsSuccess)
@@ -77,7 +80,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("pending-traders")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TraderProfileDto>>>> GetPendingTraders()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetPendingTraders()
         {
             var result = await _adminService.GetPendingTradersAsync();
             if (!result.IsSuccess)
@@ -89,7 +92,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("banned-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetBannedUsers()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetBannedUsers()
         {
             var result = await _adminService.GetBannedUsersAsync();
             if (!result.IsSuccess)
@@ -99,31 +102,33 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        [Authorize("AdminOnly")]
-        [HttpGet("verified-farmers")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FarmerProfileDto>>>> GetVerifiedFarmers()
-        {
-            var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
-            if (!verifiedFarmers.IsSuccess)
-                return NotFound(verifiedFarmers);
+        #region Farmer & Trader controllers
+        //[Authorize("AdminOnly")]
+        //[HttpGet("verified-farmers")]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
+        //{
+        //    var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
+        //    if (!verifiedFarmers.IsSuccess)
+        //        return NotFound(verifiedFarmers);
 
-            return Ok(verifiedFarmers);
-        }
+        //    return Ok(verifiedFarmers);
+        //}
 
-        [Authorize]
-        [HttpGet("verified-traders")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<TraderProfileDto>>>> GetVerifiedTraders()
-        {
-            var verifiedTraders = await _traderService.GetAllVerifiedAsync();
-            if (!verifiedTraders.IsSuccess)
-                return NotFound(verifiedTraders);
+        //[Authorize]
+        //[HttpGet("verified-traders")]
+        //public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetVerifiedTraders()
+        //{
+        //    var verifiedTraders = await _traderService.GetAllVerifiedAsync();
+        //    if (!verifiedTraders.IsSuccess)
+        //        return NotFound(verifiedTraders);
 
-            return Ok(verifiedTraders);
-        }
+        //    return Ok(verifiedTraders);
+        //}
+        #endregion
 
         [Authorize("AdminOnly")]
         [HttpGet("verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllVerifiedUsersAsync()
         {
             var result = await _userService.GetAllVerifiedUsersAsync();
             if (!result.IsSuccess)
@@ -134,7 +139,7 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("AdminOnly")]
         [HttpGet("non-verified-users")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<UserDetailsDto>>>> GetAllNonVerifiedUsersAsync()
         {
             var result = await _userService.GetAllNonVerifiedUsersAsync();
             if (!result.IsSuccess)
@@ -156,7 +161,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpGet("user/{id}")]
+        [HttpGet("users/{id}")]
         public async Task<ActionResult<ApiResponse<ApplicationUser>>> GetUserById(string id)
         {
             var result = await _adminService.GetUserByIdAsync(id);
@@ -168,7 +173,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("AdminOnly")]
-        [HttpDelete("delete-user/{id}")]
+        [HttpDelete("users/{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(string id)
         {
             var result = await _adminService.DeleteUserAsync(id);
@@ -177,6 +182,19 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }  
+        }
+
+        [Authorize("AdminOnly")]
+        [HttpPut("products/{productId}/review")]
+        public async Task<ActionResult<ApiResponse<string>>> FlagProduct(int productId)
+        {
+            var adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(adminId))
+                return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            var result = await _productService.ChangeStatusAsync(adminId, productId, ProductStatus.UnderReview);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
     }
 }

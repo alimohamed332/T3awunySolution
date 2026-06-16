@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using T3awuny.Core.Entities.Enums;
+
+namespace T3awuny.Core.Entities.UserModule
+{
+    public class TraderProfile : BaseEntity
+    {
+        public string TraderId { get; set; } = string.Empty; //(PK, FK → AspNetUsers)
+        public virtual ApplicationUser? User { get; set; } = null;
+        public string? BusinessName { get; set; } = string.Empty;
+        public BusinessType? BusinessType { get; set; }
+        public string? Description { get; set; } = string.Empty;
+        public string? TaxNumber { get; set; }
+        public bool IsVerified { get; set; }
+        public DateTime VerifiedAt { get; set; }
+    }
+}

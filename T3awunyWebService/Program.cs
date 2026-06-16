@@ -1,24 +1,29 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Application.Services;
 using T3awuny.Core;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 using T3awuny.Core.Repository.Contracts;
 using T3awuny.Infrastructure;
 using T3awuny.Infrastructure.Data;
 using T3awuny.Infrastructure.Repositories;
+using T3awuny.Infrastructure.Seed;
 using T3awuny.Infrastructure.Services;
+using T3awunyWebService.BackgroundServices;
 using T3awunyWebService.Helpers;
+using T3awunyWebService.Hubs;
 
 namespace T3awunyWebService
 {
@@ -26,6 +31,8 @@ namespace T3awunyWebService
     {
         public static async Task Main(string[] args)
         {
+            //Console.WriteLine(DateTime.UtcNow.AddMinutes(2));
+            //Console.WriteLine(DateTime.Now.AddMinutes(2));
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -39,9 +46,9 @@ namespace T3awunyWebService
                 //This is to generate the Default UI of Swagger Documentation    
                 swagger.SwaggerDoc("v1", new OpenApiInfo
                 {
-                     Version = "v1",
-                     Title = "ASP.NET 9 Web API",
-                     Description = " T3awuny Web Service"
+                    Version = "v1",
+                    Title = "ASP.NET 9 Web API",
+                    Description = " T3awuny Web Service"
                 });
                 // To Enable authorization using Swagger (JWT)    
                 swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -67,6 +74,8 @@ namespace T3awunyWebService
                       new string[] {}
                    }
                 });
+                var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                swagger.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,xmlFileName));
             });
             //builder.Services.AddEndpointsApiExplorer();
             #endregion
@@ -74,7 +83,8 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterPublicConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
+
                 });
             #endregion
 
@@ -84,10 +94,10 @@ namespace T3awunyWebService
                 options.AddPolicy("Allow", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:4200") //Angular
-                        //.AllowAnyOrigin() // Allow requests from any origin (for development purposes)
+                        .WithOrigins("http://localhost:4200", builder.Configuration["App:FrontendUrl"] ?? "https://ta3wuny.vercel.app", "http://127.0.0.1:5500")
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
             #endregion
@@ -110,19 +120,19 @@ namespace T3awunyWebService
             })
              .AddCookie("External", options =>
              {
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                 options.Cookie.SameSite = SameSiteMode.None;
+                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
              })
                .AddGoogle(options =>
                {
                    var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
-               
+
                    options.ClientId = googleAuthSection["ClientId"]
                        ?? throw new InvalidOperationException("Google ClientId not found.");
-               
+
                    options.ClientSecret = googleAuthSection["ClientSecret"]
                        ?? throw new InvalidOperationException("Google ClientSecret not found.");
-               
+
                    options.CallbackPath = "/signin-google";
                    options.SignInScheme = "External";
                })
@@ -141,6 +151,24 @@ namespace T3awunyWebService
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!)),
                     ClockSkew = TimeSpan.Zero
                 };
+                #region SignalR
+                op.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // إذا كان الطلب لـ Hub SignalR
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                }; 
+                #endregion
             });
             #endregion
 
@@ -222,6 +250,9 @@ namespace T3awunyWebService
                 options.AddPolicy("TraderOrAdmin",
                    policy => policy.RequireRole("Trader", "Admin"));
 
+                options.AddPolicy("FarmerOrTrader",
+                   policy => policy.RequireRole("Trader", "Farmer"));
+
                 options.AddPolicy("VerifiedFarmer", policy =>
                     policy.RequireRole("Farmer")
                           .RequireClaim("IsVerified", "true")); // add this claim in JWT
@@ -229,26 +260,71 @@ namespace T3awunyWebService
             #endregion
 
             #region Register farmer & trader & admin & User servicies
-            builder.Services.AddScoped<IFarmerService, FarmerService>(); 
+            builder.Services.AddScoped<IFarmerService, FarmerService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITraderService, TraderService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             #endregion
 
+            #region Register Product & Category Services
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped <ICategoryService, CategoryService>();
+            #endregion
+
+            #region Register Basket repo, service, redis connection and service
+            builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
+            {
+                var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost", true); 
+                return ConnectionMultiplexer.Connect(configuration);
+            }); //"database-MOKIC5S7"
+            builder.Services.AddScoped<IBaskeetService,BasketService>();
+            #endregion
+
+            #region Register Order, Payment, and Logistics service
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<ILogisticsService, LogisticsService>();
+            builder.Services.AddScoped<IPaymentService,PaymentService>();
+            #endregion
+
+            #region Register Auction Service and related services
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IAuctionService, AuctionService>();
+            builder.Services.AddHostedService<AuctionBackgroundService>();
+            #endregion
+
+            #region Register Review service
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            #endregion
+
+            #region Register Chat Service and repo
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatService, ChatService>();
+            #endregion
+
+            builder.Services.AddScoped<DataSeeder>();
+            //builder.Services.AddScoped<ReviewsAndChatSeeder>();
+
             var app = builder.Build();
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
-            var scope = app.Services.CreateScope();
+            using var scope = app.Services.CreateScope();
             var services = scope.ServiceProvider;
             var _dbContext = services.GetRequiredService<T3awunyDbContext>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var seeder = services.GetRequiredService<DataSeeder>();
+            //var seeder2 = services.GetRequiredService<ReviewsAndChatSeeder>();
             var logger = loggerFactory.CreateLogger<Program>();
             try
             {
                 _dbContext.Database.Migrate();  //update database by appliying any pending migrations if exists, if not it will do nothing
                 await T3awunyContextSeed.SeedRolesAsync(_dbContext); // data seeding
                 await T3awunyContextSeed.SeedAdminAsync(userManager); // data seeding
+                await T3awunyContextSeed.SeedCategoriesAsync(_dbContext); // data seeding
+                await T3awunyContextSeed.SeedDeliveryMethodsAsync(_dbContext); // data seeding
+                await seeder.SeedAsync();
+                //await seeder2.SeedAsync();
             }
             catch (Exception ex)
             {
@@ -270,8 +346,8 @@ namespace T3awunyWebService
             app.UseCors("Allow");
             app.UseAuthentication();
             app.UseAuthorization();
-
-
+            app.MapHub<AuctionHub>("/hubs/auction");
+            app.MapHub<ChatHub>("/hubs/chat");
             app.MapControllers();
 
             app.Run();

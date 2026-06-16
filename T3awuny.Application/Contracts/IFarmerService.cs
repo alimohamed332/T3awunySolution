@@ -13,6 +13,6 @@ namespace T3awuny.Application.Contracts
         Task<FarmerProfileDto> CreateProfileAsync(string userId, CreateFarmerProfileDto dto);
         Task<FarmerProfileDto> UpdateProfileAsync(string userId, UpdateFarmerProfileDto dto);
         Task<FarmerProfileDto?> GetProfileAsync(string userId);
-        Task<ApiResponse<IEnumerable<FarmerProfileDto>>> GetAllVerifiedAsync();
+        Task<ApiResponse<IReadOnlyList<FarmerProfileDto>>> GetAllVerifiedAsync();
     }
 }

@@ -1,24 +1,16 @@
 ﻿using AutoMapper;
-using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-
-//using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Data;
-//using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.JwtFeatures;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace T3awuny.Application.Services
 {
@@ -71,19 +63,27 @@ namespace T3awuny.Application.Services
                 {
                     errors.Append(error.Description + " , ");
                 }
+                _fileStorageService.DeleteImage(user.ProfileImageUrl!);
                 return new AuthModel { Message = errors.ToString() };
             }
-            
-            //foreach(var add in  model.Addresses)
-            await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
 
-            var role = model.Role?.ToLower().Contains("ta") == true ? "Trader" : "Farmer";
+            //foreach(var add in  model.Addresses)
+            try 
+            {
+                await _addressService.AddAddressAsync(user.Id, model.Addresses);//add);
+            }
+            catch
+            { 
+                await _userManager.DeleteAsync(user);
+                return new AuthModel { Message = "حدثت مشكلة أثناء الحصول علي العنوان" };
+            }       
+            var role = model.Role?.ToLower().Contains("tr") == true ? "Trader" : "Farmer";
 
             await _userManager.AddToRoleAsync(user, role);
 
-            List<string> roles = new List<string>();
-            roles.Add(role); // no loop because we have only one role for each user in this case 
-            var token = _jwtHandler.CreateToken(user, roles);
+            //List<string> roles = new List<string>();
+            //roles.Add(role); // no loop because we have only one role for each user in this case 
+            //var token = _jwtHandler.CreateToken(user, roles);
 
             // generate email confirmation token
             var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -104,8 +104,8 @@ namespace T3awuny.Application.Services
                 Email = user.Email!,
                 Username = user.UserName!,
                 IsAuthenticated = true,
-                Token = token,
-                Roles = roles,
+                //Token = token,
+                //Roles = roles,
                 Message = "تم التسجيل بنجاح برجاء تأكيد البريد الالكتروني لتتمكن من استخدام حسابك"
             };
 
@@ -201,6 +201,22 @@ namespace T3awuny.Application.Services
             authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
 
             return authModel;
+        }
+
+        public async Task<KeyValuePair<bool,List<string>>> IsValidRefreshTokenAsync(string token)
+        {
+            //var authModel = new AuthModel();
+            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+            if (user is null)
+           return new KeyValuePair<bool, List<string>>(false, new List<string> { "الريفرش توكن غير صالح" });
+
+            var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+            if (!refreshToken.IsActive)
+            return new KeyValuePair<bool, List<string>>(false, new List<string> { "الريفرش توكن منتهي الصلاحية" });
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var accessToken = _jwtHandler.CreateToken(user, roles);
+            return new KeyValuePair<bool, List<string>>(true, roles.ToList());
         }
 
         public async Task<bool> RevokeTokenAsync(string token)

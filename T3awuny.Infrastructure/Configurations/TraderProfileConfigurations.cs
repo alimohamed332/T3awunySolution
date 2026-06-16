@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.Enums;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Configurations
 {
@@ -20,7 +21,10 @@ namespace T3awuny.Infrastructure.Configurations
                 .HasMaxLength(30);
 
             builder.Property(t => t.BusinessType)
-                .HasDefaultValue(BusinessType.Wholesaler);
+                .HasConversion<string>()
+                .HasDefaultValue(BusinessType.Wholesaler)
+                .HasMaxLength(20);
+
             builder.Property(t => t.Description)
                 .HasMaxLength(150);
         }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Application.Common;
 using T3awuny.Application.DTOs.User;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.Contracts
 {
@@ -15,8 +15,8 @@ namespace T3awuny.Application.Contracts
         Task<string> GetUserIdByEmailAsync(string email);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
-        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllVerifiedUsersAsync();
-        Task<ApiResponse<IEnumerable<UserDetailsDto>>> GetAllNonVerifiedUsersAsync();
+        Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllVerifiedUsersAsync();
+        Task<ApiResponse<IReadOnlyList<UserDetailsDto>>> GetAllNonVerifiedUsersAsync();
         Task<bool> UpdateProfileImageAsync(string userId, IFormFile image);
     }
 }

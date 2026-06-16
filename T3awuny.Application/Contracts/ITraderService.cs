@@ -14,6 +14,6 @@ namespace T3awuny.Application.Contracts
         Task<TraderProfileDto> CreateProfileAsync(string userId, CreateTraderProfileDto dto);
         Task<TraderProfileDto> UpdateProfileAsync(string userId, UpdateTraderProfileDto dto);
         Task<TraderProfileDto?> GetProfileAsync(string userId);
-        Task<ApiResponse<IEnumerable<TraderProfileDto>>> GetAllVerifiedAsync();
+        Task<ApiResponse<IReadOnlyList<TraderProfileDto>>> GetAllVerifiedAsync();
     }
 }

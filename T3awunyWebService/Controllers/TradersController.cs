@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("trader-profile/{id?}")]
+        [HttpGet("trader-profile")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> GetTraderProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))
@@ -37,7 +37,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("TraderOrAdmin")]
-        [HttpPost("create-profile")]
+        [HttpPost("profiles")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> CreateTraderProfile([FromBody] CreateTraderProfileDto dto)
         {
             var id = dto.UserId;
@@ -56,7 +56,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("TraderOrAdmin")]
-        [HttpPut("update-profile")]
+        [HttpPut("profiles")]
         public async Task<ActionResult<ApiResponse<TraderProfileDto>>> UpdateTraderProfile([FromBody] UpdateTraderProfileDto dto)
         {
             var id = dto.UserId;
@@ -73,7 +73,19 @@ namespace T3awunyWebService.Controllers
 
             return Ok(ApiResponse<TraderProfileDto>.Ok(traderProfile, "تم تحديث البروفايل بنجاح"));
         }
+        /// <summary>
+        /// Get All Users
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("verified-traders")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<TraderProfileDto>>>> GetVerifiedTraders()
+        {
+            var verifiedTraders = await _traderService.GetAllVerifiedAsync();
+            if (!verifiedTraders.IsSuccess)
+                return NotFound(verifiedTraders);
 
+            return Ok(verifiedTraders);
+        }
         private string GetUserIdFromClaims()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.OrderAggregate;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Infrastructure.Data
 {
@@ -20,7 +24,7 @@ namespace T3awuny.Infrastructure.Data
                         new IdentityRole { Name = "Trader", NormalizedName = "TRADER" }
                     );
                     await _dbContext.SaveChangesAsync();
-            }
+                }
         }
 
         public static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager)
@@ -40,6 +44,62 @@ namespace T3awuny.Infrastructure.Data
                 await userManager.CreateAsync(admin, "Admin@123");
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
+        }
+
+        public static async Task SeedCategoriesAsync(T3awunyDbContext _dbContext)
+        {
+            if (!_dbContext.Categories.Any())
+            {
+                // Parent categories
+                _dbContext.Categories.AddRange(
+                new Category { Name = "Vegetables", NameAr = "خضروات" },
+                new Category { Name = "Fruits", NameAr = "فواكه" },
+                new Category { Name = "Grains", NameAr = "حبوب" },
+                new Category { Name = "Dairy", NameAr = "ألبان" },
+                new Category { Name = "Livestock", NameAr = "مواشي" }
+                );
+
+               //await _dbContext.SaveChangesAsync();
+                // Subcategories
+                _dbContext.Categories.AddRange(
+                    new Category { Name = "Leafy Greens", NameAr = "خضروات ورقية", ParentCategoryId = 1 },
+                    new Category { Name = "Root Vegetables", NameAr = "جذور", ParentCategoryId = 1 },
+                    new Category { Name = "Other", NameAr = "اخري", ParentCategoryId = 1 },
+                    new Category { Name = "Citrus Fruits", NameAr = "حمضيات", ParentCategoryId = 2 },
+                    new Category { Name = "Wheat", NameAr = "قمح", ParentCategoryId = 3 },
+                    new Category { Name = "Rice", NameAr = "أرز", ParentCategoryId = 3 }
+                );
+
+                await _dbContext.SaveChangesAsync();
+            }
+                
+        }
+
+        public static async Task SeedDeliveryMethodsAsync(T3awunyDbContext _dbContext)
+        {
+            if (!_dbContext.DeliveryMethods.Any())
+            {
+                _dbContext.AddRange(new List<DeliveryMethod>()
+                {
+                    new DeliveryMethod(){ Id = 1,ShortName = "UPS1",Description = "أسرع وقت توصيل",DeliveryTime = "من يوم الي يومين",Cost = 100},
+                    new DeliveryMethod(){ Id = 2,ShortName = "UPS2",Description = "أحصل عليها في غضون خمس ايام",DeliveryTime = "من يومين لأربع أيام",Cost = 55},
+                    new DeliveryMethod(){ Id = 3,ShortName = "UPS3",Description = "ابطأ لاكن أرخص",DeliveryTime = "من أربع أيام لأسبوع",Cost = 30},
+                    new DeliveryMethod(){ Id = 4,ShortName = "FREE",Description = "أدفع علي ما تحصل عليه فقط",DeliveryTime = "من أسبوع لعشر أيام",Cost = 0}
+                });
+                //var deliveryMethodData = File.ReadAllText("../T3awuny.Infrastructure/Data/DataSeed/delivery.json");
+                //var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodData);
+                //if (deliveryMethods is not null && deliveryMethods.Any())
+                //{
+                //    foreach (var delivery in deliveryMethods)
+                //    {
+                //        _dbContext.Set<DeliveryMethod>().Add(delivery);
+                //    }
+                //    //await _dbContext.SaveChangesAsync();
+                //}             
+
+                await _dbContext.SaveChangesAsync();
+            }
+
         }
     }
 }

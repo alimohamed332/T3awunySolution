@@ -20,7 +20,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize]
-        [HttpGet("farmer-profile/{id?}")]
+        [HttpGet("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> GetFarmerProfile(string? id)
         {
             if (string.IsNullOrEmpty(id))
@@ -36,9 +36,13 @@ namespace T3awunyWebService.Controllers
 
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم العثور على بروفايل المزارع بنجاح"));
         }
-
+        /// <summary>
+        /// if the current loged farmer who create the profile you can ignore the userId
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [Authorize("FarmerOrAdmin")]
-        [HttpPost("create-profile")]
+        [HttpPost("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> CreateFarmerProfile([FromBody]CreateFarmerProfileDto dto)
         {
             var id = dto.UserId;
@@ -57,7 +61,7 @@ namespace T3awunyWebService.Controllers
         }
 
         [Authorize("FarmerOrAdmin")]
-        [HttpPut("update-profile")]
+        [HttpPut("farmer-profile")]
         public async Task<ActionResult<ApiResponse<FarmerProfileDto>>> UpdateFarmerProfile([FromBody]UpdateFarmerProfileDto dto)
         {
             var id = dto.UserId;
@@ -74,8 +78,16 @@ namespace T3awunyWebService.Controllers
 
             return Ok(ApiResponse<FarmerProfileDto>.Ok(farmerProfile, "تم تحديث البروفايل بنجاح"));
         }
-   
 
+        [HttpGet("verified-farmers")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<FarmerProfileDto>>>> GetVerifiedFarmers()
+        {
+            var verifiedFarmers = await _farmerService.GetAllVerifiedAsync();
+            if (!verifiedFarmers.IsSuccess)
+                return NotFound(verifiedFarmers);
+
+            return Ok(verifiedFarmers);
+        }
         private string GetUserIdFromClaims()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Application.JwtFeatures
 {

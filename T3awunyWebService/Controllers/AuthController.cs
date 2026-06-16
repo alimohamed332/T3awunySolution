@@ -1,17 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.Net;
 using System.Security.Claims;
-using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
-using T3awuny.Application.Services;
 using T3awuny.Core.Entities;
 
 namespace T3awunyWebService.Controllers
@@ -26,6 +19,11 @@ namespace T3awunyWebService.Controllers
         {
             _authService = authService;
         }
+        /// <summary>
+        /// Address Label Values : Farm = 0 (farmer), Warehouse = 1 (trader) ,Home = 2 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<ActionResult<AuthModel>> RegisterAsync([FromForm] RegisterDto model)
         {
@@ -33,7 +31,7 @@ namespace T3awunyWebService.Controllers
             if(!result.IsAuthenticated)
                 return BadRequest(result);
 
-            SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            //SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
             return Ok(result);
         }
@@ -72,14 +70,27 @@ namespace T3awunyWebService.Controllers
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
+
+        [HttpGet("is-logined")]
+        public async Task<ActionResult<bool>> IsLogined()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("ابعت الريفرش توكن يابيه في الكوكي ");
+
+            var result = await _authService.IsValidRefreshTokenAsync(refreshToken);
+            if (!result.Key)
+                return BadRequest(result);
+            return Ok(result);
+        }
         [Authorize]
         [HttpPost("revoke-token")]
-        public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenDto model)
+        public async Task<ActionResult<string>> RevokeToken()
         {
-            var refreshToken = model.Token ?? Request.Cookies["refreshToken"];
+            var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
             {
-                return BadRequest("ابعت الريفرش توكن يابيه اما في الكوكي او في الريكوست بودي");
+                return BadRequest("ابعت الريفرش توكن يابيه في الكوكي");
             }
             var result = await _authService.RevokeTokenAsync(refreshToken);
             if (!result)
@@ -165,6 +176,8 @@ namespace T3awunyWebService.Controllers
             {
                 HttpOnly = true,
                 Expires = expiresOn.ToLocalTime(),
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }

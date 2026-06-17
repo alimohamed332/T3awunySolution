@@ -8,7 +8,7 @@ using T3awuny.Core.Entities.UserModule;
 
 namespace T3awuny.Core.Entities.Community_Aggregation_Module
 {
-	public class CommentLikes  :BaseEntity
+	public class CommentLikes  : BaseEntity
 	{
 		public string Id { get; set; } = Guid.NewGuid().ToString();
 		public DateTime InteractedAt { get; private set; } = DateTime.Now;

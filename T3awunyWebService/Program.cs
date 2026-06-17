@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
 using T3awuny.Application.JwtFeatures;
@@ -305,6 +306,14 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
 
+            #region Serialize Enum values into string in swagger
+            builder.Services.AddControllers().AddJsonOptions(
+                options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                }
+                );
+            #endregion
             builder.Services.AddScoped<DataSeeder>();
             //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 

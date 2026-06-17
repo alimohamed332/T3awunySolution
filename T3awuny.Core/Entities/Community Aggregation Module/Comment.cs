@@ -13,6 +13,8 @@ namespace T3awuny.Core.Entities.Community_Aggregation_Module
 		public string Id { get; set; } = Guid.NewGuid().ToString();
 		public string Description { get; set; } = default!;
 		public DateTime CreatedAt { get; private set; } = DateTime.Now;
+		public IReadOnlyList<CommentLikes>? Likes { get; set; }
+		public IReadOnlyList<Comment>? SubComments { get; set; }
 
 		//Forigen Keys
 		public string PostId { get; set; } = default!;

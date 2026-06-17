@@ -18,6 +18,9 @@ namespace T3awuny.Core.Entities.Community_Aggregation_Module
 		public Category? Category { get; set; }
 		public ApplicationUser? Publisher { get; set; }
 		public IReadOnlyList<PostFile>? Files { get; set; }
+		public IReadOnlyList<PostShare>? Shares { get; set; }
+		public IReadOnlyList<PostLike>? Likes { get; set; }
+		public IReadOnlyList<Comment>? Comments { get; set; }
 		//Forigen Keys
 		public int CategoryId { get; set; }
 		[ForeignKey(nameof(ApplicationUser.Id))]

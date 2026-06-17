@@ -39,6 +39,7 @@ namespace T3awunyWebService.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CategoryDto>>> CreateCategory([FromBody] CreateCategoryDto dto)
         {
+            dto.Id = dto.Id.HasValue ? dto.Id.Value : Random.Shared.Next(12,100);
             var result = await _categoryService.CreateCategory(dto);
             if (!result.IsSuccess)
                 return BadRequest(result);

@@ -70,14 +70,13 @@ namespace T3awunyWebService.Controllers
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
-
+        [Authorize]
         [HttpGet("is-logined")]
         public async Task<ActionResult<KeyValuePair<bool,string>>> IsLogined()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
                 return BadRequest("ابعت الريفرش توكن يابيه في الكوكي ");
-
             var result = await _authService.IsValidRefreshTokenAsync(refreshToken);
             if (!result.Key)
                 return BadRequest(result);

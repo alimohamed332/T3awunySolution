@@ -64,6 +64,8 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.Messsage, opt => opt.Ignore())
                 .ReverseMap();
 
+            CreateMap<ApplicationUser, AdminProfileDto>()
+                .ForMember(dest => dest.Address, opt => opt.Ignore());
             CreateMap<Product, ProductSummaryDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.NameAr))
                 .ForMember(dest => dest.MainImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault(i => i.IsMain)!.ImageUrl))
@@ -190,6 +192,8 @@ namespace T3awuny.Application.Helpers
 
             //Review
             CreateMap<Review,ReviewResponseDto>()
+                .ForMember(dest => dest.TargetName, opt => opt.MapFrom(src => src.TargetUser!.Name ?? ""))             
+                .ForMember(dest => dest.TargetImageUrl, opt => opt.MapFrom(src => src.TargetUser!.ProfileImageUrl ?? ""))             
                 .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Reviewer!.Name ?? ""))             
                 .ForMember(dest => dest.ReviewerImageUrl, opt => opt.MapFrom(src => src.Reviewer!.ProfileImageUrl ?? ""))             
                 ;

@@ -216,7 +216,7 @@ namespace T3awuny.Application.Services
             var orderSpecs = new OrderSpecifications(o => o.BuyerId == buyerId);
             var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpecs);
             if (!orders.Any())
-                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("لا يوجد طلبات لعرضها");
+                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Ok(new List<OrderSummaryDto>(),"لا يوجد طلبات لعرضها");
 
             var orderDtos = new List<OrderSummaryDto>();//orders.Select(o => _mapper.Map<OrderSummeryDto>(o)).ToList();
             foreach (var order in orders)
@@ -420,7 +420,7 @@ namespace T3awuny.Application.Services
             var orderSpecs = new OrderSpecifications(o => o.FarmerId == farmerId);
             var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpecs);
             if (!orders.Any())
-                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("لا يوجد طلبات لهذا المزارع لعرضها");
+                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Ok(new List<OrderSummaryDto>(), "لا يوجد طلبات لهذا المزارع لعرضها");
 
             var orderDtos = new List<OrderSummaryDto>();//= orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
             foreach (var order in orders)
@@ -447,7 +447,7 @@ namespace T3awuny.Application.Services
             var orders = await orderRepo.GetAllWithSpecAsync(orderSpecs);
 
             if (!orders.Any())
-                return ApiResponse<Pagination<OrderSummaryDto>>.Fail("لا يوجد طلبات بهذه الخصائص لعرضها");
+                return ApiResponse<Pagination<OrderSummaryDto>>.Ok(new Pagination<OrderSummaryDto>(specs.PageIndex, specs.pageSize, 0, new List<OrderSummaryDto>()),"لا يوجد طلبات بهذه الخصائص لعرضها");
 
             var countSpecs = new BaseSpecifications<Order>(orderSpecs.Criteria!);
             var count = await orderRepo.GetCountAsync(countSpecs);

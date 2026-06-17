@@ -97,7 +97,7 @@ namespace T3awuny.Application.Services
             var reviews = await _unitOfWork.Repository<Review>().GetAllWithSpecAsync(reviewsSpec);
 
             if(!reviews.Any())
-                return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Fail("لا يوجد تقييمات تم اعتمادها من المشرف لهذا المستخدم حتى الآن");
+                return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Ok(new List<ReviewResponseDto>(),"لا يوجد تقييمات تم اعتمادها من المشرف علي هذا المستخدم حتى الآن");
             var reviewDtos =new List<ReviewResponseDto>();
             foreach (var review in reviews)
             {
@@ -167,12 +167,13 @@ namespace T3awuny.Application.Services
             var reviews =  await _unitOfWork.Repository<Review>().GetAllWithSpecAsync(reviewsSpec);//reviewer
 
             if(!reviews.Any())
-                return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Fail("لا يوجد تقييمات قيد الانتظار");
+                return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Ok(new List<ReviewResponseDto>(),"لا يوجد تقييمات قيد الانتظار");
             var reviewDtos =new List<ReviewResponseDto>();
             foreach (var review in reviews)
             {
                 var reviewDto = _mapper.Map<ReviewResponseDto>(review);
                 reviewDto.ReviewerImageUrl = $"{_baseUrl}{reviewDto.ReviewerImageUrl}";
+                reviewDto.TargetImageUrl = $"{_baseUrl}{reviewDto.TargetImageUrl}";
                 reviewDtos.Add(reviewDto);
             }
             return ApiResponse<IReadOnlyList<ReviewResponseDto>>.Ok(reviewDtos, "تم الحصول على التقييمات قيد الانتظار بنجاح");

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
+using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Admin;
 using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
@@ -186,6 +187,41 @@ namespace T3awuny.Application.Services
             return ApiResponse<AdminUserDto>.Ok(adminUserDto, "تم الحصول علي المسؤول بنجاح");
         }
 
+
+        public async Task<ApiResponse<AdminProfileDto>> GetMyProfileAsAdmin(string adminId)
+        {
+            var user = await _userManager.FindByIdAsync(adminId);
+            if (user is null)
+                return ApiResponse<AdminProfileDto>.Fail("هذا المسؤول غير موجود");
+
+            //var roles = await _userManager.GetRolesAsync(user);
+            //if (!roles.Contains("Admin"))
+            //    return ApiResponse<AdminUserDto>.Fail("هذا المستخدم ليس مسؤول");
+
+            var adminUserDto = _mapper.Map<AdminProfileDto>(user);
+            adminUserDto.ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
+            var addSpecs = new BaseSpecifications<Address>(a => a.UserId == adminId && a.IsDefault);
+            var address = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
+            if (address is not null)
+                adminUserDto.Address = _mapper.Map<AddressDetailsDto>(address);
+
+            return ApiResponse<AdminProfileDto>.Ok(adminUserDto, "تم الحصول علي المسؤول بنجاح");
+        }
+
+        public async Task<ApiResponse<AdminProfileDto>> UpdateMyProfileAsAdmin(string adminId, UpdateAdminProfileDto dto)
+        {
+            var admin = await _userManager.FindByIdAsync(adminId);
+            if (admin is null)
+                return ApiResponse<AdminProfileDto>.Fail("هذا المستخدم غير موجود");
+            admin.Name = string.IsNullOrEmpty(dto.Name) ? admin.Name : dto.Name;
+            admin.Email = string.IsNullOrEmpty(dto.Email) ? admin.Email : dto.Email;
+            admin.UserName = string.IsNullOrEmpty(dto.UserName) ? admin.UserName : dto.UserName;
+
+            var result = await _userManager.UpdateAsync(admin);
+            if (!result.Succeeded)
+                return ApiResponse<AdminProfileDto>.Fail("فشل حفظ التعديل حاول لاحقاً");
+            return ApiResponse<AdminProfileDto>.Ok(_mapper.Map<AdminProfileDto>(admin), "تم الحصول علي الادمن بنجاح");
+        }
         public async Task<ApiResponse<DashboardStatsDto>> GetDashboardStatsAsync()
         {
             var now = DateTime.UtcNow;
@@ -233,7 +269,6 @@ namespace T3awuny.Application.Services
 
             return ApiResponse<DashboardStatsDto>.Ok(stats);
         }
-
 
         public async Task<ApiResponse<Pagination<AdminUserDto>>> GetAllUsersAsync(AdminUserFilterDto filter)
         {

@@ -40,7 +40,7 @@ namespace T3awuny.Application.Services
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);
             var count = await _unitOfWork.Repository<Product>().GetCountAsync(countSpec);
             if (!products.Any())
-                return ApiResponse<Pagination<ProductSummaryDto>>.Fail("لا يوجد منتجات لعرضها");
+                return ApiResponse<Pagination<ProductSummaryDto>>.Ok(new Pagination<ProductSummaryDto>(filter.PageIndex, filter.pageSize, count, new List<ProductSummaryDto>()),"لا يوجد منتجات لعرضها");
             var productsDto = new List<ProductSummaryDto>();
             var addRepo = _unitOfWork.Repository<Address>();
             foreach (var product in products)

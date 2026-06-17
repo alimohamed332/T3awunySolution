@@ -158,6 +158,7 @@ namespace T3awuny.Application.Services
             {
                 payment.Status = PaymentStatus.Paid;
                 order.PaymentStatus = PaymentStatus.Paid;
+                order.Status = OrderStatus.Preparing;
             }
             else
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
@@ -17,6 +18,7 @@ namespace T3awuny.Core.Repository.Contracts
         Task<T?> GetByIdWithSpecAsync(ISpecifications<T> spec);
         Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecifications<T> spec);
         Task<int> GetCountAsync(ISpecifications<T> spec);
+        Task<int> CountAsync(Expression<Func<T, bool>> criteria);
         Task<T> AddAsync(T entity);
         T Update(T entity);
         void Delete(T entity);

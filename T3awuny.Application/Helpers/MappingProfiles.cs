@@ -140,9 +140,9 @@ namespace T3awuny.Application.Helpers
 
             CreateMap<CreateDeliveryMethodDto, DeliveryMethod>();
 
-            CreateMap<Payment,PaymentDto>()
-                //.ForMember(dest => dest.PayerImage, opt => opt.Ignore())
-                .ForMember(dest => dest.PayerName, opt => opt.MapFrom(src => src.Payer.Name));
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.PayerName, opt => opt.Ignore());
+            //.ForMember(dest => dest.PayerName, opt => opt.MapFrom(src => src.Payer.Name));
             /////////Auction
             CreateMap<CreateAuctionDto, Auction>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))

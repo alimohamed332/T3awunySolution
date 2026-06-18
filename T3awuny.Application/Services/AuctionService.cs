@@ -76,14 +76,14 @@ namespace T3awuny.Application.Services
             return ApiResponse<Auction>.Ok(auction,"تم إنشاء المزاد بنجاح");
         }
 
-        public async Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId)
+        public async Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId, string role)
         {
             var auctionSpecs = new AuctionSpecifications(a => a.Id == auctionId,false,true);
             var auction = await _unitOfWork.Repository<Auction>().GetByIdWithSpecAsync(auctionSpecs);
 
             if (auction is null)
                 return ApiResponse<string>.Fail("هذا المزاد غير موجود");
-            if(auction.FarmerId !=  farmerId)
+            if(auction.FarmerId !=  farmerId && role != "Admin")
                 return ApiResponse<string>.Fail("هذا المزاد ليس ملكك");
             if(auction.Status != AuctionStatus.Scheduled)
                 return ApiResponse<string>.Fail("هذا المزاد لا يمكنك إلغائه");

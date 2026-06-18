@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
@@ -82,7 +84,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterPublicConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
 
                 });
             #endregion
@@ -150,6 +152,7 @@ namespace T3awunyWebService
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!)),
                     ClockSkew = TimeSpan.Zero
                 };
+                
                 #region SignalR
                 op.Events = new JwtBearerEvents
                 {
@@ -165,8 +168,21 @@ namespace T3awunyWebService
                             context.Token = accessToken;
                         }
                         return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        var _cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+                        //var userId = context.Principal!.FindFirst(c => c.Type == "uid")?.Value ?? string.Empty;
+
+                        if (_cache.TryGetValue("BannedUserId",out _))
+                        {
+                            context.Fail("User is banned");
+                        }
+
+                        return Task.CompletedTask;
                     }
                 }; 
+
                 #endregion
             });
             #endregion
@@ -305,6 +321,7 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
 
+            builder.Services.AddMemoryCache();
             builder.Services.AddScoped<DataSeeder>();
             //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 

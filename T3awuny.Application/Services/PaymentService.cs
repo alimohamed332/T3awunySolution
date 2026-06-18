@@ -27,11 +27,12 @@ namespace T3awuny.Application.Services
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
-        public PaymentService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
+        public PaymentService(IBasketRepository basketRepository, IUnitOfWork unitOfWork, IConfiguration configuration, IMapper mapper)
         {
             _basketRepository = basketRepository;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         public async Task<ApiResponse<CustomerBasket>> CreateOrUpdatePaymentIntentAsync(string basketId)
@@ -122,7 +123,7 @@ namespace T3awuny.Application.Services
             if (!payments.Any())
                 return ApiResponse<IReadOnlyList<PaymentDto>>.Ok(new List<PaymentDto>(),"لا يوجد بيانات دفع لعرضها");        
 
-            var paymentDtos = _mapper.Map<IReadOnlyList<PaymentDto>>(payments);
+            var paymentDtos = _mapper.Map<IReadOnlyList<PaymentDto>>(payments);        
             return ApiResponse<IReadOnlyList<PaymentDto>>.Ok(paymentDtos,"تم الحصول علي بيانات الدفع بنجاح");
         }
 

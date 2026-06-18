@@ -36,38 +36,37 @@ namespace T3awuny.Application.Services
                 return ApiResponse<ReviewResponseDto>.Fail("هذا المستخدم غير موجود");
             #region كل ده تحقق مرتيط بالطلب نفسه هنلغيه عشان علي نصر مش عايز يبعت ال orderId 
             //// 1. Validate order exists and belongs to reviewer
-            //var order = await _unitOfWork.Orders.GetByIdAsync(dto.OrderId);
-            //if (order is null || order.BuyerId != reviewerId)
-            //    return ApiResponse<ReviewResponseDto>.Fail("Order not found");
+            var order = await _unitOfWork.Repository<Order>().GetByIdAsync(dto.OrderId);
+            if (order is null || order.BuyerId != reviewerId || order.FarmerId != dto.TargetUserId)
+                return ApiResponse<ReviewResponseDto>.Fail("الطلب غير موجود او لا يخص هذا المستخدم");
 
             //// 2. Order must be delivered
-            //if (order.Status != OrderStatus.Delivered)
-            //    return ApiResponse<ReviewResponseDto>.Fail("You can only review after the order is delivered");
+            if (order.Status != OrderStatus.Delivered)
+                return ApiResponse<ReviewResponseDto>.Fail("لا يمكن تقييم طلب لم يتم توصيله بعد");
 
             //// 3. Check no existing review for this order
-            //var existingReview = await _unitOfWork.Reviews.GetByReviewerAndOrderAsync(reviewerId, dto.OrderId);
-            //if (existingReview is not null)
-            //    return ApiResponse<ReviewResponseDto>.Fail("You have already reviewed this order");
-
+            var reviewSpec = new BaseSpecifications<Review>(r => r.ReviewerId == reviewerId && r.OrderId == dto.OrderId);
+            var existingReview = await _unitOfWork.Repository<Review>().GetByIdWithSpecAsync(reviewSpec);
+            if (existingReview is not null)
+                return ApiResponse<ReviewResponseDto>.Fail("لقد قمت بالفعل بتقييم هذا الطلب");
             //////  Validate rating => or [Range(1,5, ErrorMessage = "التقيم يجب أن يكون بين 1 و 5")] in DTO
             ////if (dto.Rating < 1 || dto.Rating > 5)
             ////    return ApiResponse<ReviewResponseDto>.Fail("Rating must be between 1 and 5");
 
             //// Validate farmer matches the order
-            //var orderItem = await _unitOfWork.OrderItems
-            //                                 .GetFirstByOrderIdAsync(dto.OrderId);
-            //if (orderItem?.Product.FarmerId != dto.TargetFarmerId)
-            //    return ApiResponse<ReviewResponseDto>.Fail("Invalid farmer for this order"); 
-            #endregion
-            //check if the target user has any completed orders with the reviewer => either as buyer or farmer both can review each other
-            var orderSpec = new BaseSpecifications<Order>(o => (o.BuyerId == reviewerId || o.BuyerId == dto.TargetUserId) &&
-                                                 (o.FarmerId == dto.TargetUserId || o.FarmerId == reviewerId)&&
-                                                 o.Status == OrderStatus.Delivered && o.CreatedAt.AddDays(30) >= DateTime.UtcNow);
-            //ده كده هيرجع الطلبات اللي بين الاتنين دول اللي تم توصيلها خلاص ومعداش عليها شهر من تاريخ الإنشاء يعني لسه في فترة السماح للتقييم
-            var completedOrders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpec);
 
-            if(!completedOrders.Any())
-                return ApiResponse<ReviewResponseDto>.Fail("لا يوجد اي طلبات مكتملة مع هذا المستخدم اخر شهر لذلك لا يمكنك تقييمه");
+            if (order.FarmerId != dto.TargetUserId)
+                return ApiResponse<ReviewResponseDto>.Fail("هذا الطلب غير مملوك للمزارع الذي تقيم");
+            #endregion
+            ////check if the target user has any completed orders with the reviewer => either as buyer or farmer both can review each other
+            //var orderSpec = new BaseSpecifications<Order>(o => (o.BuyerId == reviewerId || o.BuyerId == dto.TargetUserId) &&
+            //                                     (o.FarmerId == dto.TargetUserId || o.FarmerId == reviewerId)&&
+            //                                     o.Status == OrderStatus.Delivered && o.CreatedAt.AddDays(30) >= DateTime.UtcNow);
+            ////ده كده هيرجع الطلبات اللي بين الاتنين دول اللي تم توصيلها خلاص ومعداش عليها شهر من تاريخ الإنشاء يعني لسه في فترة السماح للتقييم
+            //var completedOrders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpec);
+
+            //if(!completedOrders.Any())
+            //    return ApiResponse<ReviewResponseDto>.Fail("لا يوجد اي طلبات مكتملة مع هذا المستخدم اخر شهر لذلك لا يمكنك تقييمه");
 
             // Create review
             var review = new Review
@@ -80,10 +79,9 @@ namespace T3awuny.Application.Services
                 IsApproved = false,          // pending admin approval
                 CreatedAt = DateTime.UtcNow
             };
-            //i need to get the reviewer add recviewspecification class
             await _unitOfWork.Repository<Review>().AddAsync(review);
             if (await _unitOfWork.CompleteAsync() <=0 )
-                return ApiResponse<ReviewResponseDto>.Fail("فشل في تقديم التقييم حاول لاحقاً");
+                return ApiResponse<ReviewResponseDto>.Fail("فشل في تقديم حفظ حاول لاحقاً");
 
             var reviewResponse = _mapper.Map<ReviewResponseDto>(review);
             reviewResponse.ReviewerName = reviewer.Name;

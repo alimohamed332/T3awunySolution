@@ -8,9 +8,9 @@ using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.JwtFeatures;
+using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.UserModule;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace T3awuny.Application.Services
 {
@@ -25,8 +25,9 @@ namespace T3awuny.Application.Services
         private readonly IEmailService _emailService;
         private readonly IFileStorageService _fileStorageService;
         private readonly IAddressService _addressService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService, IFileStorageService fileStorageService, IAddressService addressService)
+        public AuthService(UserManager<ApplicationUser> userManager, JwtHandler jwtHandler, IMapper mapper, RoleManager<IdentityRole> roleManager, RefreshTokenHandler refreshTokenHandler, IConfiguration configuration, IEmailService emailService, IFileStorageService fileStorageService, IAddressService addressService, IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _jwtHandler = jwtHandler;
@@ -37,6 +38,7 @@ namespace T3awuny.Application.Services
             _emailService = emailService;
             _fileStorageService = fileStorageService;
             _addressService = addressService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<AuthModel> RegisterAsync(RegisterDto model)
@@ -132,13 +134,15 @@ namespace T3awuny.Application.Services
                 return authModel;
             }
             var roles = await _userManager.GetRolesAsync(user);
+
             var token = _jwtHandler.CreateToken(user, roles);
+
             authModel.Email = user.Email ?? "";
             authModel.IsAuthenticated = true;
             authModel.Username = user.UserName ?? "";
-            authModel.Roles = roles.ToList();
+            authModel.Role = roles.LastOrDefault() ?? "";
             authModel.Token = token;
-            authModel.Message = "نم تسجيل الدخول بنجاح";
+            authModel.Message = "تم تسجيل الدخول بنجاح";
 
             if (user.RefreshTokens.Any(t => t.IsActive))
             {
@@ -154,6 +158,14 @@ namespace T3awuny.Application.Services
                 user.RefreshTokens.Add(refreshToken);
                 await _userManager.UpdateAsync(user);
             }
+
+            int count = 0;
+            if (authModel.Role == "Farmer")
+                count = await _unitOfWork.Repository<FarmerProfile>().CountAsync(fp => fp.FarmerId == user.Id);
+            else if (authModel.Role == "Trader")
+                count = await _unitOfWork.Repository<TraderProfile>().CountAsync(fp => fp.TraderId == user.Id);
+            if (count <= 0)
+                authModel.HasProfile = false;
             return authModel;
         }
 
@@ -165,7 +177,7 @@ namespace T3awuny.Application.Services
             if (await _userManager.IsInRoleAsync(user, model.Role))
                 return new AuthModel { Message = "هذا المستخدم موجود في هذه المسئولية بالفعل" };
             var result = await _userManager.AddToRoleAsync(user, model.Role);
-            return result.Succeeded ? new AuthModel { Message = "تمت إضافة الدور بنجاح" } : new AuthModel { Message = "حدث شئ ما خطأ" };
+            return result.Succeeded ? new AuthModel { Message = "تمت إضافة الدور بنجاح", IsAuthenticated = true } : new AuthModel { Message = "حدث شئ ما خطأ" };
         }
 
         public async Task<AuthModel> RefreshTokenAsync(string token)
@@ -195,7 +207,7 @@ namespace T3awuny.Application.Services
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email!;
             authModel.Username = user.UserName!;
-            authModel.Roles = roles.ToList();
+            authModel.Role = roles.LastOrDefault() ?? "";
             authModel.Token = accessToken;
             authModel.RefreshToken = newRefreshToken.Token;
             authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
@@ -215,7 +227,7 @@ namespace T3awuny.Application.Services
             return new KeyValuePair<bool, string>(false, "الريفرش توكن منتهي الصلاحية");
             var roles = await _userManager.GetRolesAsync(user);
 
-            var accessToken = _jwtHandler.CreateToken(user, roles);
+            //var accessToken = _jwtHandler.CreateToken(user, roles);
             return new KeyValuePair<bool,string>(true, roles.LastOrDefault()??"");
         }
 
@@ -252,7 +264,7 @@ namespace T3awuny.Application.Services
                 Email = user.Email!,
                 Username = user.UserName!,
                 Message = "تم تأكيد البريد الالكتروني",
-                Roles = roles
+                Role = roles.LastOrDefault() ?? ""
 
             };
         }
@@ -372,7 +384,7 @@ namespace T3awuny.Application.Services
             authModel.Email = user!.Email!;
             authModel.Username = user.UserName!;
             authModel.Token = token;
-            authModel.Roles = roles;
+            authModel.Role = roles.LastOrDefault() ?? "";
 
             return authModel;                  
         }

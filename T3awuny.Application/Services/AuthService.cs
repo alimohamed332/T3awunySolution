@@ -165,7 +165,7 @@ namespace T3awuny.Application.Services
             if (await _userManager.IsInRoleAsync(user, model.Role))
                 return new AuthModel { Message = "هذا المستخدم موجود في هذه المسئولية بالفعل" };
             var result = await _userManager.AddToRoleAsync(user, model.Role);
-            return result.Succeeded ? new AuthModel { Message = "تمت إضافة الدور بنجاح" } : new AuthModel { Message = "حدث شئ ما خطأ" };
+            return result.Succeeded ? new AuthModel { Message = "تمت إضافة الدور بنجاح", IsAuthenticated = true } : new AuthModel { Message = "حدث شئ ما خطأ" };
         }
 
         public async Task<AuthModel> RefreshTokenAsync(string token)
@@ -215,7 +215,7 @@ namespace T3awuny.Application.Services
             return new KeyValuePair<bool, string>(false, "الريفرش توكن منتهي الصلاحية");
             var roles = await _userManager.GetRolesAsync(user);
 
-            var accessToken = _jwtHandler.CreateToken(user, roles);
+            //var accessToken = _jwtHandler.CreateToken(user, roles);
             return new KeyValuePair<bool,string>(true, roles.LastOrDefault()??"");
         }
 

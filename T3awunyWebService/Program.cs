@@ -82,7 +82,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterPublicConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
 
                 });
             #endregion
@@ -305,6 +305,7 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
 
+            builder.Services.AddMemoryCache();
             builder.Services.AddScoped<DataSeeder>();
             //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 

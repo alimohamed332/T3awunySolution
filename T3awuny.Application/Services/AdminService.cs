@@ -165,7 +165,7 @@ namespace T3awuny.Application.Services
             var adminUserDto = _mapper.Map<AdminUserDto>(user);
             adminUserDto.ProfileImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
             var roles = await _userManager.GetRolesAsync(user);
-            adminUserDto.Role = roles.FirstOrDefault() ?? "";
+            adminUserDto.Role = roles.LastOrDefault() ?? "";
             adminUserDto.TotalProducts = adminUserDto.Role == "Farmer" ? await _unitOfWork.Repository<Product>().CountAsync(p => p.FarmerId == userId) : 0;
             adminUserDto.TotalOrders = adminUserDto.Role == "Trader" ? await _unitOfWork.Repository<Order>().CountAsync(o => o.BuyerId == userId) : 0;
             return ApiResponse<AdminUserDto>.Ok(adminUserDto, "تم الحصول علي المستخدم بنجاح");
@@ -311,7 +311,7 @@ namespace T3awuny.Application.Services
                 var roles = await _userManager.GetRolesAsync(user);
                 if (!string.IsNullOrEmpty(filter.Role) && !roles.Contains(filter.Role)) continue;
 
-                var role = roles.FirstOrDefault() ?? "Unknown";
+                var role = roles.LastOrDefault() ?? "Unknown";
                 //var farmerProfile = role == "Farmer" ? await _unitOfWork.Repository<FarmerProfile>().GetByIdAsync(user.Id) : null;
                 //var traderProfile = role == "Trader" ? await _unitOfWork.Repository<TraderProfile>().GetByIdAsync(user.Id) : null;
                 var totalOrders = role == "Trader" ? await _unitOfWork.Repository<Order>().CountAsync(o => o.BuyerId == user.Id) : 0;

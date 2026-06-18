@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Auction;
@@ -95,11 +96,12 @@ namespace T3awunyWebService.Controllers
         [HttpDelete("{auctionId}")]
         public async Task<ActionResult<ApiResponse<string>>> CancelAcution(int auctionId)
         {
+            var role =  User.Claims.LastOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? string.Empty;
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
                 return BadRequest(ApiResponse<Auction>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
-            var result = await _auctionService.CancelAuctionAsync(farmerId, auctionId);
+            var result = await _auctionService.CancelAuctionAsync(farmerId, auctionId, role);
             if(!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);

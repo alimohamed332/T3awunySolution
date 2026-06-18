@@ -10,7 +10,7 @@ namespace T3awuny.Application.Contracts
     {
         // Farmer actions 
         Task<ApiResponse<Auction>> CreateAuctionAsync(string farmerId, CreateAuctionDto dto);
-        Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId); // Active → Canceled
+        Task<ApiResponse<string>> CancelAuctionAsync(string farmerId, int auctionId, string role); // Active → Canceled
         Task<ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>> GetMyAuctionsAsync(string farmerId);
 
         // Public — buyers browse

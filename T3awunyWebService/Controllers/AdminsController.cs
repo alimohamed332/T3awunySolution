@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Admin;
@@ -21,18 +22,20 @@ namespace T3awunyWebService.Controllers
     public class AdminsController : ControllerBase
     {
         private readonly IAdminService _adminService;
-        private readonly IFarmerService _farmerService;
-        private readonly ITraderService _traderService;
+        //private readonly IFarmerService _farmerService;
+        //private readonly ITraderService _traderService;
         private readonly IUserService _userService;
         private readonly IProductService _productService;
+        private readonly IMemoryCache _cache;
 
-        public AdminsController(IAdminService adminService, IFarmerService farmerService, ITraderService traderService, IUserService userService, IProductService productService)
+        public AdminsController(IAdminService adminService, /*IFarmerService farmerService, ITraderService traderService,*/ IUserService userService, IProductService productService, IMemoryCache cache)
         {
             _adminService = adminService;
-            _farmerService = farmerService;
-            _traderService = traderService;
+            //_farmerService = farmerService;
+            //_traderService = traderService;
             _userService = userService;
             _productService = productService;
+            _cache = cache;
         }
 
 
@@ -154,6 +157,8 @@ namespace T3awunyWebService.Controllers
             var result = await _adminService.ToggleUserStatusAsync(id);
             if (!result.IsSuccess)
                 return BadRequest(result);
+            if (result.Data == "تم حظر المستخدم")
+                _cache.Set("userId", id);
             return Ok(result);
         }
 
@@ -269,8 +274,6 @@ namespace T3awunyWebService.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-
-
         
     }
 }

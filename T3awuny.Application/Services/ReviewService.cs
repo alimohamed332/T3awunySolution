@@ -36,9 +36,9 @@ namespace T3awuny.Application.Services
                 return ApiResponse<ReviewResponseDto>.Fail("هذا المستخدم غير موجود");
             #region كل ده تحقق مرتيط بالطلب نفسه هنلغيه عشان علي نصر مش عايز يبعت ال orderId 
             //// 1. Validate order exists and belongs to reviewer
-            //var order = await _unitOfWork.Orders.GetByIdAsync(dto.OrderId);
-            //if (order is null || order.BuyerId != reviewerId)
-            //    return ApiResponse<ReviewResponseDto>.Fail("Order not found");
+            var order = await _unitOfWork.Repository<Order>().GetByIdAsync(dto.OrderId);
+            if (order is null || order.BuyerId != reviewerId || order.FarmerId != dto.TargetUserId)
+                return ApiResponse<ReviewResponseDto>.Fail("الطلب غير موجود او لا يخص هذا المستخدم");
 
             //// 2. Order must be delivered
             //if (order.Status != OrderStatus.Delivered)

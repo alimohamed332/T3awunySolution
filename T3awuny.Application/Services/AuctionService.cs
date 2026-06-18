@@ -47,7 +47,7 @@ namespace T3awuny.Application.Services
                 return ApiResponse<Auction>.Fail("لايمكن ان تنشئ مزاد علي منتج في هذه الحالة");
 
             // 2. Check no existing active/scheduled auction for this product
-            var productSpecs = new BaseSpecifications<Product>(p => p.Id == dto.ProductId && p.HasActiveAcution);
+            var productSpecs = new BaseSpecifications<Product>(  p => p.Id == dto.ProductId && p.HasActiveAcution && p.Status != ProductStatus.Archived);
             var productWithActiveAuc = await _unitOfWork.Repository<Product>().GetByIdWithSpecAsync(productSpecs);
             if (productWithActiveAuc is not null)
                 return ApiResponse<Auction>.Fail("هذا المنتج لديه مزاد نشط بالفعل");

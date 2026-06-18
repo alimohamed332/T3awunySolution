@@ -50,12 +50,12 @@ namespace T3awunyWebService.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("add-role")]
-        public async Task<ActionResult<string>> AddRoleAsync([FromBody] AddRoleDto model)
+        public async Task<ActionResult<AuthModel>> AddRoleAsync([FromBody] AddRoleDto model)
         {
             var result = await _authService.AddRoleAsync(model);
-            if (!string.IsNullOrEmpty(result))
+            if (!result.IsAuthenticated)
                 return BadRequest(result);
-            return Ok();
+            return Ok(result);
         }
 
         [HttpGet("refresh-token")]

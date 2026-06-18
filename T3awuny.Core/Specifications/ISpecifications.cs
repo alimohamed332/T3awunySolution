@@ -18,6 +18,5 @@ namespace T3awuny.Core.Specifications
         public int Take { get; } //.Take(10)
         public int Skip { get; } //.Skip(5)
         public bool IsPaginationEnabled { get; }
-
     }
 }

@@ -33,9 +33,10 @@ namespace T3awuny.Application.Services
             _baseUrl = configuration["App:ApplicationUrl"]??"";
         }
 
-        public async Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter)
+        public async Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter, string role)
         {
-            var productSpec = new ProductSpecifications(filter,true); //category farmer images
+            var isAdmin = role == "Admin";
+            var productSpec = new ProductSpecifications(filter,true,isAdmin); //category farmer images
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);
             var count = await _unitOfWork.Repository<Product>().GetCountAsync(countSpec);
@@ -67,7 +68,7 @@ namespace T3awuny.Application.Services
             var farmer = await _userManager.FindByIdAsync(farmerId);
             if (farmer is null)
                 return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("هذا المزارع غير موجود");
-            var productSpec = new ProductSpecifications(p => p.FarmerId == farmerId);  //category , mainImage
+            var productSpec = new ProductSpecifications(p => p.FarmerId == farmerId && p.Status != ProductStatus.Archived);  //category , mainImage
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             if(!products.Any())
                 return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("لا يوجد منتجات معروضة لهذا المزارع");
@@ -88,7 +89,7 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<ProductResponseDto>> GetByIdAsync(int productId)
         {
-            var productSpec = new ProductSpecifications(p => p.Id == productId, false); //Category ,farmer , Images
+            var productSpec = new ProductSpecifications(p => p.Id == productId && p.Status != ProductStatus.Archived, false); //Category ,farmer , Images
             var product = await _unitOfWork.Repository<Product>().GetByIdWithSpecAsync(productSpec);
             if (product is null)
                 return ApiResponse<ProductResponseDto>.Fail("هذا المنتج غير موجود");

@@ -64,7 +64,7 @@ namespace T3awunyWebService.Controllers
         }
         [Authorize("AdminOnly")]
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Payment>>> GetPayments()
+        public async Task<ActionResult<IReadOnlyList<PaymentDto>>> GetPayments()
         {
             var result = await _paymentService.GetPaymentsAsync();
             if(!result.IsSuccess)

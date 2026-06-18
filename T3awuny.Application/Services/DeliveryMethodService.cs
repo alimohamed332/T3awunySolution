@@ -30,7 +30,7 @@ namespace T3awuny.Application.Services
             if(!deliveryMethodsDtos.Any())
             return ApiResponse<IReadOnlyList<DeliveryMethodResponseDto>>.Ok(deliveryMethodsDtos, "لا يوجد طرق توصيل بعد");
 
-            return ApiResponse<IReadOnlyList<DeliveryMethodResponseDto>>.Ok(deliveryMethodsDtos, "لا يوجد طرق توصيل بعد");
+            return ApiResponse<IReadOnlyList<DeliveryMethodResponseDto>>.Ok(deliveryMethodsDtos, "تم الحصول علي طرق التوصيل بنجاح");
         }
 
         public async Task<ApiResponse<DeliveryMethodResponseDto>> GetDeliveryMethod(int id)

@@ -44,7 +44,7 @@ namespace T3awuny.Application.Services
             var farmerProfilesDtos = farmerProfiles.Select(f => _mapper.Map<FarmerProfileDto>(f));
 
             if (!farmerProfilesDtos.Any())
-                return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Fail("لا يوجد حسابات مزارعين في انتظار التحقق حاليا");
+                return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(new List<FarmerProfileDto>(), "لا يوجد حسابات مزارعين في انتظار التحقق حاليا");
             farmerProfilesDtos.Select(fp => fp.ProfileImageUrl = $"{_baseUrl}{fp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<FarmerProfileDto>>.Ok(farmerProfilesDtos.ToList(), "تم العثور على حسابات المزارعين في انتظار التحقق بنجاح");
         }
@@ -56,7 +56,7 @@ namespace T3awuny.Application.Services
             var traderProfilesDtos = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t));
 
             if (!traderProfilesDtos.Any()) 
-                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد حسابات تجار في انتظار التحقق حاليا");
+                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(new List<TraderProfileDto>(), "لا يوجد حسابات تجار في انتظار التحقق حاليا");
             traderProfilesDtos.Select(tp => tp.ProfileImageUrl = $"{_baseUrl}{tp.ProfileImageUrl}");
             return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(traderProfilesDtos.ToList(), "تم العثور على حسابات التجار في انتظار التحقق بنجاح");
         }
@@ -106,7 +106,7 @@ namespace T3awuny.Application.Services
             var bannedUsers = await _unitOfWork.UserRepository.GetBannedUsersAsync();
             if (!bannedUsers.Any())
             {
-                return ApiResponse<IReadOnlyList<BannedUserDto>>.Fail("لا يوجد مستخدمين محظورين حاليا");
+                return ApiResponse<IReadOnlyList<BannedUserDto>>.Ok(new List<BannedUserDto>(), "لا يوجد مستخدمين محظورين حاليا");
             }
             var bannedUsersDtos = bannedUsers.Select(u => new BannedUserDto 
             { 
@@ -220,7 +220,9 @@ namespace T3awuny.Application.Services
             var result = await _userManager.UpdateAsync(admin);
             if (!result.Succeeded)
                 return ApiResponse<AdminProfileDto>.Fail("فشل حفظ التعديل حاول لاحقاً");
-            return ApiResponse<AdminProfileDto>.Ok(_mapper.Map<AdminProfileDto>(admin), "تم الحصول علي الادمن بنجاح");
+            var adminUserDto = _mapper.Map<AdminProfileDto>(admin);
+            adminUserDto.ProfileImageUrl = $"{_baseUrl}{admin.ProfileImageUrl}";
+            return ApiResponse<AdminProfileDto>.Ok(adminUserDto, "تم الحصول علي الادمن بنجاح");
         }
         public async Task<ApiResponse<DashboardStatsDto>> GetDashboardStatsAsync()
         {

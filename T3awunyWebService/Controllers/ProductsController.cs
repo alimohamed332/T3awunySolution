@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Product;
@@ -34,7 +35,8 @@ namespace T3awunyWebService.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<Pagination<ProductSummaryDto>>>> GetAllAsync([FromQuery] ProductSpecParams filter)
         {
-            var result = await _productService.GetAllAsync(filter);
+            var role = User.Claims.LastOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? string.Empty;
+            var result = await _productService.GetAllAsync(filter,role);
             if (!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);

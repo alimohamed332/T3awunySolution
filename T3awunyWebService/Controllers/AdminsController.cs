@@ -158,7 +158,11 @@ namespace T3awunyWebService.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result);
             if (result.Data == "تم حظر المستخدم")
-                _cache.Set("userId", id);
+            {
+                _cache.Set("BannedUserId", id, TimeSpan.FromHours(1));
+                Response.Cookies.Delete("refreshToken");
+            }
+                
             return Ok(result);
         }
 

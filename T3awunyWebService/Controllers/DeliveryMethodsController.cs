@@ -41,6 +41,7 @@ namespace T3awunyWebService.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<DeliveryMethodResponseDto>>> CreateDeliveryMethod([FromBody] CreateDeliveryMethodDto dto)
         {
+            dto.Id = dto.Id.HasValue ? dto.Id.Value : Random.Shared.Next(4, 100);
             var result = await _deliveryMethodService.CreateDeliveryMethod(dto);
             if (!result.IsSuccess)
                 return BadRequest(result);

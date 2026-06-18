@@ -13,6 +13,7 @@ namespace T3awuny.Core.Specifications.ReviewSpecs
         public ReviewSpecifications(Expression<Func<Review, bool>> criteria) : base(criteria) 
         {
             Includes.Add(r => r.Reviewer);
+            Includes.Add(r => r.TargetUser);
         }
     }
 }

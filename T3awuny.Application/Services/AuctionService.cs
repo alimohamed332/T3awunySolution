@@ -47,7 +47,7 @@ namespace T3awuny.Application.Services
                 return ApiResponse<Auction>.Fail("لايمكن ان تنشئ مزاد علي منتج في هذه الحالة");
 
             // 2. Check no existing active/scheduled auction for this product
-            var productSpecs = new BaseSpecifications<Product>(p => p.Id == dto.ProductId && p.HasActiveAcution);
+            var productSpecs = new BaseSpecifications<Product>(  p => p.Id == dto.ProductId && p.HasActiveAcution && p.Status != ProductStatus.Archived);
             var productWithActiveAuc = await _unitOfWork.Repository<Product>().GetByIdWithSpecAsync(productSpecs);
             if (productWithActiveAuc is not null)
                 return ApiResponse<Auction>.Fail("هذا المنتج لديه مزاد نشط بالفعل");
@@ -297,7 +297,7 @@ namespace T3awuny.Application.Services
             var auctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs);
 
             if (!auctions.Any())
-                return ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>.Fail("لا يوجد مزادات لعرضها");
+                return ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>.Ok(new List<AuctionResponseWithNoBidsDto>(), "لا يوجد مزادات لعرضها");
 
             var auctionDtos = new List<AuctionResponseWithNoBidsDto>();//auctions.Select(a => _mapper.Map<AuctionResponseWithNoBidsDto>(a)).ToList();
             foreach (var auction in auctions)
@@ -366,7 +366,7 @@ namespace T3awuny.Application.Services
             var auctionSpecs = new AuctionSpecifications(filter);
             var auctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs);
             if (!auctions.Any())
-                return ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>.Fail("لا يوجد مزادات تم إنشائها لعرضها");
+                return ApiResponse<Pagination<AuctionResponseWithNoBidsDto>>.Ok(new Pagination<AuctionResponseWithNoBidsDto>(filter.PageIndex, filter.pageSize, 0, new List<AuctionResponseWithNoBidsDto>()),"لا يوجد مزادات تم إنشائها لعرضها");
 
             var countSpecs = new BaseSpecifications<Auction>(auctionSpecs.Criteria!);
             var count = await _unitOfWork.Repository<Auction>().GetCountAsync(countSpecs);
@@ -394,7 +394,7 @@ namespace T3awuny.Application.Services
             var bidSpecs = new BaseSpecifications<Bid>(b => b.AuctionId == auctionId);
             var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidSpecs);
             if (!bids.Any())
-                return ApiResponse<IReadOnlyList<BidResponseDto>>.Fail("لا يوجد مزايدات علي هذا المزاد");
+                return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(new List<BidResponseDto>(), "لا يوجد مزايدات علي هذا المزاد");
             var bidDtos = bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
 
             return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(bidDtos, "تم الحصول علي المزايدات بنجاح");
@@ -405,7 +405,7 @@ namespace T3awuny.Application.Services
             var bidSpecs = new BaseSpecifications<Bid>(b => b.BidderId == bidderId);
             var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidSpecs);
             if (!bids.Any())
-                return ApiResponse<IReadOnlyList<BidResponseDto>>.Fail("لا يوجد مزادات مرتبطة بهذا التاجر");
+                return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(new List<BidResponseDto>(), "لا يوجد مزادات مرتبطة بهذا التاجر");
 
             var bidDtos = bids.Select(b => _mapper.Map<BidResponseDto>(b)).ToList();
             return ApiResponse<IReadOnlyList<BidResponseDto>>.Ok(bidDtos,"تم الحصول علي كل المزيدات التي قمت بها");
@@ -416,7 +416,7 @@ namespace T3awuny.Application.Services
             var bidsSpecs = new BaseSpecifications<Bid>(b => b.BidderId == bidderId && b.IsWinning);
             var bids = await _unitOfWork.Repository<Bid>().GetAllWithSpecAsync(bidsSpecs);
             if (!bids.Any())
-                return ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>.Fail("لا يوجد مزايدات فزت من خلالها بمزادات بعد");
+                return ApiResponse<IReadOnlyList<MyWinningtAuctionsDto>>.Ok(new List<MyWinningtAuctionsDto>(), "لا يوجد مزايدات فزت من خلالها بمزادات بعد");
 
             var distincitAuctionIds = bids.Select(b => b.AuctionId)/*.Distinct()*/;
             var dtos = new List<MyWinningtAuctionsDto>();

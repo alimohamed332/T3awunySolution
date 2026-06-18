@@ -6,6 +6,8 @@ namespace T3awuny.Application.DTOs.Review
         public int Id { get; set; }
         public string ReviewerName { get; set; } = string.Empty;//
         public string? ReviewerImageUrl { get; set; } //
+        public string TargetName { get; set; } = string.Empty;//
+        public string? TargetImageUrl { get; set; } //
         public int Rating { get; set; }
         public string? Comment { get; set; }
         public bool IsApproved { get; set; }

@@ -25,6 +25,7 @@ namespace T3awuny.Application.DTOs.Product
         public string CategoryName { get; set; } = string.Empty;
         public string FarmerId { get; set; } = string.Empty;
         public string FarmerName { get; set; } = string.Empty;
+        public string FarmerImage { get; set; } = string.Empty;
         public string FarmerGovernorate { get; set; } = string.Empty; ///////
         public string FarmerCity { get; set; } = string.Empty; /////
         public List<string>? ImageUrls { get; set; } 

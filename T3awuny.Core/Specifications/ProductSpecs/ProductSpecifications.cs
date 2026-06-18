@@ -5,12 +5,13 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using T3awuny.Core.Entities;
+using T3awuny.Core.Entities.Enums;
 
 namespace T3awuny.Core.Specifications.ProductSpecs
 {
     public class ProductSpecifications : BaseSpecifications<Product>
     {
-        public ProductSpecifications(ProductSpecParams specs, bool AddInclude = false) : base
+        public ProductSpecifications(ProductSpecParams specs, bool AddInclude = false, bool isAdmin = false) : base
             ( P =>
                (string.IsNullOrEmpty(specs.Search) || P.Name.Contains(specs.Search)) && 
                (string.IsNullOrEmpty(specs.FarmerId) || P.FarmerId == specs.FarmerId) && 
@@ -18,8 +19,8 @@ namespace T3awuny.Core.Specifications.ProductSpecs
                (!specs.MinPrice.HasValue || P.UnitPrice >= specs.MinPrice) &&
                (!specs.MaxPrice.HasValue || P.UnitPrice <= specs.MaxPrice) &&
                (!specs.HasActiveAuction.HasValue || P.HasActiveAcution == specs.HasActiveAuction) &&
-               (!specs.Status.HasValue || P.Status == specs.Status)
-               
+               (!specs.Status.HasValue || P.Status == specs.Status) &&
+               (isAdmin || P.Status != ProductStatus.Archived)
             )
         {
             if (AddInclude)
@@ -63,7 +64,7 @@ namespace T3awuny.Core.Specifications.ProductSpecs
 
         }
 
-        public ProductSpecifications(Expression<Func<Product,bool>> criteria, bool lighted = true) : base(criteria) 
+        public ProductSpecifications(Expression<Func<Product,bool>> criteria, bool lighted = true) : base( criteria) 
         {
             if(lighted)
             {

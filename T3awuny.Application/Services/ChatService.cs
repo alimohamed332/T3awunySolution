@@ -89,7 +89,7 @@ namespace T3awuny.Application.Services
         {
             var conversations = await _chatRepository.GetUserConverstionsAsync(userId);
             if (conversations == null || !conversations.Any())
-                return ApiResponse<IReadOnlyList<ConversationResponseDto>>.Fail("لا يوجد محادثات خاصة بك");
+                return ApiResponse<IReadOnlyList<ConversationResponseDto>>.Ok(new List<ConversationResponseDto>(),"لا يوجد محادثات خاصة بك");
 
             var conversationDtos = new List<ConversationResponseDto>();
             foreach(var con in conversations)
@@ -122,7 +122,7 @@ namespace T3awuny.Application.Services
         {
             var messages = await _chatRepository.GetConversationMessagesAsync(conversationId, page, pageSize);
             if (!messages.Any())
-                return ApiResponse<Pagination<MessageResponseDto>>.Fail("لا يوجد رسائل لعرضها");
+                return ApiResponse<Pagination<MessageResponseDto>>.Ok(new Pagination<MessageResponseDto>(page, pageSize, 0, new List<MessageResponseDto>()), "لا يوجد رسائل لعرضها");
 
             var messageDtos = messages.Select(m => _mapper.Map<MessageResponseDto>(m)).ToList();
 

@@ -40,7 +40,7 @@ namespace T3awuny.Application.Services
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            if (order.BuyerId != userId || order.FarmerId != userId || !roles.Contains("Admin"))
+            if (order.BuyerId != userId && order.FarmerId != userId && !roles.Contains("Admin"))
                 return ApiResponse<LogisticsResponseDto>.Fail("لا يمكنك الاطلاع علي تفاصيل توصيل طلب لا يخصك");
 
             var logisticsSpec = new BaseSpecifications<Logistics>(lo => lo.OrderId == orderId);

@@ -114,14 +114,16 @@ namespace T3awuny.Application.Services
             return ApiResponse<PaymentDto>.Ok(paymentDto,"تم الحصول علي بيانات عملية الدفع بنجاح");
         }
 
-        public async Task<ApiResponse<IReadOnlyList<Payment>>> GetPaymentsAsync()
+        public async Task<ApiResponse<IReadOnlyList<PaymentDto>>> GetPaymentsAsync()
         {
-            var payments = await _unitOfWork.Repository<Payment>().GetAllAsync();
+            var paymentSpecs = new PaymentSpecifications(p => true); //order
+            var payments = await _unitOfWork.Repository<Payment>().GetAllWithSpecAsync(paymentSpecs);
 
             if (!payments.Any())
-                return ApiResponse<IReadOnlyList<Payment>>.Fail("لا يوجد بيانات دفع لعرضها");        
+                return ApiResponse<IReadOnlyList<PaymentDto>>.Ok(new List<PaymentDto>(),"لا يوجد بيانات دفع لعرضها");        
 
-            return ApiResponse<IReadOnlyList<Payment>>.Ok(payments,"تم الحصول علي بيانات الدفع بنجاح");
+            var paymentDtos = _mapper.Map<IReadOnlyList<PaymentDto>>(payments);
+            return ApiResponse<IReadOnlyList<PaymentDto>>.Ok(paymentDtos,"تم الحصول علي بيانات الدفع بنجاح");
         }
 
         public async Task<ApiResponse<string>> UpdatePaymentStatusAsync(int orderId, PaymentStatus status)
@@ -158,6 +160,7 @@ namespace T3awuny.Application.Services
             {
                 payment.Status = PaymentStatus.Paid;
                 order.PaymentStatus = PaymentStatus.Paid;
+                order.Status = OrderStatus.Preparing;
             }
             else
             {

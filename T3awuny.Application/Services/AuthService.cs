@@ -157,15 +157,15 @@ namespace T3awuny.Application.Services
             return authModel;
         }
 
-        public async Task<string> AddRoleAsync(AddRoleDto model)
+        public async Task<AuthModel> AddRoleAsync(AddRoleDto model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
             if (user is null || !await _roleManager.RoleExistsAsync(model.Role))
-                return "هناك مشكلة في رقم المستخدم او ان هذا الدور غير مدعوم";
+                return new AuthModel { Message = "هناك مشكلة في رقم المستخدم او ان هذا الدور غير مدعوم" };
             if (await _userManager.IsInRoleAsync(user, model.Role))
-                return "هذا المستخدم موجود في هذه المسئولية بالفعل";
+                return new AuthModel { Message = "هذا المستخدم موجود في هذه المسئولية بالفعل" };
             var result = await _userManager.AddToRoleAsync(user, model.Role);
-            return result.Succeeded ? string.Empty : "حدث شئ ما خطأ";
+            return result.Succeeded ? new AuthModel { Message = "تمت إضافة الدور بنجاح" } : new AuthModel { Message = "حدث شئ ما خطأ" };
         }
 
         public async Task<AuthModel> RefreshTokenAsync(string token)

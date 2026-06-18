@@ -60,7 +60,7 @@ namespace T3awuny.Application.Services
                 var productRepo = _unitOfWork.Repository<Product>();         
                 foreach (var item in basket.Items)
                 {
-                    var productSpec = new ProductSpecifications(p => p.Id == item.ProductId);
+                    var productSpec = new ProductSpecifications(p => p.Id == item.ProductId && p.Status != ProductStatus.Archived);
                     var product = await productRepo.GetByIdWithSpecAsync(productSpec);
                     if (product is null || product.Status != ProductStatus.Active) continue;  //ممكن منكملش بس كده احسن هعمل اوردر بالمنتجات المظبوطة 
 
@@ -216,7 +216,7 @@ namespace T3awuny.Application.Services
             var orderSpecs = new OrderSpecifications(o => o.BuyerId == buyerId);
             var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpecs);
             if (!orders.Any())
-                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("لا يوجد طلبات لعرضها");
+                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Ok(new List<OrderSummaryDto>(),"لا يوجد طلبات لعرضها");
 
             var orderDtos = new List<OrderSummaryDto>();//orders.Select(o => _mapper.Map<OrderSummeryDto>(o)).ToList();
             foreach (var order in orders)
@@ -249,7 +249,7 @@ namespace T3awuny.Application.Services
             if(order == null)
                 return ApiResponse<OrderResponseDto>.Fail("هذا الطلب غير موجود");
 
-            if(order.BuyerId != buyer.Id)
+            if(order.BuyerId != buyer.Id && !await _userManager.IsInRoleAsync(buyer, "Admin"))
                 return ApiResponse<OrderResponseDto>.Fail("هذا الطلب لا يخص هذا التاجر");
 
             var orderDto = _mapper.Map<OrderResponseDto>(order);
@@ -292,7 +292,7 @@ namespace T3awuny.Application.Services
              var productRepo = _unitOfWork.Repository<Product>();
             foreach (var item in order.Items)
             {
-                var productSpec = new BaseSpecifications<Product>(p => p.Id == item.ItemOrdered.ProductId);
+                var productSpec = new BaseSpecifications<Product>(p => p.Id == item.ItemOrdered.ProductId && p.Status != ProductStatus.Archived);
                 var productFromDb = await productRepo.GetByIdWithSpecAsync(productSpec);
                 if (productFromDb is null || productFromDb.Status != ProductStatus.Active) continue;
                 productFromDb.Quantity = 0; //if sell all offered quantity once بيع جملة بس
@@ -420,7 +420,7 @@ namespace T3awuny.Application.Services
             var orderSpecs = new OrderSpecifications(o => o.FarmerId == farmerId);
             var orders = await _unitOfWork.Repository<Order>().GetAllWithSpecAsync(orderSpecs);
             if (!orders.Any())
-                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Fail("لا يوجد طلبات لهذا المزارع لعرضها");
+                return ApiResponse<IReadOnlyList<OrderSummaryDto>>.Ok(new List<OrderSummaryDto>(), "لا يوجد طلبات لهذا المزارع لعرضها");
 
             var orderDtos = new List<OrderSummaryDto>();//= orders.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
             foreach (var order in orders)
@@ -447,7 +447,7 @@ namespace T3awuny.Application.Services
             var orders = await orderRepo.GetAllWithSpecAsync(orderSpecs);
 
             if (!orders.Any())
-                return ApiResponse<Pagination<OrderSummaryDto>>.Fail("لا يوجد طلبات بهذه الخصائص لعرضها");
+                return ApiResponse<Pagination<OrderSummaryDto>>.Ok(new Pagination<OrderSummaryDto>(specs.PageIndex, specs.pageSize, 0, new List<OrderSummaryDto>()),"لا يوجد طلبات بهذه الخصائص لعرضها");
 
             var countSpecs = new BaseSpecifications<Order>(orderSpecs.Criteria!);
             var count = await orderRepo.GetCountAsync(countSpecs);

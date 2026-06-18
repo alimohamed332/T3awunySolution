@@ -50,12 +50,12 @@ namespace T3awunyWebService.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("add-role")]
-        public async Task<ActionResult<string>> AddRoleAsync([FromBody] AddRoleDto model)
+        public async Task<ActionResult<AuthModel>> AddRoleAsync([FromBody] AddRoleDto model)
         {
             var result = await _authService.AddRoleAsync(model);
-            if (!string.IsNullOrEmpty(result))
+            if (!result.IsAuthenticated)
                 return BadRequest(result);
-            return Ok();
+            return Ok(result);
         }
 
         [HttpGet("refresh-token")]
@@ -70,14 +70,13 @@ namespace T3awunyWebService.Controllers
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
-
+        [Authorize]
         [HttpGet("is-logined")]
         public async Task<ActionResult<KeyValuePair<bool,string>>> IsLogined()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
                 return BadRequest("ابعت الريفرش توكن يابيه في الكوكي ");
-
             var result = await _authService.IsValidRefreshTokenAsync(refreshToken);
             if (!result.Key)
                 return BadRequest(result);

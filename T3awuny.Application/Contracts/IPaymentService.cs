@@ -15,7 +15,7 @@ namespace T3awuny.Application.Contracts
     {
         Task<ApiResponse<CustomerBasket>> CreateOrUpdatePaymentIntentAsync(string basketId);
         Task<bool> UpdatePaymentStatusToFailOrSuccess(string paymentIntentId, bool isSuccess);
-        Task<ApiResponse<IReadOnlyList<Payment>>> GetPaymentsAsync();
+        Task<ApiResponse<IReadOnlyList<PaymentDto>>> GetPaymentsAsync();
         Task<ApiResponse<PaymentDto>> GetPaymentByOrderAsync(int orderId);
         Task<ApiResponse<string>> UpdatePaymentStatusAsync(int orderId, PaymentStatus status);
         Task<KeyValuePair<string, string>> CreatePaymentIntentAutomaticAsync(decimal amount);

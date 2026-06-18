@@ -20,6 +20,8 @@ namespace T3awuny.Application.Contracts
         Task<ApiResponse<Pagination<AdminUserDto>>> GetAllUsersAsync(AdminUserFilterDto filter);
         Task<ApiResponse<AdminUserDto>> GetUserByIdAsync(string userId);
         Task<ApiResponse<AdminUserDto>> GetAdminByIdAsync(string adminId);
+        Task<ApiResponse<AdminProfileDto>> GetMyProfileAsAdmin(string adminId);
+        Task<ApiResponse<AdminProfileDto>> UpdateMyProfileAsAdmin(string adminId,UpdateAdminProfileDto dto);
         Task<ApiResponse<string>> ToggleUserStatusAsync(string userId);
         Task<ApiResponse<bool>> VerifyFarmerAsync(string farmerId);
         Task<ApiResponse<bool>> VerifyTraderAsync(string traderId);

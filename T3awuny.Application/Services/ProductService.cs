@@ -33,26 +33,30 @@ namespace T3awuny.Application.Services
             _baseUrl = configuration["App:ApplicationUrl"]??"";
         }
 
-        public async Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter)
+        public async Task<ApiResponse<Pagination<ProductSummaryDto>>> GetAllAsync(ProductSpecParams filter, string role)
         {
-            var productSpec = new ProductSpecifications(filter,true); //category farmer images
+            var isAdmin = role == "Admin";
+            var productSpec = new ProductSpecifications(filter,true,isAdmin); //category farmer images
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);
             var count = await _unitOfWork.Repository<Product>().GetCountAsync(countSpec);
             if (!products.Any())
-                return ApiResponse<Pagination<ProductSummaryDto>>.Fail("لا يوجد منتجات لعرضها");
-            var productsDto = products.Select(p => _mapper.Map<ProductSummaryDto>(p)).ToList();
+                return ApiResponse<Pagination<ProductSummaryDto>>.Ok(new Pagination<ProductSummaryDto>(filter.PageIndex, filter.pageSize, count, new List<ProductSummaryDto>()),"لا يوجد منتجات لعرضها");
+            var productsDto = new List<ProductSummaryDto>();
             var addRepo = _unitOfWork.Repository<Address>();
-            foreach (var productDto in productsDto)
+            foreach (var product in products)
             {
+                var productDto = _mapper.Map<ProductSummaryDto>(product); 
                 var addSpecs = new BaseSpecifications<Address>(a => a.UserId == productDto.FarmerId && a.IsDefault);
                 var farmerAdd = await addRepo.GetByIdWithSpecAsync(addSpecs);
                 if (farmerAdd is not null)
                 {
-                    productDto.FarmerCity = farmerAdd.Governorate;
+                    productDto.FarmerGovernorate = farmerAdd.Governorate;
                     productDto.FarmerCity = farmerAdd.City;
                 }
+                productDto.FarmerName = product.Farmer.Name;
                 productDto.MainImageUrl = $"{_baseUrl}{productDto.MainImageUrl}";
+                productsDto.Add(productDto);
             }            
             var pagination = new Pagination<ProductSummaryDto>(filter.PageIndex,filter.pageSize,count,productsDto);
 
@@ -64,7 +68,7 @@ namespace T3awuny.Application.Services
             var farmer = await _userManager.FindByIdAsync(farmerId);
             if (farmer is null)
                 return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("هذا المزارع غير موجود");
-            var productSpec = new ProductSpecifications(p => p.FarmerId == farmerId);  //category , mainImage
+            var productSpec = new ProductSpecifications(p => p.FarmerId == farmerId && p.Status != ProductStatus.Archived);  //category , mainImage
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
             if(!products.Any())
                 return ApiResponse<IReadOnlyList<ProductSummaryDto>>.Fail("لا يوجد منتجات معروضة لهذا المزارع");
@@ -85,19 +89,21 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<ProductResponseDto>> GetByIdAsync(int productId)
         {
-            var productSpec = new ProductSpecifications(p => p.Id == productId, false); //Category  mainImage
+            var productSpec = new ProductSpecifications(p => p.Id == productId && p.Status != ProductStatus.Archived, false); //Category ,farmer , Images
             var product = await _unitOfWork.Repository<Product>().GetByIdWithSpecAsync(productSpec);
             if (product is null)
                 return ApiResponse<ProductResponseDto>.Fail("هذا المنتج غير موجود");
             var productDto = _mapper.Map<ProductResponseDto>(product);
-            productDto.FarmerName = product.Farmer.Name;
+            
             var addSpecs = new BaseSpecifications<Address>(a => a.UserId == product.FarmerId && a.IsDefault);
             var farmerAdd = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
             if (farmerAdd is not null)
             {
-                productDto.FarmerCity = farmerAdd.Governorate;
+                productDto.FarmerGovernorate = farmerAdd.Governorate;
                 productDto.FarmerCity = farmerAdd.City;
             }
+            productDto.FarmerName = product.Farmer.Name;
+            productDto.FarmerImage = $"{_baseUrl}{product.Farmer.ProfileImageUrl}";
             productDto.ImageUrls = productDto.ImageUrls?.Select(i => $"{_baseUrl}{i}").ToList();
             productDto.MainImageUrl = $"{_baseUrl}{productDto.MainImageUrl}";
             return ApiResponse<ProductResponseDto>.Ok(productDto, "تم العثور علي المنتج بنجاح");
@@ -112,7 +118,7 @@ namespace T3awuny.Application.Services
             if (!roles.Any() || !roles.Contains("Farmer"))
                 return ApiResponse<Pagination<ProductResponseDto>>.Fail("هذا المستخدم ليس مزارع");
 
-            var productSpec = new ProductSpecifications(specs); //category , farmer , images
+            var productSpec = new ProductSpecifications(specs); //category , main image
             var products = await _unitOfWork.Repository<Product>().GetAllWithSpecAsync(productSpec);
 
             var countSpec = new BaseSpecifications<Product>(productSpec.Criteria!);

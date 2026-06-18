@@ -10,7 +10,7 @@ namespace T3awuny.Infrastructure.Configurations.OrderConfig
         public void Configure(EntityTypeBuilder<T3awuny.Core.Entities.OrderAggregate.Order> builder)
         {
             builder.Property(o => o.SubTotal)
-                   .HasPrecision(12, 2);
+                   .HasPrecision(20, 6);
 
             builder.Property(o => o.Status)
                    .HasConversion<string>()

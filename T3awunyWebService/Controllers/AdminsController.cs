@@ -60,7 +60,7 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
-        //[Authorize("AdminOnly")]
+       // [Authorize("AdminOnly")]
         [HttpGet("admin/{id}")]
         public async Task<ActionResult<ApiResponse<AdminUserDto>>> GetAdminById(string id)
         {
@@ -72,6 +72,34 @@ namespace T3awunyWebService.Controllers
             return Ok(result);
         }
 
+        //[Authorize("AdminOnly")]
+        [HttpGet("my-profile")]
+        public async Task<ActionResult<ApiResponse<AdminProfileDto>>> GetMyProfile()
+        {
+            var adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(adminId))
+                return BadRequest(ApiResponse<AdminProfileDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            var result = await _adminService.GetMyProfileAsAdmin(adminId);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        //[Authorize("AdminOnly")]
+        [HttpPut]
+        public async Task<ActionResult<ApiResponse<AdminProfileDto>>> UpdateProfile(string? adminId, UpdateAdminProfileDto dto)
+        {
+            if (string.IsNullOrEmpty(adminId))
+            {
+                adminId = User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value ?? string.Empty;
+                if (string.IsNullOrEmpty(adminId))
+                    return BadRequest(ApiResponse<AdminProfileDto>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
+            }
+            var result = await _adminService.UpdateMyProfileAsAdmin(adminId, dto);
+            if (!result.IsSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
         //[Authorize("AdminOnly")]
         [HttpGet("users/{id}")]
         public async Task<ActionResult<ApiResponse<AdminUserDto>>> GetUserById(string id)

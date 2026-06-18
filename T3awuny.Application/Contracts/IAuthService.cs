@@ -14,7 +14,7 @@ namespace T3awuny.Application.Contracts
     {
         Task<AuthModel> RegisterAsync(RegisterDto model);
         Task<AuthModel> GetTokenAsync(TokenRequestDto model);
-        Task<string> AddRoleAsync(AddRoleDto model);
+        Task<AuthModel> AddRoleAsync(AddRoleDto model);
         Task<AuthModel> RefreshTokenAsync(string token); // this the refresh token
         Task<KeyValuePair<bool,string>> IsValidRefreshTokenAsync(string token);
         Task<bool> RevokeTokenAsync(string token);

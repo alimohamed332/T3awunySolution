@@ -21,15 +21,15 @@ namespace T3awunyWebService.BackgroundServices
                     await using var scope = _serviceProvider.CreateAsyncScope();
                     var auctionService = scope.ServiceProvider.GetRequiredService<IAuctionService>();
 
-                    //await auctionService.ProcessAuctionStartsAsync();
-                    //await auctionService.ProcessAuctionEndsAsync();
+                    await auctionService.ProcessAuctionStartsAsync();
+                    await auctionService.ProcessAuctionEndsAsync();
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex,"Error processing auctions");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
         }
     }

@@ -164,8 +164,8 @@ namespace T3awuny.Application.Services
                 count = await _unitOfWork.Repository<FarmerProfile>().CountAsync(fp => fp.FarmerId == user.Id);
             else if (authModel.Role == "Trader")
                 count = await _unitOfWork.Repository<TraderProfile>().CountAsync(fp => fp.TraderId == user.Id);
-            if (count <= 0)
-                authModel.HasProfile = false;
+            if (count > 0 || authModel.Role == "Admin")
+                authModel.HasProfile = true;
             return authModel;
         }
 

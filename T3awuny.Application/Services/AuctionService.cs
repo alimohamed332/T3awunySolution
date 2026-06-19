@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
@@ -7,10 +8,12 @@ using T3awuny.Application.Helpers;
 using T3awuny.Core;
 using T3awuny.Core.Entities;
 using T3awuny.Core.Entities.AuctionModule;
+using T3awuny.Core.Entities.BasketModule;
 using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
 using T3awuny.Core.Entities.ProductModule;
 using T3awuny.Core.Entities.UserModule;
+using T3awuny.Core.Repository.Contracts;
 using T3awuny.Core.Specifications;
 using T3awuny.Core.Specifications.AuctionSpecs;
 
@@ -21,16 +24,20 @@ namespace T3awuny.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
-        private readonly IPaymentService _paymentService;
+        //private readonly IPaymentService _paymentService;
+        //private readonly IBasketRepository _basketRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly string _baseUrl;
         //private readonly IHubContext<AuctionHub> _hubContext;  // SignalR
-        public AuctionService(IUnitOfWork unitOfWork/*, IHubContext<AuctionHub> hubContext*/, IMapper mapper, IEmailService emailService, IPaymentService paymentService, IConfiguration configuration)
+        public AuctionService(IUnitOfWork unitOfWork/*, IHubContext<AuctionHub> hubContext*/, IMapper mapper, IEmailService emailService, /*IPaymentService paymentService,*/ IConfiguration configuration/*, IBasketRepository basketRepository*/, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
-            _paymentService = paymentService;
-            _baseUrl = configuration["App:ApplicationUrl"]??"";
+            //_paymentService = paymentService;
+            _baseUrl = configuration["App:ApplicationUrl"] ?? "";
+            _userManager = userManager;
+            //_basketRepository = basketRepository;
         }
         // HasActiveAcution in product model false => in ProcessAuctionEndsAsync and CancelAuctionAsync and true only in CreateAuctionAsync
         // ده عشان اللي انا عايزه دلوقتي ان اعرف اذا كان المنتج عليه مزاد او هيبقي عليه ولا لا انما لو غيرت اللوجيك لهل عليه (حاليا) اي مزاد اكتف ولا لا ساعتها
@@ -151,7 +158,7 @@ namespace T3awuny.Application.Services
         public async Task ProcessAuctionEndsAsync()
         {
             var auctionSpecs = new AuctionSpecifications(a => a.EndDate <= DateTime.UtcNow && a.Status == AuctionStatus.Active); 
-            var endedAuctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs);
+            var endedAuctions = await _unitOfWork.Repository<Auction>().GetAllWithSpecAsync(auctionSpecs); // bids, product, farmer, winner if exist
 
             foreach (var auction in endedAuctions)
             {
@@ -168,21 +175,24 @@ namespace T3awuny.Application.Services
                 }
                 else
                 {// Auction succeeded
-
+                    var winner = await _userManager.FindByIdAsync(winningBid.BidderId);
                     // Auto-create order and payment intend for the winner
                     try
                     {
-                        await CreateOrderForWinnerAsync(auction, winningBid);
+                        
+                        await CreateOrderForWinnerAsync(auction, winningBid,winner!);
                     }
-                    catch (Exception ) { return; }
+                    catch (Exception ) { continue; }
 
                     // Auction succeeded
                     auction.Status = AuctionStatus.Ended;
                     auction.Product!.HasActiveAcution = false; // release product
                     auction.WinnerId = winningBid.BidderId;
                     auction.EndDate = DateTime.UtcNow; // I can leave it as it is
+                    _unitOfWork.Repository<Auction>().Update(auction);
+                    await _unitOfWork.CompleteAsync();
                     // Notify winner
-                    await _emailService.SendAsync(auction.Winner!.Email!, "لقد فزت بالمزاد بنجاح",
+                    await _emailService.SendAsync(winner!.Email!, "لقد فزت بالمزاد بنجاح",
                       $"لقد فزت بالمزاد علي منتج {auction.Product!.Name} " +$" مقابل {auction.CurrentPrice} EGP"
                     );
 
@@ -193,7 +203,7 @@ namespace T3awuny.Application.Services
                 }
             }
 
-            await _unitOfWork.CompleteAsync();
+            
         }
 
         public async Task ProcessAuctionStartsAsync()
@@ -212,11 +222,13 @@ namespace T3awuny.Application.Services
              await _unitOfWork.CompleteAsync();
         }
 
-        private async Task CreateOrderForWinnerAsync(Auction auction, Bid winningBid)
+        private async Task CreateOrderForWinnerAsync(Auction auction, Bid winningBid, ApplicationUser winner)
         {
             var addSpecs = new BaseSpecifications<Address>(a => a.UserId == winningBid.BidderId && a.IsDefault);
             var winnerAddress = await _unitOfWork.Repository<Address>().GetByIdWithSpecAsync(addSpecs);
             
+            var imageSpecs = new BaseSpecifications<ProductImage>(pi => pi.ProductId == auction.ProductId && pi.IsMain);
+            var image = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(imageSpecs);
             // Get the items 
             var orderItems = new List<OrderItem>() {  // only one item
                 new OrderItem
@@ -226,35 +238,47 @@ namespace T3awuny.Application.Services
                 {
                     ProductId = auction.ProductId,
                     ProductName = auction.Product!.Name,
-                    PictureUrl = "",
+                    PictureUrl = image?.ImageUrl??"",
                     Unit = auction.Product!.Unit
                 },
                 Quantity = auction.Product!.Quantity,
                 UnitPriceAtOrder = winningBid.Amount/auction.Product!.Quantity,
                 Subtotal = winningBid.Amount
             }};
-
+            // product = soldout
 
             // Get DeliveryMethod from the delivery method repository
             var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(4);
             
             var orderAddress = new OrderAddress()
             {
-                Street = winnerAddress.Street,
-                City = winnerAddress.City,
-                Governorate = winnerAddress.Governorate,
-                Country = winnerAddress.Country,
+                Street = winnerAddress!.Street,
+                City = winnerAddress!.City,
+                Governorate = winnerAddress!.Governorate,
+                Country = winnerAddress!.Country,
                 Name = ""
             };
-
+            /////////////////////////////////////
             var orderRepo = _unitOfWork.Repository<Order>();
 
-            var paymentInfo = await _paymentService.CreatePaymentIntentAutomaticAsync(winningBid.Amount);
-
+            //var paymentInfo = await _paymentService.CreatePaymentIntentAutomaticAsync(winningBid.Amount);
+            ////create basket for the winner to store the payment intent id and client secret
+            //var basket = new CustomerBasket()
+            //{
+            //    Id = winningBid.BidderId,
+            //    PaymentIntentId = paymentInfo.Key,
+            //    ClientSecret = paymentInfo.Value
+            //};
+            //// save the basket to the database
+            //await _basketRepository.DeleteBasketAsync(basket.Id);
+            //await _basketRepository.CreateOrUpdateBasketAsync(basket);
             //Create an order
-            var order = new Order(auction.Winner!.Email!, winningBid.BidderId, winningBid.Amount,"تم إنشاء هذا الطلب تلقائي نتيجة الفوز في المزاد", orderAddress, orderItems, deliveryMethod, paymentInfo.Key);
+            
+            var order = new Order(winner!.Email!, winningBid.BidderId, winningBid.Amount,"تم إنشاء هذا الطلب تلقائي نتيجة الفوز في المزاد", orderAddress, orderItems, deliveryMethod, "");
             order.Status = OrderStatus.Confirmed;
             order.FarmerId = auction.FarmerId;
+            order.PaymentStatus = PaymentStatus.Unpaid;
+            order.CreatedAt = DateTime.UtcNow;
             await orderRepo.AddAsync(order);
 
             await _unitOfWork.CompleteAsync();
@@ -269,7 +293,7 @@ namespace T3awuny.Application.Services
                 PickupAddressId = defaultFarmerAddress!.Id,
                 DeliveryAddressId = winnerAddress.Id,
                 Status = LogisticsStatus.Scheduled,
-                EstimatedDelivery = DateTime.Now.AddDays(10)
+                EstimatedDelivery = DateTime.UtcNow.AddDays(10)
             };
             await _unitOfWork.Repository<Logistics>().AddAsync(logistics);
 
@@ -277,18 +301,19 @@ namespace T3awuny.Application.Services
             var payment = new Payment()
             {
                 OrderId = order.Id,
-                PayerId = auction.WinnerId!,
+                PayerId = winningBid.BidderId!,
                 Amount = order.GetTotal(),
-                Method = PaymentMethod.Card,
+                Method = PaymentMethod.CashOnDelivery,
                 Status = PaymentStatus.Unpaid,
-                PaymentIntentId = paymentInfo.Key
+                PaymentIntentId = ""
             };
             await _unitOfWork.Repository<Payment>().AddAsync(payment);
 
             //Save to the database
-            //await _unitOfWork.CompleteAsync();
+           
             auction.Product.Status = ProductStatus.SoldOut;
             auction.Product.Quantity = 0;
+            await _unitOfWork.CompleteAsync();
         }
         //farmer
         public async Task<ApiResponse<IReadOnlyList<AuctionResponseWithNoBidsDto>>> GetMyAuctionsAsync(string farmerId)

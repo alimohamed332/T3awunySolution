@@ -302,18 +302,19 @@ namespace T3awuny.Application.Services
 
             return ApiResponse<string>.Ok($"Image Id{newImage.Id.ToString()}", "تمت إضافة الصورة بنجاح");
         }
-        public async Task<ApiResponse<string>> DeleteImageAsync(string farmerId, int productId, int imageId)
+        public async Task<ApiResponse<string>> DeleteImageAsync(string farmerId, int productId, string imageUrl)
         {
-            var farmer = await _userManager.FindByIdAsync(farmerId);
-            if (farmer == null)
-                return ApiResponse<string>.Fail("هذا المستخدم غير موجود");
+            //var farmer = await _userManager.FindByIdAsync(farmerId);
+            //if (farmer == null)
+            //    return ApiResponse<string>.Fail("هذا المستخدم غير موجود");
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productId);
             if (product == null)
                 return ApiResponse<string>.Fail("هذا المنتج غير موجود");
             if (product.FarmerId != farmerId)
                 return ApiResponse<string>.Fail("هذا المستخدم لا يملك صلاحية تعديل هذا المنتج");
 
-            var imgSpec = new BaseSpecifications<ProductImage>(pi => pi.Id == imageId && pi.ProductId == productId && !pi.IsMain);
+            var url = imageUrl.Substring(imageUrl.IndexOf("/uploads"));
+            var imgSpec = new BaseSpecifications<ProductImage>(pi => pi.ImageUrl == url && pi.ProductId == productId && !pi.IsMain);
             var productImage = await _unitOfWork.Repository<ProductImage>().GetByIdWithSpecAsync(imgSpec); 
             if (productImage == null)
                 return ApiResponse<string>.Fail("لا يمكن حذف صورة لاتخص المنتج ولا يمكن حذف الصورة الاساسية للمنتج ضع صورة اساسية اخري قبل الحذف");
@@ -324,14 +325,14 @@ namespace T3awuny.Application.Services
             _unitOfWork.Repository<ProductImage>().Delete(productImage);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponse<string>.Ok(imageId.ToString(),"تم حذف الصوررة بنجاج");
+            return ApiResponse<string>.Ok(imageUrl,"تم حذف الصوررة بنجاج");
         }
 
-        public async Task<ApiResponse<string>> SetMainImageAsync(string farmerId, int productId, int imageId)
+        public async Task<ApiResponse<string>> SetMainImageAsync(string farmerId, int productId, string imageUrl)
         {
-            var farmer = await _userManager.FindByIdAsync(farmerId);
-            if (farmer == null)
-                return ApiResponse<string>.Fail("هذا المستخدم غير موجود");
+            //var farmer = await _userManager.FindByIdAsync(farmerId);
+            //if (farmer == null)
+            //    return ApiResponse<string>.Fail("هذا المستخدم غير موجود");
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productId);
             if (product == null)
                 return ApiResponse<string>.Fail("هذا المنتج غير موجود");
@@ -340,7 +341,8 @@ namespace T3awuny.Application.Services
 
             var imgSpec = new BaseSpecifications<ProductImage>(pi => pi.ProductId == productId);
             var productImages = await _unitOfWork.Repository<ProductImage>().GetAllWithSpecAsync(imgSpec);
-            if(!productImages.Select(pi => pi.Id).Contains(imageId))
+            var url = imageUrl.Substring(imageUrl.IndexOf("/uploads"));
+            if(!productImages.Select(pi => pi.ImageUrl).Contains(url))
                 return ApiResponse<string>.Fail("هذه الصورة غير موجودة");     
             
             foreach (var image in productImages)
@@ -348,12 +350,12 @@ namespace T3awuny.Application.Services
                 image.IsMain = false;
                 _unitOfWork.Repository<ProductImage>().Update(image);
             }
-            var newMainImage = productImages.FirstOrDefault(pi => pi.Id == imageId);
+            var newMainImage = productImages.FirstOrDefault(pi => pi.ImageUrl == url);
             newMainImage!.IsMain = true;
             _unitOfWork.Repository<ProductImage>().Update(newMainImage);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponse<string>.Ok(imageId.ToString(),"تم ضبط هذه الصورة كصورة اساسية ");
+            return ApiResponse<string>.Ok(imageUrl,"تم ضبط هذه الصورة كصورة اساسية ");
         }
     }
 }

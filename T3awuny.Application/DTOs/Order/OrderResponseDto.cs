@@ -13,6 +13,9 @@ namespace T3awuny.Application.DTOs.Order
         public string BuyerName { get; set; } = string.Empty;//
         public string BuyerId { get; set; } = string.Empty;//
         public string BuyerEmail { get; set; } = string.Empty;//
+        public string FarmerName { get; set; } = string.Empty;//
+        public string FarmerId { get; set; } = string.Empty;//
+        public string FarmerEmail { get; set; } = string.Empty;//
         public DateTime OrderDate { get; set; }
         public decimal Total { get; set; }
         public string Status { get; set; } = string.Empty;

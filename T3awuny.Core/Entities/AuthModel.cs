@@ -14,7 +14,7 @@ namespace T3awuny.Core.Entities
         [JsonIgnore] // we will not return the refresh token to the client, because the client will use the same access token until the refresh token expires, so there is no need to return the refresh token to the client
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime RefreshTokenExpiration { get; set; }
-        public bool HasProfile { get; set; } = true;
+        public bool HasProfile { get; set; } 
     }
 }
 

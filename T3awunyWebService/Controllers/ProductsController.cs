@@ -160,13 +160,13 @@ namespace T3awunyWebService.Controllers
         }
         [Authorize("FarmerOnly")]
         [HttpPatch("{productId}/images/{imageId}/set-main")]
-        public async Task<ActionResult<ApiResponse<string>>> SetMainImageAsync(int productId, int imageId)
+        public async Task<ActionResult<ApiResponse<string>>> SetMainImageAsync(int productId, string imageUrl)
         {
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
                 return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
-            var result = await _productService.SetMainImageAsync(farmerId,productId,imageId);
+            var result = await _productService.SetMainImageAsync(farmerId,productId,imageUrl);
             if(!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);
@@ -174,13 +174,13 @@ namespace T3awunyWebService.Controllers
 
         [Authorize("FarmerOnly")]
         [HttpDelete("{productId}/images/{imageId}")]
-        public async Task<ActionResult<ApiResponse<string>>> DeleteImageAsync(int productId, int imageId)
+        public async Task<ActionResult<ApiResponse<string>>> DeleteImageAsync(int productId, string imageUrl)
         {
             var farmerId = GetUserIdFromClaims();
             if (string.IsNullOrEmpty(farmerId))
                 return BadRequest(ApiResponse<string>.Fail("معرف المستخدم غير موجود في الرمز المميز"));
 
-            var result = await _productService.DeleteImageAsync(farmerId,productId,imageId);
+            var result = await _productService.DeleteImageAsync(farmerId,productId, imageUrl);
             if(!result.IsSuccess)
                 return BadRequest(result);
             return Ok(result);

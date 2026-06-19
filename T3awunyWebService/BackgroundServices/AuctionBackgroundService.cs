@@ -21,8 +21,8 @@ namespace T3awunyWebService.BackgroundServices
                     await using var scope = _serviceProvider.CreateAsyncScope();
                     var auctionService = scope.ServiceProvider.GetRequiredService<IAuctionService>();
 
-                    await auctionService.ProcessAuctionStartsAsync();
-                    await auctionService.ProcessAuctionEndsAsync();
+                    //await auctionService.ProcessAuctionStartsAsync();
+                    //await auctionService.ProcessAuctionEndsAsync();
                 }
                 catch (Exception ex)
                 {

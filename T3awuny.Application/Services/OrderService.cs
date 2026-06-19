@@ -249,19 +249,19 @@ namespace T3awuny.Application.Services
             if(order == null)
                 return ApiResponse<OrderResponseDto>.Fail("هذا الطلب غير موجود");
 
-            if(order.BuyerId != buyer.Id && !await _userManager.IsInRoleAsync(buyer, "Admin"))
-                return ApiResponse<OrderResponseDto>.Fail("هذا الطلب لا يخص هذا التاجر");
+            if(order.BuyerId != buyer.Id && order.FarmerId != userId && !await _userManager.IsInRoleAsync(buyer, "Admin"))
+                return ApiResponse<OrderResponseDto>.Fail("هذا الطلب لا يخص هذا التاجر او الفلاح");
 
             var orderDto = _mapper.Map<OrderResponseDto>(order);
             orderDto.BuyerName = buyer.Name;
             orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
-            orderDto.Logistics.LogisticsStatus = order.Logistics?.Status.ToString() ?? "";
+            orderDto.Logistics.LogisticsStatus = (LogisticsStatus)order.Logistics?.Status!;
             orderDto.Logistics.Notes = order.Logistics?.Notes ?? "";
             orderDto.Logistics.EstimatedDelivery = order.Logistics?.EstimatedDelivery;
             orderDto.Logistics.LogisticsId = order.Logistics?.Id??0;
             //////////////////////////
-            orderDto.Payment.PaymentStatus = order.PaymentStatus.ToString();
-            orderDto.Payment.PaymentMethod = order.Payment!.Method.ToString() ?? "";
+            orderDto.Payment.PaymentStatus = order.PaymentStatus;
+            orderDto.Payment.PaymentMethod = order.Payment!.Method;
             orderDto.Payment.PaymentIntentId = order.PaymentIntentId;
             orderDto.Payment.Id = order.Payment?.Id??0;
 

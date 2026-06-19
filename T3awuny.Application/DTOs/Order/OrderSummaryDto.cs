@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T3awuny.Core.Entities.Enums;
 using T3awuny.Core.Entities.OrderAggregate;
 
 namespace T3awuny.Application.DTOs.Order
@@ -15,7 +16,7 @@ namespace T3awuny.Application.DTOs.Order
         //public DateTime OrderDate { get; set; }
         public decimal Total { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string PaymentStatus { get; set; } = string.Empty;
+        public PaymentStatus PaymentStatus { get; set; } 
         //public string? Notes { get; set; }
         //public OrderAddress DeliveryAddress { get; set; } = default!;
         public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();//

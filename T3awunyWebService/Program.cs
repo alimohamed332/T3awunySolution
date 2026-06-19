@@ -8,7 +8,6 @@ using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
-using System.Security.Claims;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;

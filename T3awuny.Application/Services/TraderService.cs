@@ -93,17 +93,17 @@ namespace T3awuny.Application.Services
  
         public async Task<TraderProfileDto> UpdateProfileAsync(string userId, UpdateTraderProfileDto dto)
         {
-            var profileSpecs = new TraderSpecifications(tp => tp.TraderId == userId); // user and default add
+            var profileSpecs = new TraderSpecifications(tp => tp.TraderId == userId); // user 
             var existingProfile = await _unitOfWork.Repository<TraderProfile>().GetByIdWithSpecAsync(profileSpecs);
 
             if (existingProfile is null) return new TraderProfileDto { Messsage = "هذا التاجر ليس لديه بروفايل" };
             if (existingProfile.User is null) return new TraderProfileDto { Messsage = "هذا المستخدم غير موجود" };
-            if (!await _userManager.IsInRoleAsync(existingProfile.User, "Trader")) return new TraderProfileDto { Messsage = "هذا المستخدم ليس تاجر" };
+            //if (!await _userManager.IsInRoleAsync(existingProfile.User, "Trader")) return new TraderProfileDto { Messsage = "هذا المستخدم ليس تاجر" };
            
-            existingProfile.BusinessName = dto.BusinessName ?? existingProfile.BusinessName;
-            existingProfile.BusinessType = dto.BusinessType;
-            existingProfile.Description = dto.Description ?? existingProfile.Description;
-            existingProfile.User!.Name = dto.Name ?? existingProfile.User!.Name;
+            existingProfile.BusinessName = string.IsNullOrEmpty(dto.BusinessName) ? existingProfile.BusinessName : dto.BusinessName;
+            existingProfile.BusinessType = dto.BusinessType.HasValue ? dto.BusinessType.Value : existingProfile.BusinessType;
+            existingProfile.Description = string.IsNullOrEmpty(dto.Description) ? existingProfile.Description : dto.Description;
+            existingProfile.User!.Name = string.IsNullOrEmpty(dto.Name) ? existingProfile.User!.Name : dto.Name;
             await _unitOfWork.CompleteAsync();
 
             var traderDto = _mapper.Map<TraderProfileDto>(existingProfile);

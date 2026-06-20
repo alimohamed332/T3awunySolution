@@ -80,7 +80,7 @@ namespace T3awuny.Application.Services
                 return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او جدثت مشكلة أثناء الحفظ");
 
             conversionDto.Id = conversation.Id;
-            conversionDto.OtherUserName =user.UserName!;
+            conversionDto.OtherUserName =user.Name!;
             conversionDto.OtherUserImageUrl = $"{_baseUrl}{user.ProfileImageUrl}";
             return ApiResponse<ConversationDto>.Ok(conversionDto,"تم إنشاء محادثة بنجاح");
         }
@@ -139,7 +139,7 @@ namespace T3awuny.Application.Services
                 ConversationId = conversationId,
                 Content = dto.Content,
                 SentAt = DateTime.UtcNow,
-                IsRead = true
+                IsRead = false
             };
 
             await _unitOfWork.Repository<Message>().AddAsync(message);

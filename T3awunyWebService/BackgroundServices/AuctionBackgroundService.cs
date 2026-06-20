@@ -29,7 +29,7 @@ namespace T3awunyWebService.BackgroundServices
                     _logger.LogError(ex,"Error processing auctions");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
         }
     }

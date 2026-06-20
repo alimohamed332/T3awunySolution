@@ -239,29 +239,34 @@ namespace T3awuny.Application.Services
 
         public async Task<ApiResponse<OrderResponseDto>> GetOrderDetailsAsync(string userId, int orderId)
         {
-            var buyer = await _userManager.FindByIdAsync(userId);
-            if (buyer == null)
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
                 return ApiResponse<OrderResponseDto>.Fail("هذا المستخدم غير موجود");
 
-            var orderSpec = new OrderSpecifications(o => o.Id == orderId);
+            var orderSpec = new OrderSpecifications(o => o.Id == orderId);//
             var order = await _unitOfWork.Repository<Order>().GetByIdWithSpecAsync(orderSpec);
 
             if(order == null)
                 return ApiResponse<OrderResponseDto>.Fail("هذا الطلب غير موجود");
 
-            if(order.BuyerId != buyer.Id && !await _userManager.IsInRoleAsync(buyer, "Admin"))
-                return ApiResponse<OrderResponseDto>.Fail("هذا الطلب لا يخص هذا التاجر");
+            var buyer = await _userManager.FindByIdAsync(order.BuyerId!);
+            var farmer = await _userManager.FindByIdAsync(order.FarmerId!);
+
+            if (order.BuyerId != userId && order.FarmerId != userId && !await _userManager.IsInRoleAsync(user, "Admin"))
+                return ApiResponse<OrderResponseDto>.Fail("هذا الطلب لا يخص هذا التاجر او الفلاح");
 
             var orderDto = _mapper.Map<OrderResponseDto>(order);
-            orderDto.BuyerName = buyer.Name;
+            orderDto.BuyerName = order.Buyer.Name;
+            orderDto.FarmerName = farmer!.Name;
+            orderDto.FarmerEmail = farmer!.Email!;
             orderDto.Items = order.Items.Select(it => _mapper.Map<OrderItemResponseDto>(it)).ToList();
-            orderDto.Logistics.LogisticsStatus = order.Logistics?.Status.ToString() ?? "";
+            orderDto.Logistics.LogisticsStatus = (LogisticsStatus)order.Logistics?.Status!;
             orderDto.Logistics.Notes = order.Logistics?.Notes ?? "";
             orderDto.Logistics.EstimatedDelivery = order.Logistics?.EstimatedDelivery;
             orderDto.Logistics.LogisticsId = order.Logistics?.Id??0;
             //////////////////////////
-            orderDto.Payment.PaymentStatus = order.PaymentStatus.ToString();
-            orderDto.Payment.PaymentMethod = order.Payment!.Method.ToString() ?? "";
+            orderDto.Payment.PaymentStatus = order.PaymentStatus;
+            orderDto.Payment.PaymentMethod = order.Payment!.Method;
             orderDto.Payment.PaymentIntentId = order.PaymentIntentId;
             orderDto.Payment.Id = order.Payment?.Id??0;
 

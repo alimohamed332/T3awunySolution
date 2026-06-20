@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using T3awuny.Application.DTOs.Address;
 using T3awuny.Application.DTOs.Admin;
+using T3awuny.Application.DTOs.AI_Dtos;
 using T3awuny.Application.DTOs.Auction;
 using T3awuny.Application.DTOs.Auth;
 using T3awuny.Application.DTOs.Category;
@@ -207,6 +208,42 @@ namespace T3awuny.Application.Helpers
                 .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalProducts, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore());
+            //=============================AI=============================
+            CreateMap<ApplicationUser,AIUserDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.FarmerProfile, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
+
+            CreateMap<FarmerProfile, AIFarmerProfileDto>()
+                .ForMember(dest => dest.Governorate, opt => opt.Ignore());
+
+            CreateMap<TraderProfile, AITraderProfileDto>()
+                .ForMember(dest => dest.BusinessType, opt => opt.MapFrom(src => src.BusinessType!.Value.ToString()));
+
+            CreateMap<Review,AIReviewDto>()
+                .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Reviewer.Name))
+                .ForMember(dest => dest.TargetFarmerId, opt => opt.MapFrom(src => src.TargetUserId))
+                .ForMember(dest => dest.TargetFarmerName, opt => opt.MapFrom(src => src.TargetUser.Name));
+
+            CreateMap<Product,AIProductDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.Governorate, opt => opt.Ignore());
+
+            CreateMap<Address, AIOrderAddress>();
+
+            CreateMap<Order,AIOrderDto>()
+                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
+
+            CreateMap<Bid, AIBidDto>()
+                .ForMember(dest => dest.BidderName, opt => opt.MapFrom(src => src.Bidder.Name));
+
+            CreateMap<Auction,AIAuctionDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.Name))
+                .ForMember(dest => dest.FarmerName, opt => opt.MapFrom(src => src.Farmer!.Name))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
         }
     }
 }

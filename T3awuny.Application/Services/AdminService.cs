@@ -132,14 +132,14 @@ namespace T3awuny.Application.Services
             user.IsActive = !user.IsActive;
 
             if (!user.IsActive)
-                await RevokeAllRefreshTokensAsync(userId);
+                await RevokeAllRefreshTokensAsync(user);
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return ApiResponse<string>.Fail("فشل في تحديث حالة المستخدم حاول مرة اخرى لاحقاَ");
 
             var statusMessage = user.IsActive ? "تم تفعيل المستخدم" : "تم حظر المستخدم";
-            return ApiResponse<string>.Ok($"تم {statusMessage} بنجاح");
+            return ApiResponse<string>.Ok($"{statusMessage} بنجاح");
         }
 
         public async Task<ApiResponse<bool>> DeleteUserAsync(string userId)
@@ -298,24 +298,38 @@ namespace T3awuny.Application.Services
                 "joinDate" => filter.SortDescending ? query.OrderByDescending(u => u.JoinDate) : query.OrderBy(u => u.JoinDate),
                 _ => query.OrderByDescending(u => u.JoinDate)
             };
-
+            //var userss = await _userManager.GetUsersInRoleAsync("Farmer");
             var totalCount = await query.CountAsync();
-            var users = await query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync();
+            //var users = await query.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync();
+            var users = await query.ToListAsync();
+            var userWithRightRole = new List<ApplicationUser>();
 
             if (totalCount == 0)
                 return ApiResponse<Pagination<AdminUserDto>>.Fail("لايوجد مستخدمين حالين مستوفين هذه الشروط");
             // Filter by role if specified
             var result = new List<AdminUserDto>();
+            var userIdRolePair = new Dictionary<string, string>();
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                if (!string.IsNullOrEmpty(filter.Role) && !roles.Contains(filter.Role)) continue;
+                if (!string.IsNullOrEmpty(filter.Role) && roles.LastOrDefault() != filter.Role) continue;
 
-                var role = roles.LastOrDefault() ?? "Unknown";
+                userIdRolePair[user.Id] = roles.LastOrDefault() ?? "";
+                userWithRightRole.Add(user);         
+            }
+
+            totalCount = userWithRightRole.Count();
+            if (totalCount == 0)
+                return ApiResponse<Pagination<AdminUserDto>>.Fail("لايوجد مستخدمين حالين مستوفين هذه الشروط");
+            userWithRightRole = userWithRightRole.Skip((filter.PageNumber - 1) * filter.PageSize).Take(filter.PageSize).ToList();
+
+            foreach (var user in userWithRightRole)
+            {
+                var role = userIdRolePair[user.Id];
                 //var farmerProfile = role == "Farmer" ? await _unitOfWork.Repository<FarmerProfile>().GetByIdAsync(user.Id) : null;
                 //var traderProfile = role == "Trader" ? await _unitOfWork.Repository<TraderProfile>().GetByIdAsync(user.Id) : null;
                 var totalOrders = role == "Trader" ? await _unitOfWork.Repository<Order>().CountAsync(o => o.BuyerId == user.Id) : 0;
-                var totalProducts = role == "Farmer"? await _unitOfWork.Repository<Product>().CountAsync(p => p.FarmerId == user.Id) : 0;
+                var totalProducts = role == "Farmer" ? await _unitOfWork.Repository<Product>().CountAsync(p => p.FarmerId == user.Id) : 0;
                 //var totalSpent = await _unitOfWork.Repository<Order>().SumAsync(o => o.BuyerId == user.Id && o.Status == OrderStatus.Delivered? o.SubTotal : 0);
 
                 result.Add(new AdminUserDto
@@ -323,7 +337,7 @@ namespace T3awuny.Application.Services
                     Id = user.Id,
                     Name = user.Name,
                     Email = user.Email!,
-                    PhoneNumber = user.PhoneNumber??"",
+                    PhoneNumber = user.PhoneNumber ?? "",
                     Role = role,
                     IsActive = user.IsActive,
                     IsVerified = user.IsVerified,
@@ -463,10 +477,11 @@ namespace T3awuny.Application.Services
         //        }
         //}
         #endregion
-        private async Task RevokeAllRefreshTokensAsync(string userId)
+        private async Task RevokeAllRefreshTokensAsync(ApplicationUser user)
         {
-            var refreshTokenSpecObject = new BaseSpecifications<RefreshToken>(r => r.UserId == userId && r.IsActive);
-            var token = await _unitOfWork.Repository<RefreshToken>().GetByIdWithSpecAsync(refreshTokenSpecObject);
+            //var refreshTokenSpecObject = new BaseSpecifications<RefreshToken>(r => r.UserId == userId && r.IsActive);
+            //var token = await _unitOfWork.Repository<RefreshToken>().GetByIdWithSpecAsync(refreshTokenSpecObject);
+            var token = user.RefreshTokens.FirstOrDefault(r => r.UserId == user.Id && r.IsActive);
             if (token is not null)
             {
                 token.RevokedOn = DateTime.UtcNow;

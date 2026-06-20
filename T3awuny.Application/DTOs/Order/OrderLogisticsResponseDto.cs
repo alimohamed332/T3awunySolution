@@ -10,7 +10,7 @@ namespace T3awuny.Application.DTOs.Order
     public class OrderLogisticsResponseDto
     {
         public int LogisticsId { get; set; }
-        public string LogisticsStatus { get; set; } = string.Empty;
+        public LogisticsStatus LogisticsStatus { get; set; } 
         public DateTime? EstimatedDelivery { get; set; }
         public string? Notes { get; set; } 
     }

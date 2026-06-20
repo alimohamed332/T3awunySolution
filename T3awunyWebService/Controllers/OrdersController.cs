@@ -57,7 +57,7 @@ namespace T3awunyWebService.Controllers
         }
 
 
-        [Authorize("TraderOrAdmin")]
+        [Authorize]
         [HttpGet("{orderId}")]
         public async Task<ActionResult<ApiResponse<OrderResponseDto>>> GetOrder(int orderId)
         {

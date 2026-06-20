@@ -8,7 +8,6 @@ using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
-using System.Security.Claims;
 using System.Text;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.Helpers;
@@ -243,8 +242,9 @@ namespace T3awunyWebService
             builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>();
             #endregion
 
-            #region Register UnitOfWork
+            #region Register UnitOfWork && User Repo
             builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+            builder.Services.AddScoped<IUserRepository,UserRepository>();
             #endregion
 
             #region Add Authorization Policies
@@ -320,7 +320,7 @@ namespace T3awunyWebService
             #region Delivery Method Service
             builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
-
+            builder.Services.AddScoped<IAIDataService, AIDataService>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<DataSeeder>();
             //builder.Services.AddScoped<ReviewsAndChatSeeder>();

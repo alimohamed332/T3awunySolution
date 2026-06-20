@@ -11,7 +11,7 @@ namespace T3awuny.Application.DTOs.Trader
     {
         public string? UserId { get; set; }
         public string? BusinessName { get; set; }
-        public BusinessType BusinessType { get; set; } = BusinessType.Wholesaler;
+        public BusinessType? BusinessType { get; set; } //= BusinessType.Wholesaler;
         public string? Description { get; set; }
         public string? Name { get; set; } 
     }

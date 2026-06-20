@@ -28,7 +28,7 @@ namespace T3awuny.Application.Contracts
 
         // Image management
         Task<ApiResponse<string>> AddImageAsync(string farmerId, int productId, IFormFile image);
-        Task<ApiResponse<string>> DeleteImageAsync(string farmerId, int productId, int imageId);
-        Task<ApiResponse<string>> SetMainImageAsync(string farmerId, int productId, int imageId);
+        Task<ApiResponse<string>> DeleteImageAsync(string farmerId, int productId, string imageUrl);
+        Task<ApiResponse<string>> SetMainImageAsync(string farmerId, int productId, string imageUrl);
     }
 }

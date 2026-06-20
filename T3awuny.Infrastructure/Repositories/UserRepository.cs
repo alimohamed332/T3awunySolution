@@ -28,5 +28,12 @@ namespace T3awuny.Infrastructure.Repositories
             return await _dbContext.Users.Where(u => !u.IsActive).AsNoTracking().ToListAsync();
         }
 
+        public async Task<IReadOnlyList<ApplicationUser>> GetAIUsersDataForAIAsync()
+        {
+           return await _dbContext.Users.Where(u => u.IsVerified && u.IsActive).Include(u => u.FarmerProfile).Include(u => u.TraderProfile)
+                .Include(u => u.Addresses.Where(ad => ad.IsDefault))
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

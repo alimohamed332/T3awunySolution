@@ -94,6 +94,7 @@ namespace T3awunyWebService.Controllers
             var result = await _authService.RevokeTokenAsync(refreshToken);
             if (!result)
                 return BadRequest("الريفرش توكن ده غير صالح");
+            Response.Cookies.Delete("refreshToken");
             return Ok("خلاص عملنالك ريفوك");
 
         }
@@ -178,6 +179,7 @@ namespace T3awunyWebService.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None
             };
+            Response.Cookies.Delete("refreshToken");
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }

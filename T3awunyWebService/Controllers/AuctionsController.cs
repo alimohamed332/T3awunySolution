@@ -122,7 +122,7 @@ namespace T3awunyWebService.Controllers
                 , new
                 {
                     AuctionId = auctionId,
-                    //BidderName = bid.Bidder?.FullName,
+                    BidderName = result.Data!.BidderName,
                     BidderId = traderId,
                     dto.Amount,
                     CurrentPrice = dto.Amount,

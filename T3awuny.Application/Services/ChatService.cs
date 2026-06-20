@@ -52,7 +52,11 @@ namespace T3awuny.Application.Services
             {
                 conversionDto.Id = existing.Id;
                 conversionDto.Messages = existing.Messages;
-                if( user1Id == existing.User1Id)
+                foreach(var msg in conversionDto.Messages)
+                {
+                    msg.SentAt = msg.SentAt.AddHours(-3);//////////////////////////////////////////////
+                }
+                if ( user1Id == existing.User1Id)
                 {
                     conversionDto.OtherUserName = existing.User2.UserName!;
                     conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User2.ProfileImageUrl}";
@@ -98,7 +102,7 @@ namespace T3awuny.Application.Services
                 conDto.Id = con.Id;
                 conDto.LastMessage = con.Messages?.FirstOrDefault()?.Content;
                 conDto.UnreadCount = con.Messages?.Count(m => !m.IsRead)??0;
-                conDto.LastMessageAt = con.LastMessageAt;
+                conDto.LastMessageAt = con.LastMessageAt.AddHours(-3);////////////////////////////////////////////////
                 if(con.User1Id == userId)
                 {
                     conDto.OtherUserId = con.User2Id;

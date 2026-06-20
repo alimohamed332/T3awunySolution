@@ -46,7 +46,7 @@ namespace T3awunyWebService.Controllers
 
                 switch (stripeEvent.Type)
                 {
-                    case "payment_intent_succeeded":
+                    case "payment_intent.succeeded":
                         await _paymentService.UpdatePaymentStatusToFailOrSuccess(paymentIntent.Id, true);
                         break;
                     case "payment_intent.payment_failed":

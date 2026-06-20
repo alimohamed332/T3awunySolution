@@ -14,7 +14,7 @@ namespace T3awunyWebService.Hubs
         {
             _chatService = chatService;
         }
-        public override async Task OnConnectedAsync() //once he open the chat view that display all his chats
+        public override async Task OnConnectedAsync() 
         {
             // each user joins their own personal group so we can send them messages directly
             //var userId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -42,6 +42,8 @@ namespace T3awunyWebService.Hubs
             // 4. Send to receiver's personal group
             var receiverId = result.Data?.ReceiverId;
             await Clients.Group($"user_{receiverId}").SendAsync("messagereceived", result.Data);
+            //chceck to send  chat bot
+            //take ressult and return it again to the sender
         }
         [HubMethodName("markasread")]
         public async Task MarkAsRead(int conversationId) // when open some conversation

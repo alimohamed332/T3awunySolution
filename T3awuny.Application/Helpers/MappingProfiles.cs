@@ -201,7 +201,7 @@ namespace T3awuny.Application.Helpers
 
             //Chat
             CreateMap<Message, MessageResponseDto>()
-                .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => src.SentAt.AddHours(-3))) ///////////////////////////////////////////////////////
+                .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => src.SentAt.AddHours(3))) ///////////////////////////////////////////////////////
                 .ForMember(dest => dest.ReceiverId, opt => opt.Ignore());
 
             CreateMap<ApplicationUser,AdminUserDto>()

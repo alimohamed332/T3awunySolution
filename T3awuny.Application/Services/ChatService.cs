@@ -54,7 +54,7 @@ namespace T3awuny.Application.Services
                 conversionDto.Messages = existing.Messages;
                 foreach(var msg in conversionDto.Messages)
                 {
-                    msg.SentAt = msg.SentAt.AddHours(-3);//////////////////////////////////////////////
+                    msg.SentAt = msg.SentAt.AddHours(3);//////////////////////////////////////////////
                 }
                 if ( user1Id == existing.User1Id)
                 {
@@ -102,7 +102,7 @@ namespace T3awuny.Application.Services
                 conDto.Id = con.Id;
                 conDto.LastMessage = con.Messages?.FirstOrDefault()?.Content;
                 conDto.UnreadCount = con.Messages?.Count(m => !m.IsRead)??0;
-                conDto.LastMessageAt = con.LastMessageAt.AddHours(-3);////////////////////////////////////////////////
+                conDto.LastMessageAt = con.LastMessageAt.AddHours(3);////////////////////////////////////////////////
                 if(con.User1Id == userId)
                 {
                     conDto.OtherUserId = con.User2Id;

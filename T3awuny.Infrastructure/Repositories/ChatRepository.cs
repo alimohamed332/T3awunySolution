@@ -22,8 +22,8 @@ namespace T3awuny.Infrastructure.Repositories
         public async Task<IEnumerable<Conversation>?> GetUserConverstionsAsync(string userId)
         {
 
-            var  conv1 = await _dbContext.Conversations.Where(c => c.User1Id == userId).Include(c => c.User2).Include(c => c.Messages.OrderByDescending(m=>m.SentAt).Take(1)).AsNoTracking().ToListAsync();
-            var  conv2 = await _dbContext.Conversations.Where(c => c.User2Id == userId).Include(c => c.User1).Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1)).AsNoTracking().ToListAsync();
+            var  conv1 = await _dbContext.Conversations.Where(c => c.User1Id == userId).Include(c => c.User2).Include(c => c.Messages.OrderByDescending(m=>m.SentAt).Take(1)).OrderByDescending(c => c.LastMessageAt).AsNoTracking().ToListAsync();
+            var  conv2 = await _dbContext.Conversations.Where(c => c.User2Id == userId).Include(c => c.User1).Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1)).OrderByDescending(c => c.LastMessageAt).AsNoTracking().ToListAsync();
             return  conv1.Union(conv2);
             
         }

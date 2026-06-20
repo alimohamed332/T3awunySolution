@@ -40,7 +40,7 @@ namespace T3awuny.Application.Services
                                       IsEmailConfirmed = u.EmailConfirmed
                                    });
             if (!userDetailsDtos.Any())
-                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Fail("لا يوجد مستخدمين غير موثقين");
+                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(new List<UserDetailsDto>(),"لا يوجد مستخدمين غير موثقين");
 
             return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(userDetailsDtos.ToList(), "تم العثور على المستخدمين غير الموثقين بنجاح");
         }
@@ -58,7 +58,7 @@ namespace T3awuny.Application.Services
             });
 
             if (!userDetailsDtos.Any())
-                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Fail("لا يوجد مستخدمين موثقين");
+                return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(new List<UserDetailsDto>(),"لا يوجد مستخدمين موثقين");
 
             return ApiResponse<IReadOnlyList<UserDetailsDto>>.Ok(userDetailsDtos.ToList(), "تم العثور على المستخدمين الموثقين بنجاح");
         }

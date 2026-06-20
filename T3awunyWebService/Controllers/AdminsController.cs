@@ -157,7 +157,7 @@ namespace T3awunyWebService.Controllers
             var result = await _adminService.ToggleUserStatusAsync(id);
             if (!result.IsSuccess)
                 return BadRequest(result);
-            if (result.Data == "تم حظر المستخدم")
+            if (result.Data == "تم حظر المستخدم بنجاح")
             {
                 _cache.Set("BannedUserId", id, TimeSpan.FromHours(1));
                 Response.Cookies.Delete("refreshToken");

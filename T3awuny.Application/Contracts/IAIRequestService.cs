@@ -8,6 +8,6 @@ namespace T3awuny.Application.Contracts
 {
     public interface IAIRequestService
     {
-        Task<string> SenChatBot(string userId);
+        Task<string> SenChatBot(string message);
     }
 }

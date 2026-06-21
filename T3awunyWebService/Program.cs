@@ -331,9 +331,10 @@ namespace T3awunyWebService
             //using var scope2 = app.Services.CreateScope();
             //var services2 = scope2.ServiceProvider;
             //var ai = services2.GetRequiredService<IAIRequestService>();
-            //var res = await ai.SenChatBot("في كام حد عارض طماطم");
+            //var res = await ai.SenChatBot("مين من المزارعين عارض طماطم");
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
+            
             using var scope = app.Services.CreateScope();
             var services = scope.ServiceProvider;
             var _dbContext = services.GetRequiredService<T3awunyDbContext>();

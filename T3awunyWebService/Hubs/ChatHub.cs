@@ -61,7 +61,7 @@ namespace T3awunyWebService.Hubs
                     ReceiverId = senderId
 
                 };
-                await Clients.Caller.SendAsync("messagereceived", botResponse);
+                await Clients.Caller.SendAsync("messagereceived",messRespDto);
                 return;
             }
             await Clients.Group($"user_{receiverId}").SendAsync("messagereceived", result.Data);

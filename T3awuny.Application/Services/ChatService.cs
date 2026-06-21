@@ -52,14 +52,18 @@ namespace T3awuny.Application.Services
             {
                 conversionDto.Id = existing.Id;
                 conversionDto.Messages = existing.Messages;
-                if( user1Id == existing.User1Id)
+                foreach(var msg in conversionDto.Messages)
                 {
-                    conversionDto.OtherUserName = existing.User2.UserName!;
+                    msg.SentAt = msg.SentAt.AddHours(3);//////////////////////////////////////////////
+                }
+                if ( user1Id == existing.User1Id)
+                {
+                    conversionDto.OtherUserName = existing.User2.Name!;
                     conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User2.ProfileImageUrl}";
                 }
                 else
                 {
-                    conversionDto.OtherUserName = existing.User1.UserName!;
+                    conversionDto.OtherUserName = existing.User1.Name!;
                     conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User1.ProfileImageUrl}";
                 }
                 
@@ -77,7 +81,7 @@ namespace T3awuny.Application.Services
             var user = await _userManger.FindByIdAsync(user2Id);
             await _unitOfWork.Repository<Conversation>().AddAsync(conversation);
             if (await _unitOfWork.CompleteAsync() <= 0 || user is null)
-                return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او جدثت مشكلة أثناء الحفظ");
+                return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او حدثت مشكلة أثناء الحفظ");
 
             conversionDto.Id = conversation.Id;
             conversionDto.OtherUserName =user.Name!;
@@ -98,7 +102,7 @@ namespace T3awuny.Application.Services
                 conDto.Id = con.Id;
                 conDto.LastMessage = con.Messages?.FirstOrDefault()?.Content;
                 conDto.UnreadCount = con.Messages?.Count(m => !m.IsRead)??0;
-                conDto.LastMessageAt = con.LastMessageAt;
+                conDto.LastMessageAt = con.LastMessageAt.AddHours(3);////////////////////////////////////////////////
                 if(con.User1Id == userId)
                 {
                     conDto.OtherUserId = con.User2Id;

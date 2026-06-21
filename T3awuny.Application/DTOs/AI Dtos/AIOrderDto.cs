@@ -13,7 +13,7 @@ namespace T3awuny.Application.DTOs.AI_Dtos
     {
         public int Id { get; set; }
         public string? BuyerId { get; set; }
-        public string BuyerEmail { get; set; } = string.Empty;
+        public string BuyerName { get; set; } = string.Empty;
         public string? FarmerId { get; set; }
         public decimal TotalAmount { get; set; }//
         public string PaymentStatus { get; set; } = string.Empty;//
@@ -21,6 +21,10 @@ namespace T3awuny.Application.DTOs.AI_Dtos
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }
         public AIOrderAddress DeliveryAddress { get; set; } = new AIOrderAddress();//
+
+        public List<AIItemDto> Items { get; set; } = new List<AIItemDto>();
+        public AIPaymentDto Payment { get; set; } = new AIPaymentDto();
+        public AILogisticsDto Logistics { get; set; } = new AILogisticsDto();
 
     }
 }

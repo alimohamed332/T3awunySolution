@@ -159,7 +159,7 @@ namespace T3awuny.Application.Services
                 else
                 product.Status = status;
                 _unitOfWork.Repository<Product>().Update(product);
-                await _unitOfWork.CompleteAsync();
+                //await _unitOfWork.CompleteAsync();
             }
             else if (roles.Contains("Farmer"))
             {
@@ -167,7 +167,7 @@ namespace T3awuny.Application.Services
                 {
                     product.Status = status;
                     _unitOfWork.Repository<Product>().Update(product);
-                    await _unitOfWork.CompleteAsync();
+                   // await _unitOfWork.CompleteAsync();
                 }
                 else
                     return ApiResponse<string>.Fail("لا يستطيع المزارع التغير لهذه الحالة");
@@ -175,7 +175,12 @@ namespace T3awuny.Application.Services
             }
             else
                 return ApiResponse<string>.Fail("هذا المستخدم لا يمكك صلاحية التغيير");
-
+            if(product.Status == ProductStatus.SoldOut)
+            {
+                product.Quantity = 0;
+                _unitOfWork.Repository<Product>().Update(product);
+            }
+            await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Ok(status.ToString(),"تم التحديث لهذه الحالة بنجاح");
         }
 

@@ -17,56 +17,44 @@ namespace T3awunyWebService.Controllers
             _aiService = aiService;
         }
         [HttpGet("users")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIUserDto>>>> GetAllUsers()
+        public async Task<ActionResult<IReadOnlyList<AIUserDto>>> GetAllUsers()
         {
             var result = await _aiService.GetUsersData();
-            if (!result.IsSuccess)
-                return NotFound(result);
             return Ok(result);
         }
 
         [HttpGet("reviews")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIReviewDto>>>> GetAllReviews()
+        public async Task<ActionResult<IReadOnlyList<AIReviewDto>>> GetAllReviews()
         {
-            var result = await _aiService.GetFarmerReviewsData();
-            if (!result.IsSuccess)
-                return NotFound(result);
+            var result = await _aiService.GetFarmerReviewsData();;
             return Ok(result);
         }
 
         [HttpGet("products")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIProductDto>>>> GetAllProducts()
+        public async Task<ActionResult<IReadOnlyList<AIProductDto>>> GetAllProducts()
         {
             var result = await _aiService.GetProductsData();
-            if (!result.IsSuccess)
-                return NotFound(result);
             return Ok(result);
         }
 
         [HttpGet("orders")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIOrderDto>>>> GetAllOrders()
+        public async Task<ActionResult<IReadOnlyList<AIOrderDto>>> GetAllOrders()
         {
             var result = await _aiService.GetOrdersData();
-            if (!result.IsSuccess)
-                return NotFound(result);
             return Ok(result);
         }
 
         [HttpGet("bids")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIBidDto>>>> GetAllBids()
+        public async Task<ActionResult<IReadOnlyList<AIBidDto>>> GetAllBids()
         {
             var result = await _aiService.GetBidsData();
-            if (!result.IsSuccess)
-                return NotFound(result);
             return Ok(result);
         }
 
         [HttpGet("auctions")]
-        public async Task<ActionResult<ApiResponse<IReadOnlyList<AIAuctionDto>>>> GetAllAuctions()
+        public async Task<ActionResult<IReadOnlyList<AIAuctionDto>>> GetAllAuctions()
         {
             var result = await _aiService.GetAuctionsData();
-            if (!result.IsSuccess)
-                return NotFound(result);
             return Ok(result);
         }
 

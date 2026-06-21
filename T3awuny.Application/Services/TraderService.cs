@@ -1,15 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using T3awuny.Application.Common;
 using T3awuny.Application.Contracts;
 using T3awuny.Application.DTOs.Address;
-using T3awuny.Application.DTOs.Farmer;
 using T3awuny.Application.DTOs.Trader;
 using T3awuny.Core;
 using T3awuny.Core.Entities.UserModule;
@@ -38,13 +32,11 @@ namespace T3awuny.Application.Services
             var mappedTraderProfiles = traderProfiles.Select(t => _mapper.Map<TraderProfileDto>(t)).ToList();
 
             if (!mappedTraderProfiles.Any())
-                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Fail("لا يوجد تجار موثقين");
+                return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(new List<TraderProfileDto>(), "لا يوجد تجار موثقين");
             foreach (var trader in mappedTraderProfiles)
             {
-                if (!string.IsNullOrEmpty(trader.ProfileImageUrl))
-                {
-                    trader.ProfileImageUrl =$"{_baseUrl}{trader.ProfileImageUrl}";
-                }
+                trader.ProfileImageUrl =$"{_baseUrl}{trader.ProfileImageUrl}";
+                trader.Address = _mapper.Map<AddressDetailsDto>(trader.Address);
             }
 
             return ApiResponse<IReadOnlyList<TraderProfileDto>>.Ok(mappedTraderProfiles, "تم العثور على التجار الموثقين بنجاح");

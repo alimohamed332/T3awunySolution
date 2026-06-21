@@ -11,6 +11,9 @@ namespace T3awuny.Core.Specifications
     public class TraderSpecifications : BaseSpecifications<TraderProfile>
     {
         public TraderSpecifications() : base() {  /*intialize includes if needed*/}
-        public TraderSpecifications(Expression<Func<TraderProfile, bool>> criteria) : base(criteria) { Includes.Add(t => t.User!); }
+        public TraderSpecifications(Expression<Func<TraderProfile, bool>> criteria) : base(criteria) 
+        {
+            Includes.Add(t => t.User!.Addresses.Where(ad => ad.IsDefault));
+        }
     }
 }

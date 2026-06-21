@@ -6,11 +6,11 @@ namespace T3awuny.Application.Contracts
 {
     public interface IAIDataService
     {
-        Task<ApiResponse<IReadOnlyList<AIUserDto>>> GetUsersData();
-        Task<ApiResponse<IReadOnlyList<AIReviewDto>>> GetFarmerReviewsData();
-        Task<ApiResponse<IReadOnlyList<AIProductDto>>> GetProductsData();
-        Task<ApiResponse<IReadOnlyList<AIOrderDto>>> GetOrdersData();
-        Task<ApiResponse<IReadOnlyList<AIBidDto>>> GetBidsData();
-        Task<ApiResponse<IReadOnlyList<AIAuctionDto>>> GetAuctionsData();
+        Task<IReadOnlyList<AIUserDto>> GetUsersData();
+        Task<IReadOnlyList<AIReviewDto>> GetFarmerReviewsData();
+        Task<IReadOnlyList<AIProductDto>> GetProductsData();
+        Task<IReadOnlyList<AIOrderDto>> GetOrdersData();
+        Task<IReadOnlyList<AIBidDto>> GetBidsData();
+        Task<IReadOnlyList<AIAuctionDto>> GetAuctionsData();
     }
 }

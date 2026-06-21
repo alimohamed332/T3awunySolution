@@ -1,5 +1,5 @@
 ﻿
-using T3awuny.Core.Entities.UserModule;
+//using System.Text.Json.Serialization;
 
 namespace T3awuny.Application.DTOs.AI_Dtos
 {
@@ -11,8 +11,11 @@ namespace T3awuny.Application.DTOs.AI_Dtos
         public string? ProfileImageUrl { get; set; }
         public DateTime JoinDate { get; set; }
         public bool IsActive { get; set; }
-        public bool IsVerified { get; set; }
+        //public bool IsVerified { get; set; }
+        //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public  AIFarmerProfileDto? FarmerProfile { get; set; } = default!;
+
+        //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public  AITraderProfileDto? TraderProfile { get; set; } = default!;
     }
 }

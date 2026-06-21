@@ -161,15 +161,14 @@ namespace T3awuny.Application.Services
             {
                 payment.Status = PaymentStatus.Paid;
                 order.PaymentStatus = PaymentStatus.Paid;
-                order.Status = OrderStatus.Preparing;
+                //order.Status = OrderStatus.Preparing;
             }
             else
             {
                 payment.Status = PaymentStatus.Failed;
                 order.PaymentStatus = PaymentStatus.Failed;
             }
-
-            if( await _unitOfWork.CompleteAsync() <= 0)
+            if ( await _unitOfWork.CompleteAsync() <= 0)
                 return false;
             return true;
 

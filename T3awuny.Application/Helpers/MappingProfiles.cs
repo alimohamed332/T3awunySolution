@@ -201,6 +201,7 @@ namespace T3awuny.Application.Helpers
 
             //Chat
             CreateMap<Message, MessageResponseDto>()
+                .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => src.SentAt.AddHours(3))) ///////////////////////////////////////////////////////
                 .ForMember(dest => dest.ReceiverId, opt => opt.Ignore());
 
             CreateMap<ApplicationUser,AdminUserDto>()
@@ -212,6 +213,7 @@ namespace T3awuny.Application.Helpers
             CreateMap<ApplicationUser,AIUserDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.FarmerProfile, opt => opt.Ignore())
+                .ForMember(dest => dest.TraderProfile, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore());
 
             CreateMap<FarmerProfile, AIFarmerProfileDto>()
@@ -234,7 +236,14 @@ namespace T3awuny.Application.Helpers
             CreateMap<Order,AIOrderDto>()
                 .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.BuyerName, opt => opt.MapFrom(src => src.Buyer.Name))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
+
+            CreateMap<Logistics, AILogisticsDto>();
+            CreateMap<Payment, AIPaymentDto>();
+            CreateMap<OrderItem, AIItemDto>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ItemOrdered.ProductId))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ItemOrdered.ProductName));
 
             CreateMap<Bid, AIBidDto>()
                 .ForMember(dest => dest.BidderName, opt => opt.MapFrom(src => src.Bidder.Name));

@@ -58,12 +58,12 @@ namespace T3awuny.Application.Services
                 }
                 if ( user1Id == existing.User1Id)
                 {
-                    conversionDto.OtherUserName = existing.User2.UserName!;
+                    conversionDto.OtherUserName = existing.User2.Name!;
                     conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User2.ProfileImageUrl}";
                 }
                 else
                 {
-                    conversionDto.OtherUserName = existing.User1.UserName!;
+                    conversionDto.OtherUserName = existing.User1.Name!;
                     conversionDto.OtherUserImageUrl = $"{_baseUrl}{existing.User1.ProfileImageUrl}";
                 }
                 
@@ -81,7 +81,7 @@ namespace T3awuny.Application.Services
             var user = await _userManger.FindByIdAsync(user2Id);
             await _unitOfWork.Repository<Conversation>().AddAsync(conversation);
             if (await _unitOfWork.CompleteAsync() <= 0 || user is null)
-                return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او جدثت مشكلة أثناء الحفظ");
+                return ApiResponse<ConversationDto>.Fail("المستخدم المستهدف غير موجود او حدثت مشكلة أثناء الحفظ");
 
             conversionDto.Id = conversation.Id;
             conversionDto.OtherUserName =user.Name!;

@@ -213,6 +213,7 @@ namespace T3awuny.Application.Helpers
             CreateMap<ApplicationUser,AIUserDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.FarmerProfile, opt => opt.Ignore())
+                .ForMember(dest => dest.TraderProfile, opt => opt.Ignore())
                 .ForMember(dest => dest.Role, opt => opt.Ignore());
 
             CreateMap<FarmerProfile, AIFarmerProfileDto>()

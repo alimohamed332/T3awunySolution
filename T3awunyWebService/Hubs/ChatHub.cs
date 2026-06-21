@@ -9,10 +9,11 @@ namespace T3awunyWebService.Hubs
     public class ChatHub : Hub
     {
         private readonly IChatService _chatService;
-
-        public ChatHub(IChatService chatService)
+        private readonly IAIRequestService _aIRequestService;
+        public ChatHub(IChatService chatService, IAIRequestService aIRequestService)
         {
             _chatService = chatService;
+            _aIRequestService = aIRequestService;
         }
         public override async Task OnConnectedAsync() 
         {
@@ -41,9 +42,29 @@ namespace T3awunyWebService.Hubs
 
             // 4. Send to receiver's personal group or chat bot if the receiver is a bot
             var receiverId = result.Data?.ReceiverId;
+            if(receiverId == "chat-bot-123")
+            {
+                // send to chat bot
+                var botResponse = await _aIRequestService.SenChatBot(content);
+                //if (botResponse.IsSuccess) // send bot response back to sender
+                var result2 = await _chatService.SaveMessageAsync(receiverId, conversationId, new SendMessageDto { Content = botResponse });
+
+                if (!result2.IsSuccess) return;
+                var messRespDto = new MessageResponseDto()
+                {
+                    Id = result.Data!.Id + 1,
+                    ConversationId = conversationId,
+                    SenderId = receiverId,
+                    Content = botResponse,
+                    IsRead = false,
+                    SentAt = DateTime.UtcNow.AddHours(3),
+                    ReceiverId = senderId
+
+                };
+                await Clients.Caller.SendAsync("messagereceived", botResponse);
+                return;
+            }
             await Clients.Group($"user_{receiverId}").SendAsync("messagereceived", result.Data);
-            //chceck to send  chat bot
-            //take ressult and return it again to the sender
         }
         [HubMethodName("markasread")]
         public async Task MarkAsRead(int conversationId) // when open some conversation

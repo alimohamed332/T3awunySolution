@@ -49,9 +49,10 @@ namespace T3awuny.Application.Services
             if (basket is null)
                 return ApiResponse<OrderSummaryDto>.Fail("اختر منتجاتك من مزراع واحد في المرة واضفها الي السلة لاستكمال العملية");
 
-            if (string.IsNullOrEmpty(basket.PaymentIntentId))
+            if (string.IsNullOrEmpty(basket.PaymentIntentId) && dto.PaymentMethod != PaymentMethod.CashOnDelivery)
                 return ApiResponse<OrderSummaryDto>.Fail("يجب الحصول علي نية دفع أولاً");
-
+            if (string.IsNullOrEmpty(basket.PaymentIntentId))
+                basket.PaymentIntentId = "";
             //2. Get the items from the product repository
             var orderItems = new List<OrderItem>();
             var farmerIds = new List<string>();
@@ -123,6 +124,7 @@ namespace T3awuny.Application.Services
             //6. Create an order
             var order = new Order(buyer.Email!, buyerId, orderSubtotal, dto.Notes, orderAddress, orderItems, deliveryMethod,basket.PaymentIntentId);
             order.FarmerId = farmerId;
+            order.PaymentStatus = PaymentStatus.Unpaid;
             await orderRepo.AddAsync(order);
             var result = await _unitOfWork.CompleteAsync();
             if (result <= 0)

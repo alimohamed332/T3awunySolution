@@ -11,7 +11,7 @@ namespace T3awuny.Application.DTOs.AI_Dtos
         public string? ProfileImageUrl { get; set; }
         public DateTime JoinDate { get; set; }
         public bool IsActive { get; set; }
-        public bool IsVerified { get; set; }
+        //public bool IsVerified { get; set; }
         public  AIFarmerProfileDto? FarmerProfile { get; set; } = default!;
         public  AITraderProfileDto? TraderProfile { get; set; } = default!;
     }

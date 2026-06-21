@@ -33,6 +33,7 @@ namespace T3awunyWebService
         {
             //Console.WriteLine(DateTime.UtcNow.AddMinutes(2));
             //Console.WriteLine(DateTime.Now.AddMinutes(2));
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -83,8 +84,7 @@ namespace T3awunyWebService
             #region Register DbContext Service
             builder.Services.AddDbContext<T3awunyDbContext>(options =>
                 {
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
-
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));//MonsterConnection //DefaultConnection //MonsterPublicConnection
                 });
             #endregion
 
@@ -321,11 +321,17 @@ namespace T3awunyWebService
             builder.Services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             #endregion
             builder.Services.AddScoped<IAIDataService, AIDataService>();
+            builder.Services.AddScoped<IAIRequestService, AIRequestService>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<DataSeeder>();
             //builder.Services.AddScoped<ReviewsAndChatSeeder>();
 
             var app = builder.Build();
+
+            //using var scope2 = app.Services.CreateScope();
+            //var services2 = scope2.ServiceProvider;
+            //var ai = services2.GetRequiredService<IAIRequestService>();
+            //var res = await ai.SenChatBot("في كام حد عارض طماطم");
 
             #region Create Scope for app registered services and inject the T3awunyDbContext explicitly to apply any pending migrations and do data seeding for the application
             using var scope = app.Services.CreateScope();

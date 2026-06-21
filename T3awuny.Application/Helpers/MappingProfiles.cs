@@ -235,7 +235,14 @@ namespace T3awuny.Application.Helpers
             CreateMap<Order,AIOrderDto>()
                 .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.BuyerName, opt => opt.MapFrom(src => src.Buyer.Name))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.Ignore());
+
+            CreateMap<Logistics, AILogisticsDto>();
+            CreateMap<Payment, AIPaymentDto>();
+            CreateMap<OrderItem, AIItemDto>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ItemOrdered.ProductId))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ItemOrdered.ProductName));
 
             CreateMap<Bid, AIBidDto>()
                 .ForMember(dest => dest.BidderName, opt => opt.MapFrom(src => src.Bidder.Name));

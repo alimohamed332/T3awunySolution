@@ -39,7 +39,7 @@ namespace T3awunyWebService.Hubs
             // 3. Send to sender (confirmation)
             //await Clients.Caller.SendAsync("MessageSent", result.Data);
 
-            // 4. Send to receiver's personal group
+            // 4. Send to receiver's personal group or chat bot if the receiver is a bot
             var receiverId = result.Data?.ReceiverId;
             await Clients.Group($"user_{receiverId}").SendAsync("messagereceived", result.Data);
             //chceck to send  chat bot
